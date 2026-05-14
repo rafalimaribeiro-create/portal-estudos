@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal de Estudos</title>
+<script>
+(function(){
+  var s=localStorage.getItem('theme')||'dark';
+  document.documentElement.setAttribute('data-theme',s);
+  window.addEventListener('DOMContentLoaded',function(){
+    var b=document.getElementById('theme-btn');
+    if(b)b.textContent=s==='dark'?'☀️ Claro':'🌙 Escuro';
+  });
+})();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  [data-theme="dark"] {
+    --bg:#0d0f14;--surface:#13161e;--surface2:#1c2030;--border:#1e2330;
+    --text:#e8eaf0;--muted:#5a6070;--accent:#c8a96e;
+    --admin:#5b8dee;--const:#7dc87d;--civil:#e07b7b;--ambiental:#6dcfb8;--trabalho:#bb9af7;
+    --shadow:rgba(0,0,0,0.4);--topbar-bg:#0d0f14;
+    --note-bg:#1a1d27;--note-border:#2e3350;
+  }
+  [data-theme="light"] {
+    --bg:#f5f4f0;--surface:#ffffff;--surface2:#f0ede8;--border:#e0dbd0;
+    --text:#1a1a1a;--muted:#888070;--accent:#a07840;
+    --admin:#2563eb;--const:#16a34a;--civil:#dc2626;--ambiental:#0d9488;--trabalho:#9c6fe4;
+    --shadow:rgba(0,0,0,0.1);--topbar-bg:#ffffff;
+    --note-bg:#fefce8;--note-border:#d97706;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;display:flex;flex-direction:column;transition:background 0.3s,color 0.3s;}
+  [data-theme="dark"] body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(200,169,110,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(200,169,110,0.03) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
+
+  /* TOPBAR */
+  #topbar{position:sticky;top:0;z-index:200;background:var(--topbar-bg);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;height:52px;flex-shrink:0;transition:background 0.3s;gap:0;}
+  .tb-logo{font-family:'DM Serif Display',serif;font-size:16px;color:var(--text);margin-right:24px;white-space:nowrap;}
+  .tb-logo em{color:var(--accent);font-style:italic;}
+  .tb-nav{display:flex;flex:1;}
+  .tb-tab{padding:0 16px;height:52px;display:flex;align-items:center;font-size:12px;font-family:'DM Mono',monospace;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:color 0.2s,border-color 0.2s;letter-spacing:0.06em;}
+  .tb-tab:hover{color:var(--text);}
+  .tb-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .tb-right{display:flex;align-items:center;gap:10px;margin-left:auto;}
+  .tb-user{font-size:12px;font-family:'DM Mono',monospace;color:var(--muted);}
+  .tb-btn{font-size:12px;font-family:'DM Mono',monospace;background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;color:var(--muted);transition:color 0.2s,border-color 0.2s;white-space:nowrap;}
+  .tb-btn:hover{color:var(--text);border-color:var(--muted);}
+
+  /* AUTH */
+  #auth-screen{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:var(--bg);}
+  .auth-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px 36px;width:100%;max-width:380px;box-shadow:0 8px 32px var(--shadow);position:relative;z-index:1;}
+  .auth-logo{font-family:'DM Serif Display',serif;font-size:26px;color:var(--text);margin-bottom:4px;}
+  .auth-logo em{color:var(--accent);font-style:italic;}
+  .auth-sub{font-size:13px;color:var(--muted);margin-bottom:32px;}
+  .auth-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:24px;}
+  .auth-tab{padding:8px 16px;font-size:13px;font-family:'DM Mono',monospace;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color 0.2s,border-color 0.2s;}
+  .auth-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .auth-field{margin-bottom:16px;}
+  .auth-field label{display:block;font-size:11px;font-family:'DM Mono',monospace;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+  .auth-field input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s;}
+  .auth-field input:focus{border-color:var(--accent);}
+  .auth-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:12px;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:8px;transition:opacity 0.2s;}
+  .auth-btn:hover{opacity:0.88;}
+  .auth-msg{margin-top:12px;font-size:13px;text-align:center;min-height:18px;}
+  .auth-msg.error{color:#e07b7b;}
+  .auth-msg.ok{color:var(--const);}
+
+  /* MAIN */
+  #main{flex:1;display:flex;flex-direction:column;position:relative;z-index:1;overflow:hidden;}
+
+  /* HOME */
+  #view-home{flex:1;overflow-y:auto;padding:48px 32px 80px;}
+  .home-inner{max-width:960px;margin:0 auto;}
+  h1{font-family:'DM Serif Display',serif;font-size:clamp(32px,4vw,46px);line-height:1.1;color:var(--text);margin-bottom:10px;}
+  h1 em{font-style:italic;color:var(--accent);}
+  .subtitle{font-size:15px;color:var(--muted);font-weight:300;margin-bottom:40px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:20px;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:16px;transition:border-color 0.2s,transform 0.2s,box-shadow 0.2s;position:relative;overflow:hidden;cursor:pointer;}
+  .card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--stripe);border-radius:12px 0 0 12px;}
+  .card:hover{border-color:var(--stripe);transform:translateY(-2px);box-shadow:0 8px 32px var(--shadow);}
+  .card-top{display:flex;align-items:flex-start;gap:14px;}
+  .icon{width:40px;height:40px;border-radius:8px;background:color-mix(in srgb,var(--stripe) 15%,transparent);border:1px solid color-mix(in srgb,var(--stripe) 30%,transparent);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+  .card-title{font-family:'DM Serif Display',serif;font-size:20px;line-height:1.2;}
+  .card-sub{font-size:12px;font-family:'DM Mono',monospace;color:var(--stripe);letter-spacing:0.08em;text-transform:uppercase;margin-top:3px;}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;}
+  .tag{font-size:11px;font-family:'DM Mono',monospace;padding:3px 8px;border-radius:4px;background:color-mix(in srgb,var(--stripe) 10%,transparent);color:color-mix(in srgb,var(--stripe) 80%,var(--text));border:1px solid color-mix(in srgb,var(--stripe) 20%,transparent);}
+  .cta{margin-top:auto;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--stripe);font-weight:500;}
+  .cta svg{transition:transform 0.2s;}
+  .card:hover .cta svg{transform:translateX(4px);}
+  .card-admin{--stripe:var(--admin);}
+  .card-const{--stripe:var(--const);}
+  .card-civil{--stripe:var(--civil);}
+  .card-ambiental{--stripe:var(--ambiental);}
+  .card-trabalho{--stripe:var(--trabalho);}
+
+  /* MAPA VIEWER */
+  #view-mapa{display:none;flex:1;flex-direction:column;}
+  .mapa-bar{display:flex;align-items:center;gap:12px;padding:8px 20px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+  .mapa-back{font-size:12px;font-family:'DM Mono',monospace;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px;background:none;border:none;transition:color 0.2s;}
+  .mapa-back:hover{color:var(--accent);}
+  .mapa-title{font-family:'DM Serif Display',serif;font-size:15px;color:var(--text);}
+  .mapa-stripe{width:8px;height:8px;border-radius:50%;background:var(--mcolor);flex-shrink:0;}
+  #mapa-frame{flex:1;border:none;width:100%;height:100%;background:var(--bg);}
+
+  /* TRACKER */
+  #view-tracker{display:none;flex:1;overflow-y:auto;padding:48px 32px 80px;flex-direction:column;min-height:0;}
+  .tracker-inner{max-width:960px;margin:0 auto;}
+  .overall-bar{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px 28px;margin-bottom:32px;display:flex;align-items:center;gap:24px;}
+  .overall-pct{font-family:'DM Serif Display',serif;font-size:42px;color:var(--accent);line-height:1;flex-shrink:0;}
+  .overall-info{flex:1;}
+  .overall-label{font-size:13px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:0.08em;margin-bottom:10px;}
+  .bar-track{height:6px;background:var(--border);border-radius:3px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:3px;background:var(--accent);transition:width 0.4s ease;}
+  .subject-block{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;}
+  .subject-head{display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;user-select:none;transition:background 0.15s;}
+  .subject-head:hover{background:var(--surface2);}
+  .subject-stripe{width:3px;height:36px;border-radius:2px;background:var(--scolor);flex-shrink:0;}
+  .subject-info{flex:1;min-width:0;}
+  .subject-name{font-size:14px;font-weight:500;color:var(--text);}
+  .subject-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+  .subject-right{text-align:right;flex-shrink:0;}
+  .subject-pct-val{font-size:15px;font-weight:500;color:var(--scolor);}
+  .subject-mini-bar{width:72px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:5px;margin-left:auto;}
+  .subject-mini-fill{height:100%;border-radius:2px;background:var(--scolor);transition:width .4s;}
+  .subject-chevron{font-size:12px;color:var(--muted);transition:transform .2s;margin-left:4px;flex-shrink:0;}
+  .subject-block.open .subject-chevron{transform:rotate(180deg);}
+  .chapters-list{display:none;border-top:1px solid var(--border);}
+  .subject-block.open .chapters-list{display:block;}
+t-chevron{transform:rotate(180deg);}
+  .chapters-list{display:none;border-top:1px solid var(--border);}
+  .subject-block.open .chapters-list{display:block;}
+.chapter-row{border-bottom:1px solid var(--border);}
+  .chapter-row:last-child{border-bottom:none;}
+  .chapter-main{display:flex;align-items:center;gap:12px;padding:12px 20px 12px 36px;transition:background 0.15s;cursor:default;}
+  .chapter-main:hover{background:var(--surface2);}
+  .chapter-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--scolor);cursor:pointer;flex-shrink:0;}
+  .chapter-label{font-size:14px;flex:1;transition:color 0.2s;}
+  .chapter-row.checked .chapter-label{color:var(--muted);text-decoration:line-through;}
+  .chapter-date{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);white-space:nowrap;margin-right:4px;}
+
+  /* FLAGS */
+  .flag-btns{display:flex;gap:4px;align-items:center;}
+  .flag-btn{background:none;border:none;cursor:pointer;font-size:14px;opacity:0.3;transition:opacity 0.15s,transform 0.15s;padding:2px;border-radius:4px;}
+  .flag-btn:hover{opacity:0.7;}
+  .flag-btn.active{opacity:1;transform:scale(1.15);}
+
+  /* NOTE */
+  .note-toggle{background:none;border:none;cursor:pointer;font-size:12px;font-family:'DM Mono',monospace;color:var(--muted);padding:2px 6px;border-radius:4px;transition:color 0.15s,background 0.15s;}
+  .note-toggle:hover{color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);}
+  .note-toggle.has-note{color:var(--accent);}
+  .note-area{display:none;padding:8px 20px 12px 52px;background:var(--note-bg);border-top:1px solid var(--note-border);}
+  .note-area.open{display:block;}
+  .note-textarea{width:100%;background:transparent;border:none;outline:none;resize:none;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);line-height:1.6;min-height:60px;}
+  .note-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:6px;}
+  .note-save-btn{font-size:11px;font-family:'DM Mono',monospace;background:var(--accent);color:#fff;border:none;border-radius:5px;padding:4px 12px;cursor:pointer;transition:opacity 0.2s;}
+  .note-save-btn:hover{opacity:0.85;}
+  .note-saved{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);align-self:center;}
+
+  .loading{text-align:center;padding:60px;color:var(--muted);font-family:'DM Mono',monospace;font-size:13px;}
+
+  /* MODAL NOTE para mapas */
+  #note-modal{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;}
+  #note-modal.open{display:flex;}
+  .note-modal-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;width:100%;max-width:480px;box-shadow:0 12px 40px var(--shadow);}
+  .note-modal-title{font-family:'DM Serif Display',serif;font-size:18px;margin-bottom:16px;color:var(--text);}
+  .note-modal-ta{width:100%;background:var(--note-bg);border:1px solid var(--note-border);border-radius:8px;padding:12px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);resize:none;min-height:120px;outline:none;}
+  .note-modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:14px;}
+  .btn-cancel{font-size:13px;font-family:'DM Mono',monospace;background:none;border:1px solid var(--border);border-radius:7px;padding:7px 16px;cursor:pointer;color:var(--muted);transition:color 0.2s;}
+  .btn-cancel:hover{color:var(--text);}
+  .btn-save{font-size:13px;font-family:'DM Mono',monospace;background:var(--accent);color:#fff;border:none;border-radius:7px;padding:7px 16px;cursor:pointer;transition:opacity 0.2s;}
+  .btn-save:hover{opacity:0.85;}
+
+  @media(max-width:640px){
+    .grid{grid-template-columns:1fr;}
+    #view-home,#view-tracker{padding:32px 16px 60px;}
+    .tb-user{display:none;}
+    .overall-bar{flex-direction:column;align-items:flex-start;gap:12px;}
+  }
+
+/* ── MOBILE ── */
+@media (max-width: 640px) {
+  .grid { grid-template-columns: 1fr !important; }
+  #view-home, #view-tracker { padding: 24px 14px 60px !important; }
+  .tb-user { display: none !important; }
+  .overall-bar { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .tb-logo { font-size: 14px; margin-right: 12px; }
+  .nav-tab, .tb-tab { padding: 8px 12px !important; font-size: 11px !important; }
+  h1 { font-size: 28px !important; }
+  .chapter-main { padding: 10px 12px 10px 24px !important; }
+  .note-area { padding: 8px 12px 10px 28px !important; }
+  .subject-head { padding: 14px 16px !important; }
+  #topbar { padding: 0 12px !important; }
+  .card { padding: 20px !important; }
+}
+
+/* ── LEI SECA ── */
+#view-leiseca { display:none; flex:1; overflow-y:auto; padding:48px 32px 80px; flex-direction:column; }
+.ls-inner { max-width:1100px; margin:0 auto; }
+
+.ls-overall {
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:20px 28px;margin-bottom:32px;display:flex;align-items:center;gap:20px;
+}
+.ls-overall-pct { font-family:'DM Serif Display',serif;font-size:40px;color:var(--accent);line-height:1;flex-shrink:0; }
+.ls-overall-info { flex:1; }
+.ls-overall-label { font-size:12px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:0.08em;margin-bottom:8px; }
+.ls-bar-track { height:5px;background:var(--border);border-radius:3px;overflow:hidden; }
+.ls-bar-fill { height:100%;border-radius:3px;background:var(--accent);transition:width 0.4s; }
+
+.ls-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:12px;
+}
+
+.ls-day {
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;transition:border-color 0.2s;
+}
+.ls-day.all-done { border-color:var(--accent); }
+
+.ls-day-head {
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  cursor:pointer;user-select:none;transition:background 0.15s;
+  border-bottom:1px solid var(--border);
+}
+.ls-day-head:hover { background:var(--surface2); }
+.ls-day-num {
+  font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.08em;
+  color:var(--accent);font-weight:700;white-space:nowrap;
+}
+.ls-day-prog { flex:1;text-align:right;font-size:11px;font-family:'DM Mono',monospace;color:var(--muted); }
+.ls-day-check { font-size:14px; }
+
+.ls-day-mini-bar { height:3px;background:var(--border); }
+.ls-day-mini-fill { height:100%;background:var(--accent);transition:width 0.3s; }
+
+.ls-items { padding:8px 0; }
+.ls-item {
+  display:flex;align-items:center;gap:10px;
+  padding:7px 14px;transition:background 0.12s;
+}
+.ls-item:hover { background:var(--surface2); }
+.ls-item input[type=checkbox] {
+  width:15px;height:15px;accent-color:var(--accent);
+  cursor:pointer;flex-shrink:0;
+}
+.ls-item-label {
+  font-size:13px;flex:1;cursor:pointer;transition:color 0.15s;
+  font-family:'DM Mono',monospace;
+}
+.ls-item.done .ls-item-label { color:var(--muted);text-decoration:line-through; }
+
+.ls-filter {
+  display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;
+}
+.ls-fbtn {
+  font-size:11px;font-family:'DM Mono',monospace;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:4px 12px;cursor:pointer;color:var(--muted);
+  transition:all 0.15s;white-space:nowrap;
+}
+.ls-fbtn:hover,.ls-fbtn.active { background:var(--accent);color:#1a1a1a;border-color:var(--accent); }
+
+@media(max-width:640px){
+  .ls-grid { grid-template-columns:1fr; }
+  #view-leiseca { padding:24px 14px 60px; }
+}
+
+@media (max-width: 480px) {
+  #topbar { padding: 0 8px !important; gap: 4px; flex-wrap: nowrap; }
+  .tb-logo { font-size: 13px !important; margin-right: 6px !important; }
+  .tb-nav { gap: 0; overflow-x: auto; flex: 1; }
+  .tb-tab { padding: 0 8px !important; font-size: 10px !important; white-space: nowrap; height: 52px; }
+  .tb-right { gap: 6px; }
+  .tb-btn { font-size: 11px !important; padding: 3px 7px !important; }
+  .tb-user { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">Revisão <em>Jurídica</em></div>
+    <div class="auth-sub">Portal de Mapas Mentais</div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="switchTab('login')">Entrar</div>
+      <div class="auth-tab" onclick="switchTab('signup')">Criar conta</div>
+    </div>
+    <div id="tab-login">
+      <div class="auth-field"><label>E-mail</label><input type="email" id="login-email" placeholder="seu@email.com"/></div>
+      <div class="auth-field"><label>Senha</label><input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <button class="auth-btn" onclick="doLogin()">Entrar</button>
+    </div>
+    <div id="tab-signup" style="display:none">
+      <div class="auth-field"><label>Nome</label><input type="text" id="signup-name" placeholder="Seu nome"/></div>
+      <div class="auth-field"><label>E-mail</label><input type="email" id="signup-email" placeholder="seu@email.com"/></div>
+      <div class="auth-field"><label>Senha</label><input type="password" id="signup-pass" placeholder="Mínimo 6 caracteres" onkeydown="if(event.key==='Enter')doSignup()"/></div>
+      <button class="auth-btn" onclick="doSignup()">Criar conta</button>
+    </div>
+    <div class="auth-msg" id="auth-msg"></div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div id="topbar" style="display:none">
+  <div class="tb-logo">Revisão <em>Jurídica</em></div>
+  <div class="tb-nav">
+    <div class="tb-tab active" onclick="showView('home',this)">Mapas</div>
+    <div class="tb-tab" onclick="showView('tracker',this)">Tracker</div>
+    <div class="tb-tab" onclick="showView('leiseca',this)">Lei Seca</div>
+  </div>
+  <div class="tb-right">
+    <button class="tb-btn" onclick="toggleTheme()" id="theme-btn">☀️ Claro</button>
+    <span class="tb-user" id="user-email-display"></span>
+    <button class="tb-btn" onclick="doLogout()">Sair</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main" style="display:none">
+
+  <!-- HOME -->
+  <div id="view-home" style="display:flex;flex-direction:column;">
+    <div class="home-inner">
+      <h1>Cadernos de<br><em>Revisão Jurídica</em></h1>
+      <p class="subtitle">Selecione uma matéria para abrir os mapas interativos</p>
+      <div class="grid">
+        <div class="card card-admin" onclick="openMapa('mapas_admin.html','Direito Administrativo','#5b8dee')">
+          <div class="card-top"><div class="icon">⚖️</div><div><div class="card-title">Direito Administrativo</div><div class="card-sub">12 capítulos</div></div></div>
+          <div class="tags"><span class="tag">Regime Jurídico</span><span class="tag">Atos Administrativos</span><span class="tag">Poderes Admin.</span><span class="tag">Serviços Públicos</span><span class="tag">Responsabilidade Civil</span><span class="tag">Improbidade</span><span class="tag">+ 6 temas</span></div>
+          <div class="cta">Abrir mapas <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </div>
+        <div class="card card-const" onclick="openMapa('mapas_const.html','Direito Constitucional','#7dc87d')">
+          <div class="card-top"><div class="icon">📜</div><div><div class="card-title">Direito Constitucional</div><div class="card-sub">20 capítulos</div></div></div>
+          <div class="tags"><span class="tag">Teoria Geral do Estado</span><span class="tag">Poder Constituinte</span><span class="tag">Direitos Fundamentais</span><span class="tag">Organização do Estado</span><span class="tag">Controle de Const.</span><span class="tag">+ 15 temas</span></div>
+          <div class="cta">Abrir mapas <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </div>
+        <div class="card card-civil" onclick="openMapa('direito_civil_mapas_v4.html','Direito Civil','#e07b7b')">
+          <div class="card-top"><div class="icon">🏛️</div><div><div class="card-title">Direito Civil</div><div class="card-sub">Parte Geral + Obrigações</div></div></div>
+          <div class="tags"><span class="tag">LINDB</span><span class="tag">Pessoa Natural</span><span class="tag">Pessoa Jurídica</span><span class="tag">Bens</span><span class="tag">Prescrição e Decadência</span><span class="tag">Negócio Jurídico</span><span class="tag">Obrigações</span></div>
+          <div class="cta">Abrir mapas <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </div>
+        <div class="card card-ambiental" onclick="openMapa('mapas_ambiental.html','Direito Ambiental','#6dcfb8')">
+          <div class="card-top"><div class="icon">🌿</div><div><div class="card-title">Direito Ambiental</div><div class="card-sub">16 capítulos</div></div></div>
+          <div class="tags"><span class="tag">PNMA e SISNAMA</span><span class="tag">Licenciamento</span><span class="tag">Código Florestal</span><span class="tag">Recursos Hídricos</span><span class="tag">SNUC</span><span class="tag">Responsabilidade</span><span class="tag">+ 10 temas</span>
+      </div>
+          <div class="cta">Abrir mapas <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </div>
+      
+        <div class="card card-trabalho" onclick="openMapa('mapas_dtrabalho.html','Direito do Trabalho','#bb9af7')">
+          <div class="card-top"><div class="icon">👷</div><div><div class="card-title">Direito do Trabalho</div><div class="card-sub">15 capítulos</div></div></div>
+          <div class="tags"><span class="tag">Fontes e Princípios</span><span class="tag">Relação de Emprego</span><span class="tag">Contrato Individual</span><span class="tag">Salário</span><span class="tag">Jornada</span><span class="tag">+ 10 temas</span></div>
+          <div class="cta">Abrir mapas <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAPA VIEWER -->
+  <div id="view-mapa">
+    <div class="mapa-bar">
+      <button class="mapa-back" onclick="showView('home',document.querySelector('.tb-tab'))">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M13 8H3M7 4L3 8l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Voltar
+      </button>
+      <div class="mapa-stripe" id="mapa-stripe"></div>
+      <div class="mapa-title" id="mapa-title"></div>
+    </div>
+    <iframe id="mapa-frame" src="" title="Mapa Mental"></iframe>
+  </div>
+
+  <!-- TRACKER -->
+  <div id="view-tracker">
+    <div class="tracker-inner">
+      <h1>Tracker de <em>Revisão</em></h1>
+      <p class="subtitle">Marque capítulos, adicione flags e anotações</p>
+      <div class="overall-bar">
+        <div class="overall-pct" id="overall-pct">0%</div>
+        <div class="overall-info">
+          <div class="overall-label">PROGRESSO GERAL · <span id="overall-counts">0 / 0 capítulos</span></div>
+          <div class="bar-track"><div class="bar-fill" id="overall-bar" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div id="tracker-body"><div class="loading">Carregando...</div></div>
+    </div>
+  </div>
+
+</di
+    <!-- LEI SECA -->
+    <div id="view-leiseca" style="display:none;flex:1;overflow-y:auto;padding:48px 32px 80px;flex-direction:column;">
+      <div class="ls-inner">
+        <h1>Lei <em>Seca</em></h1>
+        <p class="subtitle" style="margin-bottom:24px">70 dias de leitura obrigatória — marque o que foi lido</p>
+        <div class="ls-overall">
+          <div class="ls-overall-pct" id="ls-pct">0%</div>
+          <div class="ls-overall-info">
+            <div class="ls-overall-label">PROGRESSO GERAL · <span id="ls-counts">0 / 280 itens</span></div>
+            <div class="ls-bar-track"><div class="ls-bar-fill" id="ls-bar" style="width:0%"></div></div>
+          </div>
+        </div>
+        <div class="ls-filter">
+          <button class="ls-fbtn active" onclick="lsFilter('all',this)">Todos os dias</button>
+          <button class="ls-fbtn" onclick="lsFilter('pending',this)">Pendentes</button>
+          <button class="ls-fbtn" onclick="lsFilter('done',this)">Concluídos</button>
+        </div>
+        <div class="ls-grid" id="ls-grid"></div>
+      </div>
+    </div>v>
+
+<!-- NOTE MODAL (para mapas) -->
+<div id="note-modal">
+  <div class="note-modal-box">
+    <div class="note-modal-title" id="note-modal-title">Anotação</div>
+    <textarea class="note-modal-ta" id="note-modal-ta" placeholder="Digite sua anotação..."></textarea>
+    <div class="note-modal-actions">
+      <button class="btn-cancel" onclick="closeNoteModal()">Cancelar</button>
+      <button class="btn-save" onclick="saveNoteModal()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://qseismabfaonggrwzuiu.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzZWlzbWFiZmFvbmdncnd6dWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzU4MTMsImV4cCI6MjA5Mzc1MTgxM30.eYnWJo9NI_-wGJCd2HalmnCGMhMvlKZxmZKuTpx3xS0';
+const {createClient} = supabase;
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: false,
+    storage: {
+      getItem: (key) => { try { return localStorage.getItem(key); } catch(e) { return null; } },
+      setItem: (key, val) => { try { localStorage.setItem(key, val); } catch(e) {} },
+      removeItem: (key) => { try { localStorage.removeItem(key); } catch(e) {} }
+    }
+  }
+});
+
+const SUBJECTS = [
+  {id:'admin',name:'Direito Administrativo',color:'#5b8dee',chapters:['Noções Preliminares','Regime Jurídico-Administrativo','Organização da Administração Pública','Atos Administrativos','Poderes Administrativos','Serviços Públicos','Responsabilidade Civil do Estado','Bens Públicos','Intervenção Estatal na Propriedade','Processo Administrativo','Improbidade Administrativa','Lei de Acesso à Informação']},
+  {id:'const',name:'Direito Constitucional',color:'#7dc87d',chapters:['Teoria Geral do Estado','Constitucionalismo e Direito Constitucional','Constituição — Classificação e Evolução','Poder Constituinte','Efeitos de Nova CF e Reformas','Sistemas Normativos Jurídicos','Hermenêutica e Interpretação Constitucional','Existência, Validade, Vigência e Eficácia','Organização do Estado','Poder Legislativo','Poder Executivo','Processo Legislativo','Defesa do Estado e das Instituições','Direitos Fundamentais em Espécie','Teoria Geral dos Direitos Fundamentais','Controle de Const. — Teoria Geral','Controle de Const. — Controle Concreto','Controle de Const. — Ações Diretas','Controle de Const. — Atos Omissivos','Controle de Const. — ADPF']},
+  {id:'civil',name:'Direito Civil',color:'#e07b7b',chapters:['LINDB','Pessoa Natural','Pessoa Jurídica','Bens','Prescrição e Decadência','Negócio Jurídico','Obrigações','Contratos']},
+  {id:'ambiental',name:'Direito Ambiental',color:'#6dcfb8',chapters:['Propedêutica do Direito Ambiental','Conceito Jurídico de Meio Ambiente','Proteção Constitucional do Meio Ambiente','Repartição de Competências Ambiental','PNMA e SISNAMA','Licenciamento Ambiental','Estudo de Impacto Ambiental','Política Nacional de Recursos Hídricos','Código Florestal','SNUC','Meio Ambiente do Trabalho','Responsabilidade Ambiental','Responsabilidade Criminal Ambiental','Tutela Processual do Meio Ambiente','Tributação Ambiental','Patrimônio Cultural']}
+,
+  {id:'dtrabalho',name:'Dir. do Trabalho',color:'#bb9af7',chapters:['Fontes do D. do Trabalho','Princípios do D. do Trabalho','Relação de Emprego','Terceirização e Flexibilização','Contrato Individual de Trabalho','Extinção do CT e Estabilidade','Salário e Remuneração','Jornada de Trabalho e Descansos','Férias e Prescrição','Segurança e Medicina do Trabalho','CCP e D. Coletivo do Trabalho','Empregado Doméstico','FGTS','Direito de Greve','Dano Moral e Profissões Regulamentadas']}
+];
+
+const FLAGS = {hard:'🔴',review:'🟡',done:'🟢'};
+let currentUser=null, progress={}, flags={}, notes={};
+let noteModalKey=null;
+
+// ── THEME ──
+function toggleTheme(){
+  const html=document.documentElement;
+  const next=html.getAttribute('data-theme')==='dark'?'light':'dark';
+  html.setAttribute('data-theme',next);
+  document.getElementById('theme-btn').textContent=next==='dark'?'☀️ Claro':'🌙 Escuro';
+  localStorage.setItem('theme',next);
+}
+(function(){
+  const saved=localStorage.getItem('theme')||'dark';
+  document.documentElement.setAttribute('data-theme',saved);
+  window.addEventListener('DOMContentLoaded',()=>{
+    const btn=document.getElementById('theme-btn');
+    if(btn) btn.textContent=saved==='dark'?'☀️ Claro':'🌙 Escuro';
+  });
+})();
+
+// ── AUTH ──
+function switchTab(tab){
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&tab==='login')||(i===1&&tab==='signup')));
+  document.getElementById('tab-login').style.display=tab==='login'?'':'none';
+  document.getElementById('tab-signup').style.display=tab==='signup'?'':'none';
+  document.getElementById('auth-msg').textContent='';
+}
+function setMsg(msg,type='error'){const el=document.getElementById('auth-msg');el.textContent=msg;el.className='auth-msg '+type;}
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  if(!email||!pass) return setMsg('Preencha todos os campos.');
+  setMsg('Entrando...','ok');
+  const {error}=await sb.auth.signInWithPassword({email,password:pass});
+  if(error) setMsg('E-mail ou senha incorretos.');
+}
+async function doSignup(){
+  const name=document.getElementById('signup-name').value.trim();
+  const email=document.getElementById('signup-email').value.trim();
+  const pass=document.getElementById('signup-pass').value;
+  if(!name||!email||!pass) return setMsg('Preencha todos os campos.');
+  if(pass.length<6) return setMsg('Senha deve ter pelo menos 6 caracteres.');
+  setMsg('Criando conta...','ok');
+  const {error}=await sb.auth.signUp({email,password:pass,options:{data:{name}}});
+  if(error) setMsg(error.message);
+  else setMsg('Conta criada! Você já pode entrar.','ok');
+}
+async function doLogout(){
+  try{ await sb.auth.signOut(); }catch(e){ console.error('signOut error:',e); }
+  currentUser=null;
+  progress={};flags={};notes={};lsProgress={};
+  // Force reload to clear all state cleanly
+  window.location.href = window.location.href.split('?')[0];
+}
+
+sb.auth.onAuthStateChange(async(event,session)=>{
+  if(session?.user){
+    currentUser=session.user;
+    document.getElementById('auth-screen').style.display='none';
+    document.getElementById('topbar').style.display='flex';
+    document.getElementById('main').style.display='flex';
+    document.getElementById('user-email-display').textContent=session.user.user_metadata?.name||session.user.email;
+    renderTracker();
+    renderLeiSeca();
+    await Promise.allSettled([loadProgress(),loadFlags(),loadNotes(),loadLeiSeca()]);
+    renderTracker();
+    renderLeiSeca();
+    // Startup DB check
+    try{
+      const {data:dbTest,error:dbErr}=await sb.from('progress').select('chapter_id').eq('user_id',currentUser.id).limit(1);
+      if(dbErr){ _lsSaveStatus('⚠ DB: '+dbErr.message,'err'); console.error('DB check failed:',dbErr); }
+      else { console.log('DB check OK, rows:',dbTest?.length); }
+    }catch(e){ _lsSaveStatus('⚠ DB connection error','err'); console.error('DB conn error:',e); }
+  } else {
+    currentUser=null;
+    document.getElementById('auth-screen').style.display='flex';
+    document.getElementById('topbar').style.display='none';
+    document.getElementById('main').style.display='none';
+  }
+});
+
+// ── DATA LOADING ──
+async function loadProgress(){
+  try{
+    const {data,error}=await sb.from('progress').select('chapter_id,done,done_at').eq('user_id',currentUser.id);
+    if(error){ console.error('loadProgress error:',error); _lsSaveStatus('⚠ loadProgress: '+error.message,'err'); progress={}; return; }
+    progress={};
+    const total=data?data.length:0;
+    console.log('loadProgress: got',total,'rows from DB');
+    if(data) data.forEach(r=>{progress[r.chapter_id]={done:r.done,date:r.done_at};});
+    console.log('progress loaded:',Object.keys(progress).length,'chapters');
+    if(total===0) _lsSaveStatus('ℹ progresso vazio no banco','saving');
+  }catch(e){ console.error('loadProgress exception:',e); progress={}; }
+}
+async function loadFlags(){ flags={}; }
+async function loadNotes(){ notes={}; }
+
+// ── VIEWS ──
+function showView(view,tabEl){
+  ['home','mapa','tracker','leiseca'].forEach(v=>{
+    const el=document.getElementById('view-'+v);
+    if(el) el.style.display='none';
+  });
+  document.querySelectorAll('.tb-tab').forEach(t=>t.classList.remove('active'));
+  if(tabEl) tabEl.classList.add('active');
+  const target=document.getElementById('view-'+view);
+  if(target) target.style.display=view==='tracker'?'block':'flex';
+  if(view==='leiseca') setTimeout(renderLeiSeca, 50);
+  if(view==='tracker' && currentUser){
+    // Reload progress from Supabase to sync with map checkboxes
+    loadProgress().then(()=>{ renderTracker(); });
+  }
+}
+function openMapa(file,title,color){
+  // Open map in same window - session already in localStorage
+  window.location.href=file;
+  document.getElementById('mapa-title').textContent=title;
+  document.getElementById('mapa-stripe').style.background=color;
+  ['home','tracker'].forEach(v=>{const el=document.getElementById('view-'+v);if(el)el.style.display='none';});
+  document.getElementById('view-mapa').style.display='flex';
+  document.querySelectorAll('.tb-tab').forEach(t=>t.classList.remove('active'));
+}
+
+// ── TRACKER RENDER ──
+function toggleBlock(id){
+  const block=document.getElementById('block-'+id);
+  if(block) block.classList.toggle('open');
+}
+
+function renderTracker(){
+  const body=document.getElementById('tracker-body');
+  body.innerHTML='';
+  SUBJECTS.forEach(subj=>{
+    const block=document.createElement('div');
+    block.className='subject-block';
+    block.id='block-'+subj.id;
+    block.style.setProperty('--scolor',subj.color);
+    const doneCount=subj.chapters.filter((_,i)=>progress[`${subj.id}_${i}`]?.done).length;
+    const pct=Math.round(doneCount/subj.chapters.length*100);
+    block.innerHTML=`
+      <div class="subject-head" onclick="toggleBlock('${subj.id}')">
+        <div class="subject-stripe"></div>
+        <div class="subject-info">
+          <div class="subject-name">${subj.name}</div>
+          <div class="subject-meta">${subj.chapters.length} cap. · <span id="smeta-${subj.id}">${doneCount} revisados</span></div>
+        </div>
+        <div class="subject-right">
+          <div class="subject-pct-val" id="spct-${subj.id}">${pct}%</div>
+          <div class="subject-mini-bar"><div class="subject-mini-fill" id="sbar-${subj.id}" style="width:${pct}%"></div></div>
+        </div>
+        <div class="subject-chevron">▼</div>
+      </div>
+      <div class="chapters-list" id="clist-${subj.id}">
+        ${subj.chapters.map((ch,i)=>renderChapterRow(subj,ch,i)).join('')}
+      </div>`;
+    body.appendChild(block);
+  });
+  updateOverallBar();
+}
+
+function renderChapterRow(subj,ch,i){
+  const key=`${subj.id}_${i}`;
+  const isDone=progress[key]?.done||false;
+  const date=progress[key]?.date;
+  const dateStr=date?new Date(date).toLocaleDateString('pt-BR'):'';
+  return `
+    <div class="chapter-row${isDone?' checked':''}" id="crow-${key}" style="--scolor:${subj.color}">
+      <div class="chapter-main">
+        <input type="checkbox" id="chk-${key}" ${isDone?'checked':''} onchange="onCheck('${key}',this.checked)"/>
+        <label class="chapter-label" for="chk-${key}">${ch}</label>
+        <span class="chapter-date" id="cdate-${key}">${dateStr}</span>
+      </div>
+    </div>`;
+}
+
+async function onCheck(key,checked){
+  const row=document.getElementById('crow-'+key);
+  if(row) row.classList.toggle('checked',checked);
+  const now=checked?new Date():null;
+  const dateEl=document.getElementById('cdate-'+key);
+  if(dateEl) dateEl.textContent=now?now.toLocaleDateString('pt-BR'):'';
+  const isoNow=now?now.toISOString():null;
+  progress[key]={done:checked,date:isoNow};
+  try{
+    // Try upsert with conflict resolution
+    const {data:ud, error:ue} = await sb.from('progress').upsert(
+      {user_id:currentUser.id,chapter_id:key,done:checked,done_at:isoNow},
+      {onConflict:'user_id,chapter_id'}
+    );
+    if(ue){
+      console.error('Tracker upsert error:',ue);
+      // Fallback: delete then insert
+      await sb.from('progress').delete().eq('user_id',currentUser.id).eq('chapter_id',key);
+      const {error:ie} = await sb.from('progress').insert({user_id:currentUser.id,chapter_id:key,done:checked,done_at:isoNow});
+      if(ie){ _lsSaveStatus('⚠ erro: '+ie.message,'err'); console.error('Tracker insert fallback error:',ie); }
+      else { _lsSaveStatus('✓ salvo','ok'); }
+    } else { _lsSaveStatus('✓ salvo','ok'); }
+  }catch(e){ console.error('Tracker save exception:',e); _lsSaveStatus('⚠ erro: '+e.message,'err'); }
+  updateOverallBar();
+  updateSubjectBar(key.split('_')[0]);
+}
+
+// ── FLAGS ──
+async function onFlag(key,flag,btn){
+  const isActive=btn.classList.contains('active');
+  const newFlag=isActive?null:flag;
+  // update UI
+  btn.closest('.flag-btns').querySelectorAll('.flag-btn').forEach(b=>b.classList.remove('active'));
+  if(newFlag) btn.classList.add('active');
+  // save
+  if(newFlag){
+    flags[key]=newFlag;
+    await sb.from('flags').upsert({user_id:currentUser.id,chapter_id:key,flag:newFlag},{onConflict:'user_id,chapter_id'});
+  } else {
+    delete flags[key];
+    await sb.from('flags').delete().eq('user_id',currentUser.id).eq('chapter_id',key);
+  }
+}
+
+// ── NOTES ──
+function toggleNote(key){
+  const area=document.getElementById('notea-'+key);
+  if(area){
+    area.classList.toggle('open');
+    if(area.classList.contains('open')){
+      const ta=document.getElementById('notetx-'+key);
+      if(ta) setTimeout(()=>ta.focus(),50);
+    }
+  }
+}
+
+async function saveNote(key){
+  const ta=document.getElementById('notetx-'+key);
+  if(!ta) return;
+  const content=ta.value;
+  notes[key]=content;
+  const savedEl=document.getElementById('notesaved-'+key);
+  const togBtn=document.getElementById('notetog-'+key);
+  if(content.trim()){
+    await sb.from('notes').upsert({user_id:currentUser.id,chapter_id:key,content,updated_at:new Date().toISOString()},{onConflict:'user_id,chapter_id'});
+    if(togBtn) togBtn.classList.add('has-note');
+  } else {
+    await sb.from('notes').delete().eq('user_id',currentUser.id).eq('chapter_id',key);
+    if(togBtn) togBtn.classList.remove('has-note');
+  }
+  if(savedEl){savedEl.textContent='Salvo ✓';setTimeout(()=>{savedEl.textContent='';},2000);}
+}
+
+async function autoSaveNote(key){await saveNote(key);}
+
+// ── OVERALL BARS ──
+function updateOverallBar(){
+  let total=0,done=0;
+  SUBJECTS.forEach(subj=>{
+    total+=subj.chapters.length;
+    done+=subj.chapters.filter((_,i)=>progress[`${subj.id}_${i}`]?.done).length;
+  });
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('overall-pct').textContent=pct+'%';
+  document.getElementById('overall-bar').style.width=pct+'%';
+  document.getElementById('overall-counts').textContent=`${done} / ${total} capítulos`;
+}
+function updateSubjectBar(subjId){
+  const subj=SUBJECTS.find(s=>s.id===subjId);
+  if(!subj) return;
+  const done=subj.chapters.filter((_,i)=>progress[`${subjId}_${i}`]?.done).length;
+  const pct=Math.round(done/subj.chapters.length*100);
+  const sbar=document.getElementById('sbar-'+subjId);
+  const spct=document.getElementById('spct-'+subjId);
+  const smeta=document.getElementById('smeta-'+subjId);
+  if(sbar) sbar.style.width=pct+'%';
+  if(spct) spct.textContent=pct+'%';
+  if(smeta) smeta.textContent=done+' revisados';
+}
+
+// ── LEI SECA ──
+const LS_DATA = {"1": [{"label": "CRFB 1 ao 11", "id": "ls_d1_i0"}, {"label": "CC 1 ao 52", "id": "ls_d1_i1"}, {"label": "CPC 1 ao 41", "id": "ls_d1_i2"}, {"label": "Lei 4657", "id": "ls_d1_i3"}], "2": [{"label": "CRFB 12 ao 19", "id": "ls_d2_i0"}, {"label": "CC 53 ao 103", "id": "ls_d2_i1"}, {"label": "CPC 42 ao 81", "id": "ls_d2_i2"}, {"label": "Lei 13709", "id": "ls_d2_i3"}], "3": [{"label": "CRFB 20 ao 31", "id": "ls_d3_i0"}, {"label": "CC 104 ao 150", "id": "ls_d3_i1"}, {"label": "CPC 82 ao 112", "id": "ls_d3_i2"}, {"label": "Lei 13146 art. 1-60", "id": "ls_d3_i3"}], "4": [{"label": "CRFB 32 ao 40", "id": "ls_d4_i0"}, {"label": "CC 151 ao 201", "id": "ls_d4_i1"}, {"label": "CPC 113 ao 148", "id": "ls_d4_i2"}, {"label": "Lei 13146 art. 61-127", "id": "ls_d4_i3"}], "5": [{"label": "CRFB 41 ao 50", "id": "ls_d5_i0"}, {"label": "CC 202 ao 250", "id": "ls_d5_i1"}, {"label": "CPC 149 ao 175", "id": "ls_d5_i2"}, {"label": "Lei 10741", "id": "ls_d5_i3"}], "6": [{"label": "CRFB 51 ao 58", "id": "ls_d6_i0"}, {"label": "CC 251 ao 303", "id": "ls_d6_i1"}, {"label": "CPC 176 ao 235", "id": "ls_d6_i2"}, {"label": "Lei 13140", "id": "ls_d6_i3"}], "7": [{"label": "CRFB 59 ao 69", "id": "ls_d7_i0"}, {"label": "CC 304 ao 351", "id": "ls_d7_i1"}, {"label": "CPC 236 ao 275", "id": "ls_d7_i2"}, {"label": "Lei 12153", "id": "ls_d7_i3"}], "8": [{"label": "CRFB 70 ao 83", "id": "ls_d8_i0"}, {"label": "CC 352 ao 457", "id": "ls_d8_i1"}, {"label": "CPC 276 ao 317", "id": "ls_d8_i2"}, {"label": "Dec 20910", "id": "ls_d8_i3"}], "9": [{"label": "CRFB 84 ao 90", "id": "ls_d9_i0"}, {"label": "CC 458 ao 564", "id": "ls_d9_i1"}, {"label": "CPC 318 ao 353", "id": "ls_d9_i2"}, {"label": "Lei 11419", "id": "ls_d9_i3"}], "10": [{"label": "CRFB 91 ao 100", "id": "ls_d10_i0"}, {"label": "CC 565 ao 652", "id": "ls_d10_i1"}, {"label": "CPC 354 ao 395", "id": "ls_d10_i2"}, {"label": "Lei 6515", "id": "ls_d10_i3"}], "11": [{"label": "CRFB 101 ao 105", "id": "ls_d11_i0"}, {"label": "CC 653 ao 709", "id": "ls_d11_i1"}, {"label": "CPC 396 ao 441", "id": "ls_d11_i2"}, {"label": "Lei 7347", "id": "ls_d11_i3"}], "12": [{"label": "CRFB 106-124", "id": "ls_d12_i0"}, {"label": "CC 710 ao 802", "id": "ls_d12_i1"}, {"label": "CPC 442 ao 480", "id": "ls_d12_i2"}, {"label": "Lei 5478", "id": "ls_d12_i3"}], "13": [{"label": "CRFB 125 ao 130-A", "id": "ls_d13_i0"}, {"label": "CC 803 ao 903", "id": "ls_d13_i1"}, {"label": "CPC 481 ao 508", "id": "ls_d13_i2"}, {"label": "Dec 4597", "id": "ls_d13_i3"}], "14": [{"label": "CRFB 131 ao 141", "id": "ls_d14_i0"}, {"label": "CC 904 ao 1000", "id": "ls_d14_i1"}, {"label": "CPC 509 ao 538", "id": "ls_d14_i2"}, {"label": "Lei 1060", "id": "ls_d14_i3"}], "15": [{"label": "CRFB 142 ao 152", "id": "ls_d15_i0"}, {"label": "CC 1001 ao 1101", "id": "ls_d15_i1"}, {"label": "CPC 539 ao 553", "id": "ls_d15_i2"}, {"label": "Lei 9503", "id": "ls_d15_i3"}], "16": [{"label": "CRFB 153 ao 162", "id": "ls_d16_i0"}, {"label": "CC 1102 ao 1195", "id": "ls_d16_i1"}, {"label": "CPC 554 ao 598", "id": "ls_d16_i2"}, {"label": "Lei 1521", "id": "ls_d16_i3"}], "17": [{"label": "CRFB 163 ao 169", "id": "ls_d17_i0"}, {"label": "CC 1196 ao 1298", "id": "ls_d17_i1"}, {"label": "CPC 599 ao 646", "id": "ls_d17_i2"}, {"label": "Lei 13869", "id": "ls_d17_i3"}], "18": [{"label": "CRFB 170 ao 181", "id": "ls_d18_i0"}, {"label": "CC 1299 ao 1399", "id": "ls_d18_i1"}, {"label": "CPC 647 ao 706", "id": "ls_d18_i2"}, {"label": "Lei 10826", "id": "ls_d18_i3"}], "19": [{"label": "CRFB 182 ao 195", "id": "ls_d19_i0"}, {"label": "CC 1400 ao 1510", "id": "ls_d19_i1"}, {"label": "CPC 707 ao 743", "id": "ls_d19_i2"}, {"label": "Lei 9609", "id": "ls_d19_i3"}], "20": [{"label": "CRFB 196 ao 216", "id": "ls_d20_i0"}, {"label": "CC 1511 ao 1606", "id": "ls_d20_i1"}, {"label": "CPC 744 ao 785", "id": "ls_d20_i2"}, {"label": "Lei 11343", "id": "ls_d20_i3"}], "21": [{"label": "CRFB 217 ao 250", "id": "ls_d21_i0"}, {"label": "CC 1607 ao 1710", "id": "ls_d21_i1"}, {"label": "CPC 786 ao 823", "id": "ls_d21_i2"}, {"label": "Lei 11340", "id": "ls_d21_i3"}], "22": [{"label": "CP 1 ao 31", "id": "ls_d22_i0"}, {"label": "CPP 1 ao 30", "id": "ls_d22_i1"}, {"label": "CPC 824 ao 853", "id": "ls_d22_i2"}, {"label": "CC 1711 ao 1797", "id": "ls_d22_i3"}], "23": [{"label": "CP 32 ao 58", "id": "ls_d23_i0"}, {"label": "CPP 31 ao 62", "id": "ls_d23_i1"}, {"label": "CPC 854 ao 878", "id": "ls_d23_i2"}, {"label": "CC 1798 ao 1896", "id": "ls_d23_i3"}], "24": [{"label": "CP 59 ao 90", "id": "ls_d24_i0"}, {"label": "CPP 63 ao 91", "id": "ls_d24_i1"}, {"label": "CPC 879 ao 903", "id": "ls_d24_i2"}, {"label": "CC 1897 ao 2046", "id": "ls_d24_i3"}], "25": [{"label": "CP 91 ao 109", "id": "ls_d25_i0"}, {"label": "CPP 92 ao 118", "id": "ls_d25_i1"}, {"label": "CPC 904 ao 928", "id": "ls_d25_i2"}, {"label": "Lei 8560", "id": "ls_d25_i3"}], "26": [{"label": "CP 110 ao 136", "id": "ls_d26_i0"}, {"label": "CPP 119 ao 154", "id": "ls_d26_i1"}, {"label": "CPC 929 ao 975", "id": "ls_d26_i2"}, {"label": "Lei 9278", "id": "ls_d26_i3"}], "27": [{"label": "CP 137 ao 154-B", "id": "ls_d27_i0"}, {"label": "CPP 155 ao 184", "id": "ls_d27_i1"}, {"label": "CPC 976 ao 1014", "id": "ls_d27_i2"}, {"label": "Lei 12318", "id": "ls_d27_i3"}], "28": [{"label": "CP 155 ao 186", "id": "ls_d28_i0"}, {"label": "CPP 185 ao 200", "id": "ls_d28_i1"}, {"label": "CPC 1015 ao 1071", "id": "ls_d28_i2"}, {"label": "Lei 11804", "id": "ls_d28_i3"}], "29": [{"label": "CP 187 ao 226", "id": "ls_d29_i0"}, {"label": "CPP 201 a 230", "id": "ls_d29_i1"}, {"label": "Lei 6015 1 ao 100", "id": "ls_d29_i2"}, {"label": "Lei 12965", "id": "ls_d29_i3"}], "30": [{"label": "CP 227 ao 266", "id": "ls_d30_i0"}, {"label": "CPP 231 ao 258", "id": "ls_d30_i1"}, {"label": "Lei 6015 101 a 200", "id": "ls_d30_i2"}, {"label": "Lei 911", "id": "ls_d30_i3"}], "31": [{"label": "CP 267 ao 295", "id": "ls_d31_i0"}, {"label": "CPP 259 ao 290", "id": "ls_d31_i1"}, {"label": "Lei 6015 201 a 299", "id": "ls_d31_i2"}, {"label": "Lei 9307", "id": "ls_d31_i3"}], "32": [{"label": "CP 296 ao 327", "id": "ls_d32_i0"}, {"label": "CPP 291 ao 320", "id": "ls_d32_i1"}, {"label": "Lei 8429", "id": "ls_d32_i2"}, {"label": "Lei 9494", "id": "ls_d32_i3"}], "33": [{"label": "CP 328 ao 361", "id": "ls_d33_i0"}, {"label": "CPP 321 ao 350", "id": "ls_d33_i1"}, {"label": "Lei 8245", "id": "ls_d33_i2"}, {"label": "Lei 9455", "id": "ls_d33_i3"}], "34": [{"label": "Lei 9610 1-60", "id": "ls_d34_i0"}, {"label": "CPP 351 ao 380", "id": "ls_d34_i1"}, {"label": "Lei 8009", "id": "ls_d34_i2"}, {"label": "Lei 8137", "id": "ls_d34_i3"}], "35": [{"label": "Lei 9610 61-115", "id": "ls_d35_i0"}, {"label": "CPP 381 ao 393", "id": "ls_d35_i1"}, {"label": "Lei 11790", "id": "ls_d35_i2"}, {"label": "Lei 7716", "id": "ls_d35_i3"}], "36": [{"label": "CPP 394 ao 431", "id": "ls_d36_i0"}, {"label": "ECA 1 ao 77", "id": "ls_d36_i1"}, {"label": "Lei 12694", "id": "ls_d36_i2"}, {"label": "LEP 1 ao 30", "id": "ls_d36_i3"}], "37": [{"label": "CPP 432 ao 497", "id": "ls_d37_i0"}, {"label": "ECA 78 ao 115", "id": "ls_d37_i1"}, {"label": "Lei 9868", "id": "ls_d37_i2"}, {"label": "LEP 31 ao 60", "id": "ls_d37_i3"}], "38": [{"label": "CPP 513 ao 530-I", "id": "ls_d38_i0"}, {"label": "ECA 116 ao 192", "id": "ls_d38_i1"}, {"label": "Lei 9882", "id": "ls_d38_i2"}, {"label": "LEP 61 ao 90", "id": "ls_d38_i3"}], "39": [{"label": "CPP 531 ao 555", "id": "ls_d39_i0"}, {"label": "ECA 193 ao 230", "id": "ls_d39_i1"}, {"label": "Lei 12562", "id": "ls_d39_i2"}, {"label": "LEP 91 ao 120", "id": "ls_d39_i3"}], "40": [{"label": "CPP 563-592", "id": "ls_d40_i0"}, {"label": "ECA 231 ao 267", "id": "ls_d40_i1"}, {"label": "Lei 12016", "id": "ls_d40_i2"}, {"label": "LEP 121 ao 150", "id": "ls_d40_i3"}], "41": [{"label": "CPP 593-620", "id": "ls_d41_i0"}, {"label": "Lei 12594 art. 1-48", "id": "ls_d41_i1"}, {"label": "Lei 13300", "id": "ls_d41_i2"}, {"label": "LEP 151 ao 180", "id": "ls_d41_i3"}], "42": [{"label": "CPP 621-667", "id": "ls_d42_i0"}, {"label": "Lei 12594 art. 49-90", "id": "ls_d42_i1"}, {"label": "Lei 13431", "id": "ls_d42_i2"}, {"label": "LEP 181 ao 204", "id": "ls_d42_i3"}], "43": [{"label": "Lei 11101 1 ao 50", "id": "ls_d43_i0"}, {"label": "CPP 780-811", "id": "ls_d43_i1"}, {"label": "CDC 1 a 54", "id": "ls_d43_i2"}, {"label": "Lei 6404 1 a 100", "id": "ls_d43_i3"}], "44": [{"label": "Lei 11101 51 ao 100", "id": "ls_d44_i0"}, {"label": "Lei 8437", "id": "ls_d44_i1"}, {"label": "CDC 55 a 119", "id": "ls_d44_i2"}, {"label": "Lei 6404 101 a 200", "id": "ls_d44_i3"}], "45": [{"label": "Lei 11101 101 ao 150", "id": "ls_d45_i0"}, {"label": "Lei 13964", "id": "ls_d45_i1"}, {"label": "Lei 4717", "id": "ls_d45_i2"}, {"label": "Lei 6404 201 a 300", "id": "ls_d45_i3"}], "46": [{"label": "Lei 11101 151 ao 201", "id": "ls_d46_i0"}, {"label": "Lei 3688", "id": "ls_d46_i1"}, {"label": "Lei 10259", "id": "ls_d46_i2"}, {"label": "Lei 7357", "id": "ls_d46_i3"}], "47": [{"label": "Lei 8072", "id": "ls_d47_i0"}, {"label": "Lei 7960", "id": "ls_d47_i1"}, {"label": "Lei 9099", "id": "ls_d47_i2"}, {"label": "Lei 5474", "id": "ls_d47_i3"}], "48": [{"label": "Lei 12850", "id": "ls_d48_i0"}, {"label": "Lei 9296", "id": "ls_d48_i1"}, {"label": "Lei 9099 cont.", "id": "ls_d48_i2"}, {"label": "Lei 2044", "id": "ls_d48_i3"}], "49": [{"label": "Lei 9613", "id": "ls_d49_i0"}, {"label": "Lei 9807", "id": "ls_d49_i1"}, {"label": "Lei 6024", "id": "ls_d49_i2"}, {"label": "DL 3365", "id": "ls_d49_i3"}], "50": [{"label": "Lei 4737 1 ao 100", "id": "ls_d50_i0"}, {"label": "LC 64", "id": "ls_d50_i1"}, {"label": "Lei 9504", "id": "ls_d50_i2"}, {"label": "CTN 1 ao 31", "id": "ls_d50_i3"}], "51": [{"label": "Lei 4737 101 a 200", "id": "ls_d51_i0"}, {"label": "Lei 9096", "id": "ls_d51_i1"}, {"label": "Lei 6091", "id": "ls_d51_i2"}, {"label": "CTN 32 ao 62", "id": "ls_d51_i3"}], "52": [{"label": "Lei 4737 201 ao 300", "id": "ls_d52_i0"}, {"label": "LC 87", "id": "ls_d52_i1"}, {"label": "LC 116", "id": "ls_d52_i2"}, {"label": "CTN 63 ao 90", "id": "ls_d52_i3"}], "53": [{"label": "Lei 4737 301 ao 383", "id": "ls_d53_i0"}, {"label": "Lei 6830", "id": "ls_d53_i1"}, {"label": "LC 123", "id": "ls_d53_i2"}, {"label": "CTN 91 ao 120", "id": "ls_d53_i3"}], "54": [{"label": "Lei 9507", "id": "ls_d54_i0"}, {"label": "Lei 11417", "id": "ls_d54_i1"}, {"label": "Lei 1579", "id": "ls_d54_i2"}, {"label": "CTN 121 ao 151", "id": "ls_d54_i3"}], "55": [{"label": "LC 101", "id": "ls_d55_i0"}, {"label": "Lei 12846", "id": "ls_d55_i1"}, {"label": "Lei 9637", "id": "ls_d55_i2"}, {"label": "CTN 152 ao 182", "id": "ls_d55_i3"}], "56": [{"label": "Lei 11107", "id": "ls_d56_i0"}, {"label": "Lei 8987", "id": "ls_d56_i1"}, {"label": "Lei 9790", "id": "ls_d56_i2"}, {"label": "CTN 183 ao 212", "id": "ls_d56_i3"}], "57": [{"label": "Lei 14133 1 ao 32", "id": "ls_d57_i0"}, {"label": "Lei 8666 1 ao 30", "id": "ls_d57_i1"}, {"label": "Lei 8112 1 ao 61", "id": "ls_d57_i2"}, {"label": "Lei 9729 1 ao 60", "id": "ls_d57_i3"}], "58": [{"label": "Lei 14133 33 ao 58", "id": "ls_d58_i0"}, {"label": "Lei 8666 31 ao 60", "id": "ls_d58_i1"}, {"label": "Lei 8112 62 ao 126-A", "id": "ls_d58_i2"}, {"label": "Lei 9729 61 ao 125", "id": "ls_d58_i3"}], "59": [{"label": "Lei 14133 59 ao 88", "id": "ls_d59_i0"}, {"label": "Lei 8666 61 ao 90", "id": "ls_d59_i1"}, {"label": "Lei 8112 127 ao 185", "id": "ls_d59_i2"}, {"label": "Lei 9729 126 ao 182", "id": "ls_d59_i3"}], "60": [{"label": "Lei 11804", "id": "ls_d60_i0"}, {"label": "Lei 8666 91 ao 126", "id": "ls_d60_i1"}, {"label": "Lei 8112 186 ao 253", "id": "ls_d60_i2"}, {"label": "Lei 9729 183 ao 248", "id": "ls_d60_i3"}], "61": [{"label": "Lei 14133 124 ao 154", "id": "ls_d61_i0"}, {"label": "Lei 11079", "id": "ls_d61_i1"}, {"label": "Lei 12527", "id": "ls_d61_i2"}, {"label": "Lei 4132", "id": "ls_d61_i3"}], "62": [{"label": "Lei 14133 155 ao 177", "id": "ls_d62_i0"}, {"label": "Lei 13019", "id": "ls_d62_i1"}, {"label": "Lei 9784", "id": "ls_d62_i2"}, {"label": "DL 25/37", "id": "ls_d62_i3"}], "63": [{"label": "Lei 12288", "id": "ls_d63_i0"}, {"label": "Lei 10520", "id": "ls_d63_i1"}, {"label": "DL 3365", "id": "ls_d63_i2"}, {"label": "Lei 9985", "id": "ls_d63_i3"}], "64": [{"label": "Lei 6938", "id": "ls_d64_i0"}, {"label": "Lei 12651", "id": "ls_d64_i1"}, {"label": "Lei 5197", "id": "ls_d64_i2"}, {"label": "Dec 3087", "id": "ls_d64_i3"}], "65": [{"label": "Lei 7802", "id": "ls_d65_i0"}, {"label": "Lei 11105", "id": "ls_d65_i1"}, {"label": "Lei 11284", "id": "ls_d65_i2"}, {"label": "Dec 99701", "id": "ls_d65_i3"}], "66": [{"label": "Lei 11428", "id": "ls_d66_i0"}, {"label": "Lei 10257", "id": "ls_d66_i1"}, {"label": "Lei 9605", "id": "ls_d66_i2"}, {"label": "Conama 237", "id": "ls_d66_i3"}], "67": [{"label": "LC 140", "id": "ls_d67_i0"}, {"label": "Lei 6766", "id": "ls_d67_i1"}, {"label": "Lei 9795", "id": "ls_d67_i2"}, {"label": "Conama 428", "id": "ls_d67_i3"}], "68": [{"label": "Lei 12305", "id": "ls_d68_i0"}, {"label": "Lei 9433", "id": "ls_d68_i1"}, {"label": "Dec 20910", "id": "ls_d68_i2"}, {"label": "Lei 9748", "id": "ls_d68_i3"}], "69": [{"label": "DL 6017", "id": "ls_d69_i0"}, {"label": "Dec 4597", "id": "ls_d69_i1"}, {"label": "Lei 6001", "id": "ls_d69_i2"}, {"label": "Dec 6949", "id": "ls_d69_i3"}], "70": [{"label": "Lei 12299", "id": "ls_d70_i0"}, {"label": "Lei 10098", "id": "ls_d70_i1"}, {"label": "Lei 9459", "id": "ls_d70_i2"}, {"label": "Outros Decl. Direitos Crianças / Regras Beijing / Res. 125 CNJ / Prov. 32 CNJ", "id": "ls_d70_i3"}]};
+let lsProgress = {};
+let lsFilter_mode = 'all';
+
+async function loadLeiSeca(){
+  if(!currentUser) return;
+  try{
+    const {data,error} = await sb.from('progress')
+      .select('chapter_id,done')
+      .eq('user_id', currentUser.id)
+      .neq('chapter_id', '');
+    if(error){ console.error('loadLeiSeca error:',error); _lsSaveStatus('⚠ loadLeiSeca: '+error.message,'err'); lsProgress={}; return; }
+    lsProgress = {};
+    const total=data?data.length:0;
+    console.log('loadLeiSeca: got',total,'rows from DB');
+    if(data) data.forEach(r=>{ if(r.done) lsProgress[r.chapter_id]=true; });
+  }catch(e){ console.error('loadLeiSeca exception:',e); lsProgress={}; }
+}
+
+function lsFilter(mode, btn){
+  lsFilter_mode = mode;
+  document.querySelectorAll('.ls-fbtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLeiSeca();
+}
+
+function renderLeiSeca(){
+  if(typeof LS_DATA === "undefined") return;
+  const grid = document.getElementById('ls-grid');
+  if(!grid) return;
+  grid.innerHTML = '';
+
+  // Overall progress
+  const total = 280;
+  const done = Object.keys(lsProgress).length;
+  const pct = Math.round(done/total*100);
+  const pctEl = document.getElementById('ls-pct');
+  const barEl = document.getElementById('ls-bar');
+  const cntEl = document.getElementById('ls-counts');
+  if(pctEl) pctEl.textContent = pct+'%';
+  if(barEl) barEl.style.width = pct+'%';
+  if(cntEl) cntEl.textContent = done+' / '+total+' itens';
+
+  Object.entries(LS_DATA).forEach(([day, items])=>{
+    const dayDone = items.filter(it=>lsProgress[it.id]).length;
+    const allDone = dayDone === items.length;
+
+    // Filter
+    if(lsFilter_mode === 'done' && !allDone) return;
+    if(lsFilter_mode === 'pending' && allDone) return;
+
+    const dayPct = Math.round(dayDone/items.length*100);
+    const card = document.createElement('div');
+    card.className = 'ls-day' + (allDone?' all-done':'');
+    card.id = 'lsd-'+day;
+
+    card.innerHTML = `
+      <div class="ls-day-head" onclick="lsToggleDay('${day}')">
+        <span class="ls-day-num">DIA ${day}</span>
+        <span class="ls-day-prog">${dayDone}/${items.length}</span>
+        <span class="ls-day-check">${allDone?'✅':'⬜'}</span>
+      </div>
+      <div class="ls-day-mini-bar"><div class="ls-day-mini-fill" id="lsbar-${day}" style="width:${dayPct}%"></div></div>
+      <div class="ls-items" id="lsitems-${day}">
+        ${items.map(it=>{
+          const done = !!lsProgress[it.id];
+          return `<div class="ls-item${done?' done':''}" id="lsitem-${it.id}">
+            <input type="checkbox" id="lschk-${it.id}" ${done?'checked':''}
+              onchange="lsToggleItem('${it.id}',this.checked)"/>
+            <label class="ls-item-label" for="lschk-${it.id}">${it.label}</label>
+          </div>`;
+        }).join('')}
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+async function lsToggleItem(itemId, checked){
+  if(checked) lsProgress[itemId]=true;
+  else delete lsProgress[itemId];
+  // Update day card
+  const day = itemId.match(/ls_d(\d+)_/)[1];
+  const items = LS_DATA[day];
+  const dayDone = items.filter(it=>lsProgress[it.id]).length;
+  const allDone = dayDone === items.length;
+  const dayPct = Math.round(dayDone/items.length*100);
+  const bar = document.getElementById('lsbar-'+day);
+  if(bar) bar.style.width = dayPct+'%';
+  const card = document.getElementById('lsd-'+day);
+  if(card){
+    card.classList.toggle('all-done', allDone);
+    const head = card.querySelector('.ls-day-head');
+    if(head){
+      const prog = head.querySelector('.ls-day-prog');
+      const chk = head.querySelector('.ls-day-check');
+      if(prog) prog.textContent = dayDone+'/'+items.length;
+      if(chk) chk.textContent = allDone?'✅':'⬜';
+    }
+  }
+  const item = document.getElementById('lsitem-'+itemId);
+  if(item) item.classList.toggle('done', checked);
+  // Update overall
+  const total=280, done=Object.keys(lsProgress).length;
+  const pct=Math.round(done/total*100);
+  const pctEl=document.getElementById('ls-pct');
+  const barEl=document.getElementById('ls-bar');
+  const cntEl=document.getElementById('ls-counts');
+  if(pctEl) pctEl.textContent=pct+'%';
+  if(barEl) barEl.style.width=pct+'%';
+  if(cntEl) cntEl.textContent=done+' / '+total+' itens';
+  // Save
+  if(!currentUser){ _lsSaveStatus('Faça login para salvar','err'); return; }
+  _lsSaveStatus('salvando…','saving');
+  try{
+    const now = checked ? new Date().toISOString() : null;
+    const {error:lue} = await sb.from('progress').upsert(
+      {user_id:currentUser.id, chapter_id:itemId, done:checked, done_at:now},
+      {onConflict:'user_id,chapter_id'}
+    );
+    if(lue){
+      console.error('Lei Seca upsert error:',lue);
+      // Fallback: delete then insert
+      await sb.from('progress').delete().eq('user_id',currentUser.id).eq('chapter_id',itemId);
+      const {error:lie} = await sb.from('progress').insert({user_id:currentUser.id,chapter_id:itemId,done:checked,done_at:now});
+      if(lie){ _lsSaveStatus('⚠ erro: '+lie.message,'err'); console.error('Lei Seca insert fallback error:',lie); }
+      else { _lsSaveStatus('✓ salvo','ok'); }
+    } else { _lsSaveStatus('✓ salvo','ok'); }
+  }catch(e){
+    console.error('Lei Seca save exception:', e);
+    _lsSaveStatus('⚠ erro: '+e.message,'err');
+  }
+}
+
+function _lsSaveStatus(msg, type){
+  let el = document.getElementById('_ls_save_status');
+  if(!el){
+    el = document.createElement('div');
+    el.id = '_ls_save_status';
+    el.style.cssText = 'position:fixed;bottom:20px;right:20px;padding:8px 14px;border-radius:8px;font-size:12px;font-family:monospace;z-index:9999;transition:opacity 0.4s;pointer-events:none;';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.opacity = '1';
+  el.style.background = type==='ok' ? 'rgba(34,197,94,0.2)' : type==='err' ? 'rgba(239,68,68,0.2)' : 'rgba(122,162,247,0.2)';
+  el.style.color = type==='ok' ? '#22c55e' : type==='err' ? '#ef4444' : '#7aa2f7';
+  el.style.border = '1px solid ' + (type==='ok' ? 'rgba(34,197,94,0.4)' : type==='err' ? 'rgba(239,68,68,0.4)' : 'rgba(122,162,247,0.4)');
+  setTimeout(()=>{ el.style.opacity='0'; }, type==='ok' ? 3000 : 8000);
+}
+
+async function lsToggleDay(day){
+  const items = LS_DATA[day];
+  const dayDone = items.filter(it=>lsProgress[it.id]).length;
+  const markAll = dayDone < items.length;
+  for(const it of items){
+    const chk = document.getElementById('lschk-'+it.id);
+    if(chk && chk.checked !== markAll){
+      chk.checked = markAll;
+      await lsToggleItem(it.id, markAll);
+    }
+  }
+}
+
+</script>
+</body>
+</html>
+
+
+
+window.addEventListener('focus', async ()=>{
+  try{
+    if(typeof loadProgress==='function') await loadProgress();
+    if(typeof loadLeiSeca==='function') await loadLeiSeca();
+    if(typeof renderTracker==='function') renderTracker();
+    if(typeof renderLeiSeca==='function') renderLeiSeca();
+    console.log('[SYNC] Tracker atualizado ao focar a janela');
+  }catch(e){
+    console.error('[SYNC ERROR]',e);
+  }
+});
