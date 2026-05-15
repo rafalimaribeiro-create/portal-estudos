@@ -311,7 +311,18 @@ var _TRK={mapId:"dtrabalho",total:15,done:{}};
 function _trkToggle(cid,done){_trkToggle_real(cid,done);}
 (function(){var s=localStorage.getItem("theme")||"dark";document.documentElement.setAttribute("data-theme",s);window.addEventListener("DOMContentLoaded",function(){var b=document.getElementById("_thb");if(b)b.textContent=s==="dark"?"☀️":"🌙";});})();
 function _tT(){var h=document.documentElement,n=h.getAttribute("data-theme")==="dark"?"light":"dark";h.setAttribute("data-theme",n);localStorage.setItem("theme",n);var b=document.getElementById("_thb");if(b)b.textContent=n==="dark"?"☀️":"🌙";}
-async function _logout(){try{var s=supabase.createClient("https://qseismabfaonggrwzuiu.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzZWlzbWFiZmFvbmdncnd6dWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzU4MTMsImV4cCI6MjA5Mzc1MTgxM30.eYnWJo9NI_-wGJCd2HalmnCGMhMvlKZxmZKuTpx3xS0");await s.auth.signOut();}catch(e){}window.location.href="index.html";}
+async function _logout(){try{var s=supabase.createClient("https://qseismabfaonggrwzuiu.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzZWlzbWFiZmFvbmdncnd6dWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzU4MTMsImV4cCI6MjA5Mzc1MTgxM30.eYnWJo9NI_-wGJCd2HalmnCGMhMvlKZxmZKuTpx3xS0", {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: false,
+    storage: {
+      getItem: (k) => { try { return localStorage.getItem(k); } catch(e) { return null; } },
+      setItem: (k,v) => { try { localStorage.setItem(k,v); } catch(e) {} },
+      removeItem: (k) => { try { localStorage.removeItem(k); } catch(e) {} }
+    }
+  }
+});await s.auth.signOut();}catch(e){}window.location.href="index.html";}
 var _sbo=window.innerWidth>768;
 function _sbT(){_sbo=!_sbo;_sbA();localStorage.setItem("_sbo",_sbo?"1":"0");}
 function _sbC(){_sbo=false;_sbA();}
@@ -336,10 +347,3 @@ async function _trkToggle_real(cid,done){if(!_u){await _ensureAuth();if(!_u)retu
 
 </body>
 </html>
-<script>
-window.addEventListener('storage', function(e){
-  if(e.key === '_tracker_last_update'){
-    location.reload();
-  }
-});
-</script>
