@@ -505,7 +505,11 @@ async function doLogout(){
   currentUser=null;
   progress={};flags={};notes={};lsProgress={};
   // Force reload to clear all state cleanly
-  window.location.href = window.location.href.split('?')[0];
+  // Clear any cached Supabase tokens
+  try {
+    Object.keys(localStorage).filter(k=>k.startsWith('sb-')).forEach(k=>localStorage.removeItem(k));
+  } catch(e) {}
+  window.location.href = window.location.href.split('?')[0] + '?logout=1';
 }
 
 sb.auth.onAuthStateChange(async(event,session)=>{
@@ -566,6 +570,16 @@ function showView(view,tabEl){
     loadProgress().then(()=>{ renderTracker(); });
   }
 }
+
+// Sync when user returns to portal from a map
+window.addEventListener('focus', async ()=>{
+  try{
+    if(typeof loadProgress==='function') await loadProgress();
+    if(typeof loadLeiSeca==='function') await loadLeiSeca();
+    if(typeof renderTracker==='function') renderTracker();
+    if(typeof renderLeiSeca==='function') renderLeiSeca();
+  }catch(e){ console.error('[SYNC ERROR]',e); }
+});
 function openMapa(file,title,color){
   // Open map in same window - session already in localStorage
   window.location.href=file;
@@ -739,7 +753,7 @@ async function loadLeiSeca(){
     const {data,error} = await sb.from('progress')
       .select('chapter_id,done')
       .eq('user_id', currentUser.id)
-      .neq('chapter_id', '');
+      .like('chapter_id', 'ls_%');
     if(error){ console.error('loadLeiSeca error:',error); _lsSaveStatus('⚠ loadLeiSeca: '+error.message,'err'); lsProgress={}; return; }
     lsProgress = {};
     const total=data?data.length:0;
@@ -895,17 +909,3 @@ async function lsToggleDay(day){
 </script>
 </body>
 </html>
-
-
-
-window.addEventListener('focus', async ()=>{
-  try{
-    if(typeof loadProgress==='function') await loadProgress();
-    if(typeof loadLeiSeca==='function') await loadLeiSeca();
-    if(typeof renderTracker==='function') renderTracker();
-    if(typeof renderLeiSeca==='function') renderLeiSeca();
-    console.log('[SYNC] Tracker atualizado ao focar a janela');
-  }catch(e){
-    console.error('[SYNC ERROR]',e);
-  }
-});

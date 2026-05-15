@@ -709,7 +709,18 @@ function _tT(){
 }
 
 // ── AUTH via URL hash token ──
-var _sb=supabase.createClient('https://qseismabfaonggrwzuiu.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzZWlzbWFiZmFvbmdncnd6dWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzU4MTMsImV4cCI6MjA5Mzc1MTgxM30.eYnWJo9NI_-wGJCd2HalmnCGMhMvlKZxmZKuTpx3xS0');
+var _sb=supabase.createClient('https://qseismabfaonggrwzuiu.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzZWlzbWFiZmFvbmdncnd6dWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzU4MTMsImV4cCI6MjA5Mzc1MTgxM30.eYnWJo9NI_-wGJCd2HalmnCGMhMvlKZxmZKuTpx3xS0', {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: false,
+    storage: {
+      getItem: (k) => { try { return localStorage.getItem(k); } catch(e) { return null; } },
+      setItem: (k,v) => { try { localStorage.setItem(k,v); } catch(e) {} },
+      removeItem: (k) => { try { localStorage.removeItem(k); } catch(e) {} }
+    }
+  }
+});
 var _mid='civil';
 var _u=null,_m={},_sid=null,_sel=null;
 
@@ -980,7 +991,18 @@ function _trkRender(){
 }
 
 async function _trkToggle(chapterId, done, chk){
-  if(!_TRK.user){ alert('Faça login para usar o tracker'); return; }
+  if(!_TRK.user){
+    // Try to recover session
+    try {
+      const r = await _sb.auth.getSession();
+      if(r.data && r.data.session && r.data.session.user){
+        _TRK.user = r.data.session.user;
+      } else {
+        console.warn('No session found, cannot save tracker');
+        return;
+      }
+    } catch(e) { console.error('getSession error:', e); return; }
+  }
   var now = done ? new Date().toISOString() : null;
   if(done) _TRK.done[chapterId] = true;
   else delete _TRK.done[chapterId];
@@ -992,12 +1014,6 @@ async function _trkToggle(chapterId, done, chk){
       done: done,
       done_at: now
     }, {onConflict: 'user_id,chapter_id'});
-
-try{
-  window.dispatchEvent(new CustomEvent('tracker-updated'));
-  localStorage.setItem('_tracker_last_update', Date.now().toString());
-}catch(e){console.error(e);}
-
   }catch(e){ console.warn('tracker save err', e); }
 }
 </script>
