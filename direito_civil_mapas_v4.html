@@ -1015,6 +1015,7 @@ async function _trkToggle(chapterId, done, chk){
       done_at: now
     }, {onConflict: 'user_id,chapter_id'});
   }catch(e){ console.warn('tracker save err', e); }
+  try{ localStorage.setItem('_pgprog_'+chapterId, JSON.stringify({done, date:now})); }catch(_){}
 }
 </script>
 </body>

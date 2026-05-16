@@ -1130,6 +1130,7 @@ async function _trkToggle(chapterId, done){
       console.log('Saved:', chapterId, done);
     }
   } catch(e) { console.warn('_trkToggle error', e); }
+  try{ localStorage.setItem('_pgprog_'+chapterId, JSON.stringify({done, date:done?new Date().toISOString():null})); }catch(_){}
 }
 </script>
 
