@@ -916,6 +916,10 @@ function toggleMapTheme(){
   const btn = document.getElementById('theme-toggle-btn');
   if(btn) btn.textContent = next === 'dark' ? '☀️ Claro' : '🌙 Escuro';
 }
+async function _doLogout(){
+  try{ await _sb.auth.signOut(); }catch(e){}
+  window.location.href='index.html';
+}
 </script>
 
 <!-- WORD-STYLE TOOLBAR -->
