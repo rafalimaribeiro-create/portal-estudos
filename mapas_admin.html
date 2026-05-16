@@ -1090,6 +1090,8 @@ async function _trkLoad(){
       if(row.done && row.chapter_id.startsWith('admin_'))
         _TRK.done[row.chapter_id] = true;
     });
+    // Sync to localStorage so the global tracker in index.html can read it
+    try{ Object.keys(_TRK.done).forEach(function(cid){ localStorage.setItem('_pgprog_'+cid,JSON.stringify({done:true,date:null})); }); }catch(_){}
     _trkRender();
   } catch(e) { console.warn('_trkLoad error', e); }
 }

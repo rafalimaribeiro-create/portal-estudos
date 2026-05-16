@@ -563,7 +563,7 @@ function _loadProgressLS(){
   console.log('loadProgress: loaded',Object.keys(progress).length,'chapters from localStorage cache');
 }
 function _mergeProgressLS(){
-  try{ Object.keys(localStorage).filter(k=>k.startsWith('_pgprog_')).forEach(k=>{const cid=k.slice(8);if(!progress[cid]){try{const v=JSON.parse(localStorage.getItem(k));if(v)progress[cid]=v;}catch(e){}}});}catch(e){}
+  try{ Object.keys(localStorage).filter(k=>k.startsWith('_pgprog_')).forEach(k=>{const cid=k.slice(8);try{const v=JSON.parse(localStorage.getItem(k));if(!v)return;if(!progress[cid]||(v.done&&!progress[cid].done)){progress[cid]=v;}}catch(e){}});}catch(e){}
 }
 async function loadFlags(){ flags={}; }
 async function loadNotes(){ notes={}; }
