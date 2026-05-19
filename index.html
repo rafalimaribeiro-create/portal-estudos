@@ -766,12 +766,23 @@ async function loadLeiSeca(){
       .select('chapter_id,done')
       .eq('user_id', currentUser.id)
       .like('chapter_id', 'ls_%');
-    if(error){ console.error('loadLeiSeca error:',error); _lsSaveStatus('⚠ loadLeiSeca: '+error.message,'err'); lsProgress={}; return; }
+    if(error){ console.error('loadLeiSeca error:',error); _lsSaveStatus('⚠ loadLeiSeca: '+error.message,'err'); _loadLeiSecaLS(); return; }
     lsProgress = {};
     const total=data?data.length:0;
     console.log('loadLeiSeca: got',total,'rows from DB');
     if(data) data.forEach(r=>{ if(r.done) lsProgress[r.chapter_id]=true; });
-  }catch(e){ console.error('loadLeiSeca exception:',e); lsProgress={}; }
+    try{ Object.keys(lsProgress).forEach(k=>{ localStorage.setItem('_pgprog_'+k, JSON.stringify({done:true,date:null})); }); }catch(_){}
+    if(total===0) _loadLeiSecaLS(); else _mergeLeiSecaLS();
+  }catch(e){ console.error('loadLeiSeca exception:',e); _loadLeiSecaLS(); }
+}
+
+function _loadLeiSecaLS(){
+  lsProgress={};
+  try{ Object.keys(localStorage).filter(k=>k.startsWith('_pgprog_ls_')).forEach(k=>{try{const v=JSON.parse(localStorage.getItem(k));if(v&&v.done)lsProgress[k.slice(8)]=true;}catch(e){}}); }catch(e){}
+}
+
+function _mergeLeiSecaLS(){
+  try{ Object.keys(localStorage).filter(k=>k.startsWith('_pgprog_ls_')).forEach(k=>{const id=k.slice(8);try{const v=JSON.parse(localStorage.getItem(k));if(v&&v.done&&!lsProgress[id])lsProgress[id]=true;}catch(e){}}); }catch(e){}
 }
 
 function lsFilter(mode, btn){
@@ -836,6 +847,7 @@ function renderLeiSeca(){
 async function lsToggleItem(itemId, checked){
   if(checked) lsProgress[itemId]=true;
   else delete lsProgress[itemId];
+  try{ localStorage.setItem('_pgprog_'+itemId, JSON.stringify({done:checked,date:checked?new Date().toISOString():null})); }catch(_){}
   // Update day card
   const day = itemId.match(/ls_d(\d+)_/)[1];
   const items = LS_DATA[day];
