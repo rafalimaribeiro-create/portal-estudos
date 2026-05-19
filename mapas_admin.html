@@ -1153,7 +1153,7 @@ async function _trkToggle(chapterId, done){
 </style>
 <script id="_mm_js">
 ;(function(){
-var _P=['#7dd3fc','#86efac','#fca5a5','#fdba74','#c4b5fd','#fde68a','#5eead4','#f9a8d4','#a5b4fc','#6ee7b7'];
+var _P=['#3b82f6','#10b981','#ef4444','#f97316','#8b5cf6','#eab308','#14b8a6','#ec4899','#6366f1','#22c55e'];
 var _GX=30,_GY=8,_MXW=175,_MNW=90,_FS=11,_CW=6.2,_LH=15,_VP=10;
 var _col=new Set(),_nid=0,_cur=null,_tr={x:0,y:0,sc:1},_act=false;
 
@@ -1213,7 +1213,7 @@ function _rend(){
     else if(n._side===1){x1=n._x+n._w;x2=c._x;}else{x1=n._x;x2=c._x+c._w;}
     var mx=(x1+x2)/2,sw=Math.max(1.2,3.8-c._depth*0.7);
     eg.appendChild(E('path',{d:'M '+x1+' '+y1+' C '+mx+' '+y1+' '+mx+' '+y2+' '+x2+' '+y2,
-      stroke:col,'stroke-opacity':'0.5','stroke-width':sw,fill:'none','stroke-linecap':'round'}));
+      stroke:col,'stroke-opacity':'0.75','stroke-width':sw,fill:'none','stroke-linecap':'round'}));
   });});
   w.appendChild(eg);
   nodes.forEach(function(n){
@@ -1226,9 +1226,9 @@ function _rend(){
         fill:iL?'rgba(0,0,0,0.05)':'rgba(255,255,255,0.06)',stroke:iL?'#888':'#5a5f70','stroke-width':'2'}));
     }else{
       g.appendChild(E('rect',{x:n._x,y:n._y,width:n._w,height:n._h,rx:'5',ry:'5',
-        fill:'rgba('+rgb+','+(n._depth===1?'0.18':'0.1')+')',stroke:col,'stroke-width':n._depth===1?'1.8':'1.2'}));
+        fill:'rgba('+rgb+','+(iL?(n._depth===1?'0.28':'0.16'):(n._depth===1?'0.42':'0.26'))+')',stroke:col,'stroke-width':n._depth===1?'2.2':'1.5'}));
     }
-    var tx=E('text',{x:n._x+n._w/2,'text-anchor':'middle',fill:col,
+    var tx=E('text',{x:n._x+n._w/2,'text-anchor':'middle',fill:n._depth===0?col:(iL?'#111111':'#f0f0f0'),
       'font-family':"'SF Mono','Fira Code','Courier New',monospace",
       'font-size':n._depth===0?13:_FS,'font-weight':n._depth<=1?'600':'normal',
       style:'pointer-events:none;user-select:none;'});
