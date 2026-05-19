@@ -520,15 +520,7 @@ sb.auth.onAuthStateChange(async(event,session)=>{
     document.getElementById('topbar').style.display='flex';
     document.getElementById('main').style.display='flex';
     document.getElementById('user-email-display').textContent=session.user.user_metadata?.name||session.user.email;
-    renderTracker();
-    renderLeiSeca();
-    await loadProgress();
-    loadLeiSeca();
-    await Promise.allSettled([loadFlags(),loadNotes()]);
-    renderTracker();
-    renderLeiSeca();
-    renderHomeCards();
-    // Auto-switch to tab requested via URL param (e.g. index.html?tab=tracker)
+    // Switch tab immediately (before any async ops) so user sees the right tab right away
     try{
       const _urlTab = new URLSearchParams(window.location.search).get('tab');
       if(_urlTab && ['tracker','leiseca','home'].includes(_urlTab)){
@@ -537,6 +529,14 @@ sb.auth.onAuthStateChange(async(event,session)=>{
         history.replaceState(null,'',window.location.pathname);
       }
     }catch(_){}
+    renderTracker();
+    renderLeiSeca();
+    await loadProgress();
+    loadLeiSeca();
+    await Promise.allSettled([loadFlags(),loadNotes()]);
+    renderTracker();
+    renderLeiSeca();
+    renderHomeCards();
     // Startup DB check
     try{
       const {data:dbTest,error:dbErr}=await sb.from('progress').select('chapter_id').eq('user_id',currentUser.id).limit(1);
