@@ -107,7 +107,7 @@ mark{background:#f59e0b;color:#1a1a1a;border-radius:2px;padding:0 2px}
 [data-theme="light"] main { background: #f8f7f2 !important; }
 
 /* Toggle button */
-#theme-toggle-btn {
+#theme-toggle-btn {display:none;
   position: fixed;
   bottom: 20px;
   right: 20px;
@@ -812,11 +812,7 @@ async function _sn(){
 }
 </script>
 
-<div id="_back_btn" style="position:fixed;top:50px;left:10px;z-index:9998;">
-  <a href="index.html" style="display:flex;align-items:center;gap:6px;background:var(--surface,#13161e);border:1px solid var(--border,#2e3350);border-radius:8px;padding:6px 12px;text-decoration:none;color:var(--text,#e8eaf0);font-size:12px;font-family:monospace;box-shadow:0 2px 8px rgba(0,0,0,0.3);">
-    ← Portal
-  </a>
-</div>
+
 
 <script>
 async function _doLogout(){

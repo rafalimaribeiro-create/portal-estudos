@@ -302,7 +302,7 @@
 [data-theme="light"] main { background: #f8f7f2 !important; }
 
 /* Toggle button */
-#theme-toggle-btn {
+#theme-toggle-btn {display:none;
   position: fixed;
   bottom: 20px;
   right: 20px;
@@ -925,78 +925,12 @@ async function _doLogout(){
 
 <!-- WORD-STYLE TOOLBAR -->
 <div id="_wtb">
-  <!-- Theme -->
   <div class="_grp">
     <button class="_tb-btn" id="_tb" onclick="_tT()" title="Alternar tema">☀️</button>
-  <a href="index.html" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;text-decoration:none;white-space:nowrap;">← Portal</a>
-  <a href="index.html?tab=tracker" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;text-decoration:none;white-space:nowrap;">📊 Tracker</a>
-  <button class="_tb-btn" id="_mm_btn" onclick="window.__MM&&window.__MM.toggle(window.__MM_getData())" title="Mapa Mental" style="font-size:15px;padding:2px 8px;">🌐</button>
-  <button onclick="_doLogout()" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;cursor:pointer;white-space:nowrap;">Sair</button>
-  </div>
-  <div class="_sep"></div>
-
-  <!-- Highlight -->
-  <div class="_grp">
-    <span class="_grp-label">Destaque</span>
-    <span class="_sw" style="background:rgba(250,204,21,0.7)" onclick="_hl('yellow')" id="_sw_y" title="Amarelo"></span>
-    <span class="_sw" style="background:rgba(34,197,94,0.65)" onclick="_hl('green')"  id="_sw_g" title="Verde"></span>
-    <span class="_sw" style="background:rgba(59,130,246,0.65)" onclick="_hl('blue')"  id="_sw_b" title="Azul"></span>
-    <span class="_sw" style="background:rgba(239,68,68,0.65)"  onclick="_hl('red')"   id="_sw_r" title="Vermelho"></span>
-    <button class="_tb-btn" onclick="_hl(null)" title="Remover destaque">✕</button>
-  </div>
-  <div class="_sep"></div>
-
-  <!-- Font Color -->
-  <div class="_grp">
-    <span class="_grp-label">Cor</span>
-    <span class="_sw" style="background:#fbbf24" onclick="_fc('#fbbf24')" id="_fc_1" title="Amarelo"></span>
-    <span class="_sw" style="background:#34d399" onclick="_fc('#34d399')" id="_fc_2" title="Verde"></span>
-    <span class="_sw" style="background:#60a5fa" onclick="_fc('#60a5fa')" id="_fc_3" title="Azul"></span>
-    <span class="_sw" style="background:#f87171" onclick="_fc('#f87171')" id="_fc_4" title="Vermelho"></span>
-    <span class="_sw" style="background:#c084fc" onclick="_fc('#c084fc')" id="_fc_5" title="Roxo"></span>
-    <span class="_sw" style="background:#fb923c" onclick="_fc('#fb923c')" id="_fc_6" title="Laranja"></span>
-    <button class="_tb-btn" onclick="_fc(null)" title="Cor padrão">✕</button>
-  </div>
-  <div class="_sep"></div>
-
-  <!-- Font Size -->
-  <div class="_grp">
-    <span class="_grp-label">Tamanho</span>
-    <button class="_tb-btn" onclick="_fs(-1)" title="Diminuir">A−</button>
-    <input class="_fs-num" id="_fsv" type="text" value="—" readonly title="Tamanho atual">
-    <button class="_tb-btn" onclick="_fs(1)" title="Aumentar">A+</button>
-    <button class="_tb-btn" onclick="_fs(0)" title="Reset">↺</button>
-  </div>
-  <div class="_sep"></div>
-
-  <!-- Flags -->
-  <div class="_grp">
-    <span class="_grp-label">Flag</span>
-    <button class="_tb-btn" id="_f0" onclick="_fl('hard')"   title="Difícil">🔴</button>
-    <button class="_tb-btn" id="_f1" onclick="_fl('review')" title="Revisar">🟡</button>
-    <button class="_tb-btn" id="_f2" onclick="_fl('done')"   title="Dominado">🟢</button>
-    <button class="_tb-btn" onclick="_fl(null)" title="Remover flag">✕</button>
-  </div>
-  <div class="_sep"></div>
-
-  <!-- Note -->
-  <div class="_grp">
-    <button class="_tb-btn" id="_ntbtn" onclick="_on()" title="Adicionar nota">✏️ Nota</button>
-  </div>
-
-  <!-- Selected node info -->
-  <div id="_sel-info">← Clique num nó para marcar</div>
-</div>
-
-<!-- NOTE MODAL -->
-<div id="_np">
-  <div class="_npb">
-    <div class="_nptitle" id="_npt">📝 Nota</div>
-    <textarea class="_npta" id="_npta" placeholder="Escreva sua anotação..."></textarea>
-    <div class="_npact">
-      <button class="_npcxl" onclick="_cn()">Cancelar</button>
-      <button class="_npsave" onclick="_sn()">Salvar nota</button>
-    </div>
+    <a href="index.html" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;text-decoration:none;white-space:nowrap;">← Portal</a>
+    <a href="index.html?tab=tracker" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;text-decoration:none;white-space:nowrap;">📊 Tracker</a>
+    <button class="_tb-btn" id="_mm_btn" onclick="window.__MM&&window.__MM.toggle(window.__MM_getData())" title="Mapa Mental" style="font-size:15px;padding:2px 8px;">🌐</button>
+    <button onclick="_doLogout()" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;cursor:pointer;white-space:nowrap;">Sair</button>
   </div>
 </div>
 
@@ -1004,7 +938,7 @@ async function _doLogout(){
 
 <style>
 body { padding-top: 46px !important; }
-#_hdr { position:fixed; top:0; left:0; right:0; z-index:9900; height:46px;
+#_hdr { display:none!important; position:fixed; top:0; left:0; right:0; z-index:9900; height:46px;
   background:var(--bg,#1a1d27); border-bottom:1px solid var(--border,#2e3350);
   display:flex; align-items:center; gap:8px; padding:0 12px; }
 [data-theme="light"] #_hdr { background:#fff; border-color:#d8d3c8; }

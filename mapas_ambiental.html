@@ -1058,6 +1058,17 @@ window.__MM_getData = function(){
   }
 })();
 </script>
+<script>
+// Mobile sidebar + color picker (called from #_hdr)
+var _sbo=window.innerWidth>768;
+function _sbT(){_sbo=!_sbo;_sbA();localStorage.setItem('_sbo',_sbo?'1':'0');}
+function _sbC(){_sbo=false;_sbA();}
+function _sbA(){var sb=document.getElementById('sidebar'),ov=document.getElementById('_sbov'),mob=window.innerWidth<=768;if(sb)sb.classList.toggle('sb-off',!_sbo);if(ov)ov.classList.toggle('open',_sbo&&mob);}
+function _logout(){_doLogout();}
+function _pickColor(c){var m={y:'yellow',g:'green',b:'blue',p:'pink',o:'orange'};_hl(c?m[c]:null);}
+window.addEventListener('DOMContentLoaded',function(){var sv=localStorage.getItem('_sbo');_sbo=window.innerWidth>768?(sv!=='0'):false;_sbA();});
+window.addEventListener('resize',function(){if(window.innerWidth>768&&!_sbo){_sbo=true;_sbA();}if(window.innerWidth<=768&&_sbo){_sbo=false;_sbA();}});
+</script>
 </body>
 </html>
 
