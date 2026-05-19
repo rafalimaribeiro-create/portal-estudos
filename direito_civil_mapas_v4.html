@@ -1043,7 +1043,7 @@ function _wt(s,mw){
   var mc=Math.floor(mw/_CW),ws=(s||'').split(/\s+/),ls=[],c='';
   ws.forEach(function(w){var t=c?c+' '+w:w;if(t.length>mc&&c){ls.push(c);c=w;}else c=t;});
   if(c)ls.push(c);
-  if(ls.length>4){ls=ls.slice(0,4);ls[3]=ls[3].slice(0,-1)+'…';}
+
   return ls.length?ls:[''];
 }
 function _di(s,d){
