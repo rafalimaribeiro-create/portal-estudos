@@ -293,7 +293,7 @@ function doSearch() {
 <div id="_hdr">
   <button class="hbtn"onclick="_sbT()"style="padding:4px 8px;font-size:16px;">&#9776;</button>
   <a href="index.html" class="hbtn">&#8592; Portal</a>
-  <a href="index.html?tab=tracker" class="hbtn">&#128202; Tracker</a>
+  <a href="index.html" onclick="try{sessionStorage.setItem('_gotoTab','tracker')}catch(e){}" class="hbtn">&#128202; Tracker</a>
   <button class="hbtn" id="_mm_btn" onclick="window.__MM&&window.__MM.toggle(window.__MM_getData())" title="Mapa Mental">🌐</button>
   <button onclick="_logout()"class="hbtn">Sair</button>
   <span id="_htit">Dir. do Trabalho</span>

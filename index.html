@@ -432,11 +432,17 @@ t-chevron{transform:rotate(180deg);}
 </div>
 
 <script>
-// Read ?tab= param immediately on script load, before any async auth callback
+// Read intended tab immediately — sessionStorage (set by map pages) takes priority over URL param
 let _pendingTab = null;
 try{
-  const _p = new URLSearchParams(window.location.search).get('tab');
-  if(_p && ['tracker','leiseca','home'].includes(_p)){ _pendingTab=_p; history.replaceState(null,'',window.location.pathname); }
+  const _ss = sessionStorage.getItem('_gotoTab');
+  const _qs = new URLSearchParams(window.location.search).get('tab');
+  const _p  = _ss || _qs;
+  if(_p && ['tracker','leiseca','home'].includes(_p)){
+    _pendingTab = _p;
+    sessionStorage.removeItem('_gotoTab');
+    if(_qs) history.replaceState(null,'',window.location.pathname);
+  }
 }catch(_){}
 
 const SUPABASE_URL = 'https://qseismabfaonggrwzuiu.supabase.co';
