@@ -432,6 +432,13 @@ t-chevron{transform:rotate(180deg);}
 </div>
 
 <script>
+// Read ?tab= param immediately on script load, before any async auth callback
+let _pendingTab = null;
+try{
+  const _p = new URLSearchParams(window.location.search).get('tab');
+  if(_p && ['tracker','leiseca','home'].includes(_p)){ _pendingTab=_p; history.replaceState(null,'',window.location.pathname); }
+}catch(_){}
+
 const SUPABASE_URL = 'https://qseismabfaonggrwzuiu.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzZWlzbWFiZmFvbmdncnd6dWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzU4MTMsImV4cCI6MjA5Mzc1MTgxM30.eYnWJo9NI_-wGJCd2HalmnCGMhMvlKZxmZKuTpx3xS0';
 const {createClient} = supabase;
@@ -520,15 +527,14 @@ sb.auth.onAuthStateChange(async(event,session)=>{
     document.getElementById('topbar').style.display='flex';
     document.getElementById('main').style.display='flex';
     document.getElementById('user-email-display').textContent=session.user.user_metadata?.name||session.user.email;
-    // Switch tab immediately (before any async ops) so user sees the right tab right away
-    try{
-      const _urlTab = new URLSearchParams(window.location.search).get('tab');
-      if(_urlTab && ['tracker','leiseca','home'].includes(_urlTab)){
-        const _tabBtn = [...document.querySelectorAll('.tb-tab')].find(b=>(b.getAttribute('onclick')||'').includes("'"+_urlTab+"'"));
-        showView(_urlTab, _tabBtn||null);
-        history.replaceState(null,'',window.location.pathname);
-      }
-    }catch(_){}
+    // Switch to pending tab (set at page load, before this callback ran)
+    if(_pendingTab){
+      try{
+        const _tabBtn=[...document.querySelectorAll('.tb-tab')].find(b=>(b.getAttribute('onclick')||'').includes("'"+_pendingTab+"'"));
+        showView(_pendingTab,_tabBtn||null);
+      }catch(_){}
+      _pendingTab=null;
+    }
     renderTracker();
     renderLeiSeca();
     await loadProgress();
