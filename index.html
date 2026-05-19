@@ -501,15 +501,11 @@ async function doSignup(){
   else setMsg('Conta criada! Você já pode entrar.','ok');
 }
 async function doLogout(){
-  try{ await sb.auth.signOut(); }catch(e){ console.error('signOut error:',e); }
-  currentUser=null;
-  progress={};flags={};notes={};lsProgress={};
-  // Force reload to clear all state cleanly
-  // Clear any cached Supabase tokens
-  try {
-    Object.keys(localStorage).filter(k=>k.startsWith('sb-')).forEach(k=>localStorage.removeItem(k));
-  } catch(e) {}
-  window.location.href = window.location.href.split('?')[0] + '?logout=1';
+  // Limpa localStorage antes de redirecionar
+  try{ Object.keys(localStorage).filter(k=>k.startsWith('sb-')).forEach(k=>localStorage.removeItem(k)); }catch(e){}
+  // signOut em background — não bloqueia o redirect
+  sb.auth.signOut().catch(()=>{});
+  window.location.href = window.location.href.split('?')[0];
 }
 
 sb.auth.onAuthStateChange(async(event,session)=>{
