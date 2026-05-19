@@ -916,6 +916,10 @@ function toggleMapTheme(){
   const btn = document.getElementById('theme-toggle-btn');
   if(btn) btn.textContent = next === 'dark' ? '☀️ Claro' : '🌙 Escuro';
 }
+async function _doLogout(){
+  try{ await _sb.auth.signOut(); }catch(e){}
+  window.location.href='index.html';
+}
 </script>
 
 <!-- WORD-STYLE TOOLBAR -->
@@ -1090,6 +1094,8 @@ async function _trkLoad(){
       if(row.done && row.chapter_id.startsWith('admin_'))
         _TRK.done[row.chapter_id] = true;
     });
+    // Sync to localStorage so the global tracker in index.html can read it
+    try{ Object.keys(_TRK.done).forEach(function(cid){ localStorage.setItem('_pgprog_'+cid,JSON.stringify({done:true,date:null})); }); }catch(_){}
     _trkRender();
   } catch(e) { console.warn('_trkLoad error', e); }
 }
@@ -1130,6 +1136,7 @@ async function _trkToggle(chapterId, done){
       console.log('Saved:', chapterId, done);
     }
   } catch(e) { console.warn('_trkToggle error', e); }
+  try{ localStorage.setItem('_pgprog_'+chapterId, JSON.stringify({done, date:done?new Date().toISOString():null})); }catch(_){}
 }
 </script>
 

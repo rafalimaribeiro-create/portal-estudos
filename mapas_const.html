@@ -911,6 +911,7 @@ async function _trkLoad(){
       if(row.done && row.chapter_id.startsWith(_TRK.mapId+'_'))
         _TRK.done[row.chapter_id] = true;
     });
+    try{ Object.keys(_TRK.done).forEach(function(cid){ localStorage.setItem('_pgprog_'+cid,JSON.stringify({done:true,date:null})); }); }catch(_){}
     _trkRender();
   }catch(e){ console.warn('tracker load err', e); }
 }
@@ -959,6 +960,7 @@ async function _trkToggle(chapterId, done, chk){
       done_at: now
     }, {onConflict: 'user_id,chapter_id'});
   }catch(e){ console.warn('tracker save err', e); }
+  try{ localStorage.setItem('_pgprog_'+chapterId, JSON.stringify({done, date:now})); }catch(_){}
 }
 </script>
 </body>

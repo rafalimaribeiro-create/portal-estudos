@@ -501,15 +501,11 @@ async function doSignup(){
   else setMsg('Conta criada! Você já pode entrar.','ok');
 }
 async function doLogout(){
-  try{ await sb.auth.signOut(); }catch(e){ console.error('signOut error:',e); }
-  currentUser=null;
-  progress={};flags={};notes={};lsProgress={};
-  // Force reload to clear all state cleanly
-  // Clear any cached Supabase tokens
-  try {
-    Object.keys(localStorage).filter(k=>k.startsWith('sb-')).forEach(k=>localStorage.removeItem(k));
-  } catch(e) {}
-  window.location.href = window.location.href.split('?')[0] + '?logout=1';
+  // Limpa localStorage antes de redirecionar
+  try{ Object.keys(localStorage).filter(k=>k.startsWith('sb-')).forEach(k=>localStorage.removeItem(k)); }catch(e){}
+  // signOut em background — não bloqueia o redirect
+  sb.auth.signOut().catch(()=>{});
+  window.location.href = window.location.href.split('?')[0];
 }
 
 sb.auth.onAuthStateChange(async(event,session)=>{
@@ -540,16 +536,30 @@ sb.auth.onAuthStateChange(async(event,session)=>{
 
 // ── DATA LOADING ──
 async function loadProgress(){
+  if(!currentUser){ return; }
   try{
     const {data,error}=await sb.from('progress').select('chapter_id,done,done_at').eq('user_id',currentUser.id);
-    if(error){ console.error('loadProgress error:',error); _lsSaveStatus('⚠ loadProgress: '+error.message,'err'); progress={}; return; }
+    if(error){
+      console.error('loadProgress error:',error.code,error.message,error.hint);
+      _lsSaveStatus('⚠ loadProgress: '+error.message,'err');
+      _loadProgressLS(); return;
+    }
     progress={};
     const total=data?data.length:0;
     console.log('loadProgress: got',total,'rows from DB');
     if(data) data.forEach(r=>{progress[r.chapter_id]={done:r.done,date:r.done_at};});
-    console.log('progress loaded:',Object.keys(progress).length,'chapters');
-    if(total===0) _lsSaveStatus('ℹ progresso vazio no banco','saving');
-  }catch(e){ console.error('loadProgress exception:',e); progress={}; }
+    _mergeProgressLS();
+    console.log('progress loaded:',Object.keys(progress).length,'chapters (DB:'+total+')');
+    if(total===0) _lsSaveStatus('ℹ progresso vazio no banco — verificar RLS no Supabase','saving');
+  }catch(e){ console.error('loadProgress exception:',e); _loadProgressLS(); }
+}
+function _loadProgressLS(){
+  progress={};
+  try{ Object.keys(localStorage).filter(k=>k.startsWith('_pgprog_')).forEach(k=>{try{const v=JSON.parse(localStorage.getItem(k));if(v)progress[k.slice(8)]=v;}catch(e){}});}catch(e){}
+  console.log('loadProgress: loaded',Object.keys(progress).length,'chapters from localStorage cache');
+}
+function _mergeProgressLS(){
+  try{ Object.keys(localStorage).filter(k=>k.startsWith('_pgprog_')).forEach(k=>{const cid=k.slice(8);try{const v=JSON.parse(localStorage.getItem(k));if(!v)return;if(!progress[cid]||(v.done&&!progress[cid].done)){progress[cid]=v;}}catch(e){}});}catch(e){}
 }
 async function loadFlags(){ flags={}; }
 async function loadNotes(){ notes={}; }
@@ -573,6 +583,7 @@ function showView(view,tabEl){
 
 // Sync when user returns to portal from a map
 window.addEventListener('focus', async ()=>{
+  if(!currentUser) return;
   try{
     if(typeof loadProgress==='function') await loadProgress();
     if(typeof loadLeiSeca==='function') await loadLeiSeca();
@@ -650,6 +661,7 @@ async function onCheck(key,checked){
   if(dateEl) dateEl.textContent=now?now.toLocaleDateString('pt-BR'):'';
   const isoNow=now?now.toISOString():null;
   progress[key]={done:checked,date:isoNow};
+  try{ localStorage.setItem('_pgprog_'+key, JSON.stringify({done:checked,date:isoNow})); }catch(_){}
   try{
     // Try upsert with conflict resolution
     const {data:ud, error:ue} = await sb.from('progress').upsert(
