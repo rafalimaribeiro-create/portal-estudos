@@ -916,6 +916,7 @@ function toggleMapTheme(){
   const btn = document.getElementById('theme-toggle-btn');
   if(btn) btn.textContent = next === 'dark' ? '☀️ Claro' : '🌙 Escuro';
 }
+function _tT(){var h=document.documentElement,n=h.getAttribute('data-theme')==='dark'?'light':'dark';h.setAttribute('data-theme',n);localStorage.setItem('theme',n);var b=document.getElementById('_tb');if(b)b.textContent=n==='dark'?'☀️':'🌙';}
 async function _doLogout(){
   try{ await _sb.auth.signOut(); }catch(e){}
   window.location.href='index.html';
@@ -928,6 +929,7 @@ async function _doLogout(){
   <div class="_grp">
     <button class="_tb-btn" id="_tb" onclick="_tT()" title="Alternar tema">☀️</button>
   <a href="index.html" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;text-decoration:none;white-space:nowrap;">← Portal</a>
+  <a href="index.html?tab=tracker" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;text-decoration:none;white-space:nowrap;">📊 Tracker</a>
   <button onclick="_doLogout()" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;cursor:pointer;white-space:nowrap;">Sair</button>
   </div>
   <div class="_sep"></div>
@@ -1026,6 +1028,7 @@ body { padding-top: 46px !important; }
 
 <div id="_hdr">
   <a href="index.html" class="hbtn">&#8592; Portal</a>
+  <a href="index.html?tab=tracker" class="hbtn">&#128202; Tracker</a>
   <span id="_htit">Dir. Administrativo</span>
   <button class="hbtn" onclick="_trkTheme()" id="_thb">&#9728;&#65039;</button>
   <button class="hbtn" onclick="_trkLogout()">Sair</button>
