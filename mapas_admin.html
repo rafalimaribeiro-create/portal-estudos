@@ -1333,7 +1333,7 @@ function _rend(){
     }
     g.addEventListener('click',function(e){
       e.stopPropagation();
-      if(n.children&&n.children.length){if(_col.has(n._id))_col.delete(n._id);else _col.add(n._id);_rend();_fit();}
+      if(n.children&&n.children.length){if(_col.has(n._id))_col.delete(n._id);else _col.add(n._id);_rend();}
     });
     w.appendChild(g);
   });
