@@ -517,7 +517,9 @@ sb.auth.onAuthStateChange(async(event,session)=>{
     document.getElementById('user-email-display').textContent=session.user.user_metadata?.name||session.user.email;
     renderTracker();
     renderLeiSeca();
-    await Promise.allSettled([loadProgress(),loadFlags(),loadNotes(),loadLeiSeca()]);
+    await loadProgress();
+    loadLeiSeca();
+    await Promise.allSettled([loadFlags(),loadNotes()]);
     renderTracker();
     renderLeiSeca();
     // Startup DB check
@@ -574,7 +576,7 @@ function showView(view,tabEl){
   if(tabEl) tabEl.classList.add('active');
   const target=document.getElementById('view-'+view);
   if(target) target.style.display=view==='tracker'?'block':'flex';
-  if(view==='leiseca') setTimeout(renderLeiSeca, 50);
+  if(view==='leiseca'){ loadLeiSeca(); renderLeiSeca(); }
   if(view==='tracker' && currentUser){
     // Reload progress from Supabase to sync with map checkboxes
     loadProgress().then(()=>{ renderTracker(); });
@@ -586,7 +588,7 @@ window.addEventListener('focus', async ()=>{
   if(!currentUser) return;
   try{
     if(typeof loadProgress==='function') await loadProgress();
-    if(typeof loadLeiSeca==='function') await loadLeiSeca();
+    if(typeof loadLeiSeca==='function') loadLeiSeca();
     if(typeof renderTracker==='function') renderTracker();
     if(typeof renderLeiSeca==='function') renderLeiSeca();
   }catch(e){ console.error('[SYNC ERROR]',e); }
@@ -759,21 +761,16 @@ const LS_DATA = {"1": [{"label": "CRFB 1 ao 11", "id": "ls_d1_i0"}, {"label": "C
 let lsProgress = {};
 let lsFilter_mode = 'all';
 
-async function loadLeiSeca(){
-  if(!currentUser) return;
-  try{
-    const {data,error} = await sb.from('progress')
-      .select('chapter_id,done')
-      .eq('user_id', currentUser.id)
-      .like('chapter_id', 'ls_%');
-    if(error){ console.error('loadLeiSeca error:',error); _lsSaveStatus('⚠ loadLeiSeca: '+error.message,'err'); _loadLeiSecaLS(); return; }
-    lsProgress = {};
-    const total=data?data.length:0;
-    console.log('loadLeiSeca: got',total,'rows from DB');
-    if(data) data.forEach(r=>{ if(r.done) lsProgress[r.chapter_id]=true; });
-    try{ Object.keys(lsProgress).forEach(k=>{ localStorage.setItem('_pgprog_'+k, JSON.stringify({done:true,date:null})); }); }catch(_){}
-    if(total===0) _loadLeiSecaLS(); else _mergeLeiSecaLS();
-  }catch(e){ console.error('loadLeiSeca exception:',e); _loadLeiSecaLS(); }
+function loadLeiSeca(){
+  // Build from already-loaded progress object (loadProgress fetches all rows including ls_*)
+  lsProgress = {};
+  Object.keys(progress).filter(k=>k.startsWith('ls_')).forEach(k=>{
+    if(progress[k]&&progress[k].done) lsProgress[k]=true;
+  });
+  // Merge any localStorage items not in progress (handles offline / pre-load cache)
+  _mergeLeiSecaLS();
+  // Persist done items to localStorage for cross-page persistence
+  try{ Object.keys(lsProgress).forEach(k=>{ localStorage.setItem('_pgprog_'+k, JSON.stringify({done:true,date:null})); }); }catch(_){}
 }
 
 function _loadLeiSecaLS(){
@@ -845,9 +842,12 @@ function renderLeiSeca(){
 }
 
 async function lsToggleItem(itemId, checked){
+  const now = checked ? new Date().toISOString() : null;
   if(checked) lsProgress[itemId]=true;
   else delete lsProgress[itemId];
-  try{ localStorage.setItem('_pgprog_'+itemId, JSON.stringify({done:checked,date:checked?new Date().toISOString():null})); }catch(_){}
+  // Keep progress in sync so loadLeiSeca() sees current state
+  progress[itemId] = {done:checked, date:now};
+  try{ localStorage.setItem('_pgprog_'+itemId, JSON.stringify({done:checked,date:now})); }catch(_){}
   // Update day card
   const day = itemId.match(/ls_d(\d+)_/)[1];
   const items = LS_DATA[day];
@@ -882,7 +882,6 @@ async function lsToggleItem(itemId, checked){
   if(!currentUser){ _lsSaveStatus('Faça login para salvar','err'); return; }
   _lsSaveStatus('salvando…','saving');
   try{
-    const now = checked ? new Date().toISOString() : null;
     const {error:lue} = await sb.from('progress').upsert(
       {user_id:currentUser.id, chapter_id:itemId, done:checked, done_at:now},
       {onConflict:'user_id,chapter_id'}
