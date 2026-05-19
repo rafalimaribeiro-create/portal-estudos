@@ -447,7 +447,14 @@ function _rend(){
     }
     g.addEventListener('click',function(e){
       e.stopPropagation();
-      if(n.children&&n.children.length){if(_col.has(n._id))_col.delete(n._id);else _col.add(n._id);_rend();}
+      if(n.children&&n.children.length){
+        var _px=n._x+n._w/2,_py=n._cy;
+        if(_col.has(n._id))_col.delete(n._id);else _col.add(n._id);
+        _rend();
+        _tr.x+=((_px-(n._x+n._w/2))*_tr.sc);
+        _tr.y+=(_py-n._cy)*_tr.sc;
+        _apT();
+      }
     });
     w.appendChild(g);
   });
