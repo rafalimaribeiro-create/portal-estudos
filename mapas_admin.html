@@ -932,6 +932,59 @@ async function _doLogout(){
     <button class="_tb-btn" id="_mm_btn" onclick="window.__MM&&window.__MM.toggle(window.__MM_getData())" title="Mapa Mental" style="font-size:15px;padding:2px 8px;">🌐</button>
     <button onclick="_doLogout()" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;cursor:pointer;white-space:nowrap;">Sair</button>
   </div>
+  <div class="_sep"></div>
+  <div class="_grp">
+    <span class="_grp-label">Destaque</span>
+    <span class="_sw" style="background:rgba(250,204,21,0.7)" onclick="_hl('yellow')" id="_sw_y" title="Amarelo"></span>
+    <span class="_sw" style="background:rgba(34,197,94,0.65)" onclick="_hl('green')"  id="_sw_g" title="Verde"></span>
+    <span class="_sw" style="background:rgba(59,130,246,0.65)" onclick="_hl('blue')"  id="_sw_b" title="Azul"></span>
+    <span class="_sw" style="background:rgba(239,68,68,0.65)"  onclick="_hl('red')"   id="_sw_r" title="Vermelho"></span>
+    <button class="_tb-btn" onclick="_hl(null)" title="Remover destaque">✕</button>
+  </div>
+  <div class="_sep"></div>
+  <div class="_grp">
+    <span class="_grp-label">Cor</span>
+    <span class="_sw" style="background:#fbbf24" onclick="_fc('#fbbf24')" id="_fc_1" title="Amarelo"></span>
+    <span class="_sw" style="background:#34d399" onclick="_fc('#34d399')" id="_fc_2" title="Verde"></span>
+    <span class="_sw" style="background:#60a5fa" onclick="_fc('#60a5fa')" id="_fc_3" title="Azul"></span>
+    <span class="_sw" style="background:#f87171" onclick="_fc('#f87171')" id="_fc_4" title="Vermelho"></span>
+    <span class="_sw" style="background:#c084fc" onclick="_fc('#c084fc')" id="_fc_5" title="Roxo"></span>
+    <span class="_sw" style="background:#fb923c" onclick="_fc('#fb923c')" id="_fc_6" title="Laranja"></span>
+    <button class="_tb-btn" onclick="_fc(null)" title="Cor padrão">✕</button>
+  </div>
+  <div class="_sep"></div>
+  <div class="_grp">
+    <span class="_grp-label">Tamanho</span>
+    <button class="_tb-btn" onclick="_fs(-1)" title="Diminuir">A−</button>
+    <input class="_fs-num" id="_fsv" type="text" value="—" readonly title="Tamanho atual">
+    <button class="_tb-btn" onclick="_fs(1)" title="Aumentar">A+</button>
+    <button class="_tb-btn" onclick="_fs(0)" title="Reset">↺</button>
+  </div>
+  <div class="_sep"></div>
+  <div class="_grp">
+    <span class="_grp-label">Flag</span>
+    <button class="_tb-btn" id="_f0" onclick="_fl('hard')"   title="Difícil">🔴</button>
+    <button class="_tb-btn" id="_f1" onclick="_fl('review')" title="Revisar">🟡</button>
+    <button class="_tb-btn" id="_f2" onclick="_fl('done')"   title="Dominado">🟢</button>
+    <button class="_tb-btn" onclick="_fl(null)" title="Remover flag">✕</button>
+  </div>
+  <div class="_sep"></div>
+  <div class="_grp">
+    <button class="_tb-btn" id="_ntbtn" onclick="_on()" title="Adicionar nota">✏️ Nota</button>
+  </div>
+  <div id="_sel-info">← Clique num nó para marcar</div>
+</div>
+
+<!-- NOTE MODAL -->
+<div id="_np">
+  <div class="_npb">
+    <div class="_nptitle" id="_npt">📝 Nota</div>
+    <textarea class="_npta" id="_npta" placeholder="Escreva sua anotação..."></textarea>
+    <div class="_npact">
+      <button class="_npcxl" onclick="_cn()">Cancelar</button>
+      <button class="_npsave" onclick="_sn()">Salvar nota</button>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1012,7 +1065,7 @@ window.addEventListener('DOMContentLoaded', function(){
   _sb.auth.getSession().then(function(r){
     if(r.data && r.data.session && r.data.session.user){
       _TRK.user = r.data.session.user;
-      _trkLoad();
+      _trkLoad();_loadAnnotations();
     }
   });
 });
@@ -1079,6 +1132,108 @@ async function _trkToggle(chapterId, done){
 </script>
 
 
+<script>
+// ── ANNOTATION SYSTEM (highlight, flag, font, note) ──
+var _mid='admin',_m={},_sid=null,_sel=null;
+function _uid(){return(_TRK&&_TRK.user)?_TRK.user.id:null;}
+function _txt(el){return el.querySelector('.node-text')||el.querySelector('span')||el;}
+function _mkid(el){var t=_txt(el);var lbl=(t?t.textContent:'').trim().slice(0,40);return lbl.replace(/\s+/g,'_').replace(/[^a-z0-9_]/gi,'').toLowerCase()+'__admin';}
+function _am(el,nid){
+  var mk=_m[nid]||{};var t=_txt(el);
+  t.classList.remove('hl-yellow','hl-green','hl-blue','hl-red');
+  el.querySelectorAll('._fb2,._nb3').forEach(function(e){e.remove();});
+  if(mk.hl)t.classList.add('hl-'+mk.hl);
+  if(mk.fc)t.style.color=mk.fc;else t.style.removeProperty('color');
+  if(mk.fs)t.style.fontSize=mk.fs+'px';else t.style.removeProperty('font-size');
+  if(mk.fl){var fb=document.createElement('span');fb.className='_fb2';fb.style.cssText='margin-left:5px;font-size:12px;';fb.textContent=mk.fl==='hard'?'🔴':mk.fl==='review'?'🟡':'🟢';t.after(fb);}
+  if(mk.nt&&mk.nt.trim()){var nb=document.createElement('span');nb.className='_nb3';nb.style.cssText='margin-left:4px;cursor:help;font-size:11px;';nb.title=mk.nt;nb.textContent='📝';t.after(nb);}
+}
+document.addEventListener('click',function(e){
+  if(e.target.closest('#_wtb,#_np'))return;
+  var row=e.target.closest('.node-row');if(!row)return;
+  if(_sel)_sel.classList.remove('_sel');
+  var nid=row.getAttribute('data-mnid');
+  if(!nid){nid=_mkid(row);row.setAttribute('data-mnid',nid);}
+  _sid=nid;_sel=row;row.classList.add('_sel');
+  var t=_txt(row);var lbl=(t?t.textContent:'').trim().slice(0,50);
+  var si=document.getElementById('_sel-info');if(si)si.textContent=lbl||'Nó selecionado';
+  document.querySelectorAll('#_f0,#_f1,#_f2').forEach(function(b){b.classList.remove('_on');});
+  var mk=_m[nid]||{};
+  if(mk.fl){var fi={hard:'_f0',review:'_f1',done:'_f2'};var fb=document.getElementById(fi[mk.fl]);if(fb)fb.classList.add('_on');}
+  var fv=document.getElementById('_fsv');if(fv)fv.value=mk.fs?(mk.fs+'px'):'—';
+  document.querySelectorAll('._sw').forEach(function(s){s.classList.remove('_on');});
+  if(mk.hl){var sw=document.getElementById('_sw_'+mk.hl[0]);if(sw)sw.classList.add('_on');}
+  if(mk.fc){var fcb=document.querySelector('._sw[onclick*="'+mk.fc+'"]');if(fcb)fcb.classList.add('_on');}
+});
+async function _loadAnnotations(){
+  if(!_uid())return;
+  try{
+    var hl=await _sb.from('highlights').select('node_id,color').eq('user_id',_uid()).eq('map_id',_mid);
+    if(hl.data)hl.data.forEach(function(r){if(!_m[r.node_id])_m[r.node_id]={};_m[r.node_id].hl=r.color;});
+    var fl=await _sb.from('node_flags').select('node_id,flag').eq('user_id',_uid()).eq('map_id',_mid);
+    if(fl.data)fl.data.forEach(function(r){if(!_m[r.node_id])_m[r.node_id]={};_m[r.node_id].fl=r.flag;});
+    var st=await _sb.from('node_style').select('node_id,font_color,font_size').eq('user_id',_uid()).eq('map_id',_mid);
+    if(st.data)st.data.forEach(function(r){if(!_m[r.node_id])_m[r.node_id]={};_m[r.node_id].fc=r.font_color;_m[r.node_id].fs=r.font_size;});
+    var nt=await _sb.from('node_notes').select('node_id,content').eq('user_id',_uid()).eq('map_id',_mid);
+    if(nt.data)nt.data.forEach(function(r){if(!_m[r.node_id])_m[r.node_id]={};_m[r.node_id].nt=r.content;});
+    document.querySelectorAll('.node-row[data-mnid]').forEach(function(row){_am(row,row.getAttribute('data-mnid'));});
+  }catch(e){}
+}
+async function _hl(color){
+  if(!_sid)return;if(!_uid()){alert('Faça login para usar marcações');return;}
+  if(!_m[_sid])_m[_sid]={};_m[_sid].hl=color;
+  if(_sel)_am(_sel,_sid);
+  document.querySelectorAll('._sw[id^="_sw_"]').forEach(function(s){s.classList.remove('_on');});
+  if(color){var sw=document.getElementById('_sw_'+color[0]);if(sw)sw.classList.add('_on');await _sb.from('highlights').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,color:color},{onConflict:'user_id,map_id,node_id'});}
+  else await _sb.from('highlights').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
+}
+async function _fc(color){
+  if(!_sid)return;if(!_uid()){alert('Faça login para usar marcações');return;}
+  if(!_m[_sid])_m[_sid]={};_m[_sid].fc=color;
+  if(_sel)_am(_sel,_sid);
+  document.querySelectorAll('._sw[id^="_fc_"]').forEach(function(s){s.classList.remove('_on');});
+  if(color){var fcb=document.querySelector('._sw[onclick*="'+color+'"]');if(fcb)fcb.classList.add('_on');}
+  var sz=(_m[_sid]&&_m[_sid].fs)||null;
+  if(color||sz)await _sb.from('node_style').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,font_color:color,font_size:sz},{onConflict:'user_id,map_id,node_id'});
+  else await _sb.from('node_style').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
+}
+async function _fs(delta){
+  if(!_sid)return;if(!_uid()){alert('Faça login para usar marcações');return;}
+  if(!_m[_sid])_m[_sid]={};
+  var t=_sel?_txt(_sel):null;
+  var cur=(_m[_sid].fs)||(t?parseInt(window.getComputedStyle(t).fontSize)||13:13);
+  var nv=delta===0?null:Math.max(8,Math.min(28,cur+delta));
+  _m[_sid].fs=nv;if(_sel)_am(_sel,_sid);
+  var fv=document.getElementById('_fsv');if(fv)fv.value=nv?(nv+'px'):'—';
+  var fc=(_m[_sid]&&_m[_sid].fc)||null;
+  if(nv||fc)await _sb.from('node_style').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,font_color:fc,font_size:nv},{onConflict:'user_id,map_id,node_id'});
+  else await _sb.from('node_style').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
+}
+async function _fl(flag){
+  if(!_sid)return;if(!_uid()){alert('Faça login para usar marcações');return;}
+  if(!_m[_sid])_m[_sid]={};_m[_sid].fl=flag;if(_sel)_am(_sel,_sid);
+  document.querySelectorAll('#_f0,#_f1,#_f2').forEach(function(b){b.classList.remove('_on');});
+  if(flag){var fi={hard:'_f0',review:'_f1',done:'_f2'};var fb=document.getElementById(fi[flag]);if(fb)fb.classList.add('_on');await _sb.from('node_flags').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,flag:flag},{onConflict:'user_id,map_id,node_id'});}
+  else await _sb.from('node_flags').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
+}
+function _on(){
+  if(!_sid)return;var mk=_m[_sid]||{};
+  document.getElementById('_npta').value=mk.nt||'';
+  var si=document.getElementById('_sel-info');
+  document.getElementById('_npt').textContent='📝 Nota: '+(si?si.textContent:'');
+  document.getElementById('_np').classList.add('_o');
+}
+function _cn(){document.getElementById('_np').classList.remove('_o');}
+async function _sn(){
+  if(!_sid||!_uid())return _cn();
+  var content=document.getElementById('_npta').value;
+  if(!_m[_sid])_m[_sid]={};_m[_sid].nt=content;
+  if(_sel)_am(_sel,_sid);
+  if(content.trim())await _sb.from('node_notes').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,content:content},{onConflict:'user_id,map_id,node_id'});
+  else await _sb.from('node_notes').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
+  _cn();
+}
+</script>
 <style id="_mm_css">
 #_mm_wrap{display:none;position:fixed;z-index:500;}
 #_mm_svg{width:100%;height:100%;display:block;}
