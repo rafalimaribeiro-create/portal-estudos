@@ -528,6 +528,15 @@ sb.auth.onAuthStateChange(async(event,session)=>{
     renderTracker();
     renderLeiSeca();
     renderHomeCards();
+    // Auto-switch to tab requested via URL param (e.g. index.html?tab=tracker)
+    try{
+      const _urlTab = new URLSearchParams(window.location.search).get('tab');
+      if(_urlTab && ['tracker','leiseca','home'].includes(_urlTab)){
+        const _tabBtn = [...document.querySelectorAll('.tb-tab')].find(b=>(b.getAttribute('onclick')||'').includes("'"+_urlTab+"'"));
+        showView(_urlTab, _tabBtn||null);
+        history.replaceState(null,'',window.location.pathname);
+      }
+    }catch(_){}
     // Startup DB check
     try{
       const {data:dbTest,error:dbErr}=await sb.from('progress').select('chapter_id').eq('user_id',currentUser.id).limit(1);
