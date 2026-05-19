@@ -96,6 +96,11 @@
   .card-civil{--stripe:var(--civil);}
   .card-ambiental{--stripe:var(--ambiental);}
   .card-trabalho{--stripe:var(--trabalho);}
+  .card-prog-wrap{margin-top:2px;}
+  .card-prog{width:100%;height:3px;background:rgba(128,128,128,0.15);border-radius:2px;overflow:hidden;}
+  .card-prog-fill{height:100%;border-radius:2px;background:var(--stripe);transition:width 0.5s ease;width:0%;}
+  .card-prog-label{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);margin-top:5px;letter-spacing:0.04em;}
+  .card.card-complete{border-color:var(--stripe);}
 
   /* MAPA VIEWER */
   #view-mapa{display:none;flex:1;flex-direction:column;}
@@ -522,6 +527,7 @@ sb.auth.onAuthStateChange(async(event,session)=>{
     await Promise.allSettled([loadFlags(),loadNotes()]);
     renderTracker();
     renderLeiSeca();
+    renderHomeCards();
     // Startup DB check
     try{
       const {data:dbTest,error:dbErr}=await sb.from('progress').select('chapter_id').eq('user_id',currentUser.id).limit(1);
@@ -578,9 +584,9 @@ function showView(view,tabEl){
   if(target) target.style.display=view==='tracker'?'block':'flex';
   if(view==='leiseca'){ loadLeiSeca(); renderLeiSeca(); }
   if(view==='tracker' && currentUser){
-    // Reload progress from Supabase to sync with map checkboxes
-    loadProgress().then(()=>{ renderTracker(); });
+    loadProgress().then(()=>{ renderTracker(); renderHomeCards(); });
   }
+  if(view==='home') renderHomeCards();
 }
 
 // Sync when user returns to portal from a map
@@ -591,6 +597,7 @@ window.addEventListener('focus', async ()=>{
     if(typeof loadLeiSeca==='function') loadLeiSeca();
     if(typeof renderTracker==='function') renderTracker();
     if(typeof renderLeiSeca==='function') renderLeiSeca();
+    if(typeof renderHomeCards==='function') renderHomeCards();
   }catch(e){ console.error('[SYNC ERROR]',e); }
 });
 function openMapa(file,title,color){
@@ -601,6 +608,29 @@ function openMapa(file,title,color){
   ['home','tracker'].forEach(v=>{const el=document.getElementById('view-'+v);if(el)el.style.display='none';});
   document.getElementById('view-mapa').style.display='flex';
   document.querySelectorAll('.tb-tab').forEach(t=>t.classList.remove('active'));
+}
+
+// ── HOME CARDS PROGRESS ──
+function renderHomeCards(){
+  SUBJECTS.forEach(subj=>{
+    const done = subj.chapters.filter((_,i)=>progress[`${subj.id}_${i}`]?.done).length;
+    const total = subj.chapters.length;
+    const pct = total ? Math.round(done/total*100) : 0;
+    const suffix = subj.id==='dtrabalho' ? 'trabalho' : subj.id;
+    const card = document.querySelector('.card-'+suffix);
+    if(!card) return;
+    let progWrap = card.querySelector('.card-prog-wrap');
+    if(!progWrap){
+      progWrap = document.createElement('div');
+      progWrap.className = 'card-prog-wrap';
+      progWrap.innerHTML = '<div class="card-prog"><div class="card-prog-fill"></div></div><div class="card-prog-label"></div>';
+      const cta = card.querySelector('.cta');
+      if(cta) card.insertBefore(progWrap, cta); else card.appendChild(progWrap);
+    }
+    progWrap.querySelector('.card-prog-fill').style.width = pct+'%';
+    progWrap.querySelector('.card-prog-label').textContent = done+' / '+total+' revisados';
+    card.classList.toggle('card-complete', pct===100);
+  });
 }
 
 // ── TRACKER RENDER ──
@@ -681,6 +711,7 @@ async function onCheck(key,checked){
   }catch(e){ console.error('Tracker save exception:',e); _lsSaveStatus('⚠ erro: '+e.message,'err'); }
   updateOverallBar();
   updateSubjectBar(key.split('_')[0]);
+  renderHomeCards();
 }
 
 // ── FLAGS ──
