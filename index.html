@@ -20,14 +20,14 @@
   [data-theme="dark"] {
     --bg:#0d0f14;--surface:#13161e;--surface2:#1c2030;--border:#1e2330;
     --text:#e8eaf0;--muted:#5a6070;--accent:#c8a96e;
-    --admin:#5b8dee;--const:#7dc87d;--civil:#e07b7b;--ambiental:#6dcfb8;--trabalho:#bb9af7;--ptrabalho:#f59e0b;
+    --admin:#5b8dee;--const:#7dc87d;--civil:#e07b7b;--ambiental:#6dcfb8;--trabalho:#bb9af7;--ptrabalho:#f59e0b;--dtributario:#6366f1;
     --shadow:rgba(0,0,0,0.4);--topbar-bg:#0d0f14;
     --note-bg:#1a1d27;--note-border:#2e3350;
   }
   [data-theme="light"] {
     --bg:#f5f4f0;--surface:#ffffff;--surface2:#f0ede8;--border:#e0dbd0;
     --text:#1a1a1a;--muted:#888070;--accent:#a07840;
-    --admin:#2563eb;--const:#16a34a;--civil:#dc2626;--ambiental:#0d9488;--trabalho:#9c6fe4;--ptrabalho:#d97706;
+    --admin:#2563eb;--const:#16a34a;--civil:#dc2626;--ambiental:#0d9488;--trabalho:#9c6fe4;--ptrabalho:#d97706;--dtributario:#4f46e5;
     --shadow:rgba(0,0,0,0.1);--topbar-bg:#ffffff;
     --note-bg:#fefce8;--note-border:#d97706;
   }
@@ -97,6 +97,7 @@
   .card-ambiental{--stripe:var(--ambiental);}
   .card-trabalho{--stripe:var(--trabalho);}
   .card-ptrabalho{--stripe:var(--ptrabalho);}
+  .card-dtributario{--stripe:var(--dtributario);}
   .card-prog-wrap{margin-top:2px;}
   .card-prog{width:100%;height:3px;background:rgba(128,128,128,0.15);border-radius:2px;overflow:hidden;}
   .card-prog-fill{height:100%;border-radius:2px;background:var(--stripe);transition:width 0.5s ease;width:0%;}
@@ -366,6 +367,11 @@ t-chevron{transform:rotate(180deg);}
           <div class="tags"><span class="tag">Teoria Geral</span><span class="tag">Organização JT</span><span class="tag">Partes</span><span class="tag">Prazos</span><span class="tag">Procedimento</span></div>
           <div class="cta">Abrir mapas <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         </div>
+        <div class="card card-dtributario" onclick="openMapa('mapas_dtributario.html','Direito Tributário','#6366f1')">
+          <div class="card-top"><div class="icon">💰</div><div><div class="card-title">Direito Tributário</div><div class="card-sub">5 capítulos</div></div></div>
+          <div class="tags"><span class="tag">Noções Introdutórias</span><span class="tag">Limitações Constitucionais</span><span class="tag">Competência</span><span class="tag">Obrigação</span><span class="tag">Responsabilidade</span></div>
+          <div class="cta">Abrir mapas <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </div>
         <div class="card card-trabalho" onclick="openMapa('mapas_dtrabalho.html','Direito do Trabalho','#bb9af7')">
           <div class="card-top"><div class="icon">👷</div><div><div class="card-title">Direito do Trabalho</div><div class="card-sub">15 capítulos</div></div></div>
           <div class="tags"><span class="tag">Fontes e Princípios</span><span class="tag">Relação de Emprego</span><span class="tag">Contrato Individual</span><span class="tag">Salário</span><span class="tag">Jornada</span><span class="tag">+ 10 temas</span></div>
@@ -475,6 +481,7 @@ const SUBJECTS = [
   {id:'ambiental',name:'Direito Ambiental',color:'#6dcfb8',chapters:['Propedêutica do Direito Ambiental','Conceito Jurídico de Meio Ambiente','Proteção Constitucional do Meio Ambiente','Repartição de Competências Ambiental','PNMA e SISNAMA','Licenciamento Ambiental','Estudo de Impacto Ambiental','Política Nacional de Recursos Hídricos','Código Florestal','SNUC','Meio Ambiente do Trabalho','Responsabilidade Ambiental','Responsabilidade Criminal Ambiental','Tutela Processual do Meio Ambiente','Tributação Ambiental','Patrimônio Cultural']}
 ,
   {id:'ptrabalho',chapters:Array.from({length:12},(_,i)=>'cap'+i)},
+  {id:'dtributario',chapters:Array.from({length:5},(_,i)=>'cap'+i)},
     {id:'dtrabalho',name:'Dir. do Trabalho',color:'#bb9af7',chapters:['Fontes do D. do Trabalho','Princípios do D. do Trabalho','Relação de Emprego','Terceirização e Flexibilização','Contrato Individual de Trabalho','Extinção do CT e Estabilidade','Salário e Remuneração','Jornada de Trabalho e Descansos','Férias e Prescrição','Segurança e Medicina do Trabalho','CCP e D. Coletivo do Trabalho','Empregado Doméstico','FGTS','Direito de Greve','Dano Moral e Profissões Regulamentadas']}
 ];
 
