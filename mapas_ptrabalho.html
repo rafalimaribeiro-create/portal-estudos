@@ -379,7 +379,7 @@ body { padding-top: 46px !important; }
     <input id="search" placeholder="buscar em todos os capítulos..." type="text" autocomplete="off">
   </div>
   <div id="trk-bar">
-    <div id="trk-label"><span>Revisão</span><span><span id="trk-cnt">0/16</span>&nbsp;<span id="trk-pct">0%</span></span></div>
+    <div id="trk-label"><span>Revisão</span><span><span id="trk-cnt">0/12</span>&nbsp;<span id="trk-pct">0%</span></span></div>
     <div id="trk-track"><div id="trk-fill" style="width:0%"></div></div>
   </div>
   <div id="tabs"></div>
@@ -805,6 +805,8 @@ window.addEventListener('DOMContentLoaded', function(){
     if(r.data&&r.data.session&&r.data.session.user){
       _TRK.user = r.data.session.user;
       _trkLoad();
+    } else {
+      _trkRender();
     }
   });
 });

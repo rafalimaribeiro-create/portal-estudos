@@ -824,6 +824,8 @@ window.addEventListener('DOMContentLoaded', function(){
     if(r.data&&r.data.session&&r.data.session.user){
       _TRK.user = r.data.session.user;
       _trkLoad();
+    } else {
+      _trkRender();
     }
   });
 });
