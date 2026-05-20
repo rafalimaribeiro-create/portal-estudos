@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html data-theme="dark" lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Processo do Trabalho</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;--border:#2a3348;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --accent:#f59e0b;--accent2:#d97706;
+  --cespe:#d97706;--cespe-bg:#1c1500;--cespe-border:#78350f;
+  --stj:#3b82f6;--stj-bg:#0c1426;--stj-border:#1e3a5f;
+  --obs:#10b981;--obs-bg:#061410;--obs-border:#064e3b;
+  --h1:#fcd34d;--h2:#fbbf24;--h3:#f59e0b;
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;line-height:1.6}
+#app{display:flex;flex-direction:row;height:100vh;overflow:hidden;padding-top:46px;}
+#sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;height:calc(100vh - 46px);}
+#sb-header{padding:10px 12px 8px;border-bottom:1px solid var(--border);flex-shrink:0;}
+#sb-title{font-size:13px;font-family:monospace;color:var(--accent);font-weight:500;margin-bottom:6px;}
+#search{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:11px;color:var(--text);font-family:monospace;outline:none;}
+#search:focus{border-color:var(--accent);}
+#trk-bar{padding:8px 12px 6px;border-bottom:1px solid var(--border);flex-shrink:0;}
+#trk-label{font-size:10px;font-family:monospace;letter-spacing:.08em;text-transform:uppercase;color:#7c8db5;display:flex;justify-content:space-between;margin-bottom:5px;}
+#trk-pct{color:var(--accent);font-weight:700;}
+#trk-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+#trk-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s;}
+#tabs{overflow-y:auto;flex:1;padding:4px 0;}
+.tab{display:flex;align-items:center;gap:6px;padding:7px 12px;cursor:pointer;transition:background .12s;font-size:12px;color:var(--text);font-family:monospace;border-left:3px solid transparent;}
+.tab:hover{background:var(--bg);}
+.tab.active{border-left-color:var(--accent);background:rgba(200,169,110,0.08);color:var(--accent);}
+.tab input[type=checkbox]{width:13px;height:13px;accent-color:var(--accent);flex-shrink:0;cursor:pointer;}
+#main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);}
+.match-bar{padding:6px 16px;font-size:12px;font-family:monospace;color:var(--accent);background:var(--bg2);border-bottom:1px solid var(--border);display:none;}
+.content{flex:1;overflow-y:auto;padding:20px 24px;}
+#empty-msg{display:flex;align-items:center;justify-content:center;height:100%;font-family:monospace;font-size:12px;letter-spacing:.15em;opacity:.3;color:var(--text);}
+.node{margin:0}
+.row{display:flex;align-items:flex-start;gap:6px;padding:3px 6px;border-radius:5px;cursor:pointer;transition:background .1s}
+.row:hover{background:var(--bg3)}
+.row.hit{background:#1a2e1a}
+.tog{width:14px;height:14px;flex-shrink:0;margin-top:1px;font-size:10px;color:var(--text3);display:flex;align-items:center;justify-content:center}
+.txt{flex:1;word-break:break-word}
+.txt.d0{font-size:14px;font-weight:600;color:var(--h1)}
+.txt.d1{font-size:13px;font-weight:500;color:var(--h2)}
+.txt.d2{font-size:13px;color:var(--h3)}
+.txt.dn{font-size:13px;color:var(--text)}
+.txt.callout{font-size:12px;color:var(--text2);border-left:2px solid var(--cespe);padding-left:6px;font-style:italic}
+.children{padding-left:18px;border-left:1px solid var(--border);margin-left:7px}
+mark{background:#78350f;color:#fcd34d;border-radius:2px;padding:0 1px}
+.callout-box{border-radius:6px;padding:8px 12px;margin:6px 0;font-size:12px;line-height:1.6}
+.callout-box.cespe{background:var(--cespe-bg);border:1px solid var(--cespe-border)}
+.callout-box.stj{background:var(--stj-bg);border:1px solid var(--stj-border)}
+.callout-box.obs{background:var(--obs-bg);border:1px solid var(--obs-border)}
+.callout-label{font-size:11px;font-weight:700;letter-spacing:.05em;margin-bottom:4px}
+.cespe .callout-label{color:var(--cespe)}
+.stj .callout-label{color:var(--stj)}
+.obs .callout-label{color:var(--obs)}
+.callout-title{font-weight:600;margin-bottom:3px;font-size:12px}
+.cespe .callout-title{color:#fcd34d}
+.stj .callout-title{color:#93c5fd}
+.obs .callout-title{color:#6ee7b7}
+.callout-body{color:#94a3b8}
+.no-res{color:var(--text3);padding:24px;text-align:center}
+
+/* ── LIGHT THEME ── */
+[data-theme="light"] {
+  --bg: #f8f7f2 !important;
+  --bg2: #eeeae0 !important;
+  --bg3: #e5e0d5 !important;
+  --surface: #ffffff !important;
+  --surface2: #f0ede8 !important;
+  --border: #d8d3c8 !important;
+  --border-hover: #b8b3a8 !important;
+  --text: #1a1a1a !important;
+  --text2: #4a4a4a !important;
+  --text3: #888070 !important;
+  --text-muted: #888070 !important;
+  --text-dim: #bbbbbb !important;
+  --accent: #a07840 !important;
+  --accent-dim: rgba(160,120,64,0.12) !important;
+  --accent2: #2563eb !important;
+  --accent2-dim: rgba(37,99,235,0.10) !important;
+  --cespe: #b45309 !important;
+  --cespe-bg: #fef3c7 !important;
+  --cespe-border: #d97706 !important;
+  --stj: #1d4ed8 !important;
+  --stj-bg: #dbeafe !important;
+  --stj-border: #3b82f6 !important;
+  --obs: #047857 !important;
+  --obs-bg: #d1fae5 !important;
+  --obs-border: #10b981 !important;
+  --node-l1: #1d4ed8 !important;
+  --node-l2: #7c3aed !important;
+  --node-l3: #047857 !important;
+  --node-l4: #c2410c !important;
+  --node-l5: #be185d !important;
+  --h1: #047857 !important;
+  --h2: #065f46 !important;
+  --h3: #064e3b !important;
+}
+
+[data-theme="light"] body { background: #f8f7f2 !important; color: #1a1a1a !important; }
+[data-theme="light"] #sidebar,
+[data-theme="light"] #sidebar-header,
+[data-theme="light"] #toolbar,
+[data-theme="light"] header { background: #eeeae0 !important; border-color: #d8d3c8 !important; }
+[data-theme="light"] #search,
+[data-theme="light"] input[type=text],
+[data-theme="light"] input[type=search] { background: #ffffff !important; color: #1a1a1a !important; border-color: #d8d3c8 !important; }
+[data-theme="light"] .ch-item:hover { background: rgba(0,0,0,0.04) !important; }
+[data-theme="light"] .ch-item.active { background: rgba(160,120,64,0.1) !important; }
+[data-theme="light"] #content,
+[data-theme="light"] #map-content,
+[data-theme="light"] .content,
+[data-theme="light"] main { background: #f8f7f2 !important; }
+
+/* Toggle button */
+#theme-toggle-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  background: #c8a96e;
+  color: #1a1a1a;
+  border: none;
+  border-radius: 50px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-family: monospace;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: opacity 0.2s;
+  font-weight: 600;
+}
+#theme-toggle-btn:hover { opacity: 0.85; }
+
+/* LIGHT THEME */
+[data-theme="light"] {
+  --bg:#f8f7f2!important;--bg2:#eeeae0!important;--bg3:#e5e0d5!important;
+  --surface:#ffffff!important;--surface2:#f0ede8!important;--border:#d8d3c8!important;
+  --text:#1a1a1a!important;--text2:#4a4a4a!important;--text3:#888070!important;
+  --text-muted:#888070!important;--accent:#a07840!important;--accent2:#2563eb!important;
+  --cespe:#b45309!important;--cespe-bg:#fef3c7!important;--cespe-border:#d97706!important;
+  --stj:#1d4ed8!important;--stj-bg:#dbeafe!important;--stj-border:#3b82f6!important;
+  --obs:#047857!important;--obs-bg:#d1fae5!important;--obs-border:#10b981!important;
+  --node-l1:#1d4ed8!important;--node-l2:#7c3aed!important;--node-l3:#047857!important;
+  --node-l4:#c2410c!important;--node-l5:#be185d!important;
+}
+[data-theme="light"] body{background:#f8f7f2!important;color:#1a1a1a!important;}
+[data-theme="light"] #sidebar,[data-theme="light"] #sidebar-header,
+[data-theme="light"] #chapter-list,[data-theme="light"] header,
+[data-theme="light"] #toolbar,[data-theme="light"] #tabs{background:#eeeae0!important;border-color:#d8d3c8!important;}
+[data-theme="light"] #search,[data-theme="light"] #search-box,[data-theme="light"] input{background:#fff!important;color:#1a1a1a!important;border-color:#d8d3c8!important;}
+[data-theme="light"] .node-row:hover,[data-theme="light"] .row:hover{background:rgba(0,0,0,0.04)!important;}
+[data-theme="light"] .tab,[data-theme="light"] .ch-item{color:#4a4a4a!important;}
+
+/* HIGHLIGHTS */
+.hl-yellow{background:rgba(250,204,21,0.45)!important;border-radius:2px;}
+.hl-green{background:rgba(34,197,94,0.38)!important;border-radius:2px;}
+.hl-blue{background:rgba(59,130,246,0.38)!important;border-radius:2px;}
+.hl-red{background:rgba(239,68,68,0.38)!important;border-radius:2px;}
+._sel{outline:2px solid #c8a96e!important;outline-offset:1px;border-radius:3px;}
+
+/* WORD-STYLE TOOLBAR */
+#_wtb{
+  position:fixed;top:0;left:0;right:0;z-index:9999;
+  background:var(--surface,#1a1d2e);
+  border-bottom:1px solid var(--border,#2e3350);
+  display:flex;align-items:center;gap:2px;
+  padding:4px 10px;height:42px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+  flex-wrap:nowrap;overflow-x:auto;
+}
+[data-theme="light"] #_wtb{background:#f3f2f1;border-color:#d0ccc8;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+
+body{padding-top:42px!important;}
+
+#_wtb ._sep{width:1px;height:24px;background:var(--border,#2e3350);margin:0 4px;flex-shrink:0;}
+[data-theme="light"] #_wtb ._sep{background:#d0ccc8;}
+
+#_wtb ._grp{display:flex;align-items:center;gap:2px;flex-shrink:0;}
+
+#_wtb ._grp-label{
+  font-size:9px;font-family:monospace;letter-spacing:0.08em;
+  text-transform:uppercase;color:var(--text-muted,#5a6070);
+  padding:0 4px;white-space:nowrap;
+}
+
+/* Toolbar buttons */
+._tb-btn{
+  background:none;border:1px solid transparent;border-radius:4px;
+  padding:3px 7px;cursor:pointer;font-size:13px;
+  color:var(--text,#e8eaf0);transition:background 0.12s,border-color 0.12s;
+  display:flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0;
+  font-family:system-ui,sans-serif;
+}
+._tb-btn:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.15);}
+[data-theme="light"] ._tb-btn{color:#1a1a1a;}
+[data-theme="light"] ._tb-btn:hover{background:rgba(0,0,0,0.07);border-color:rgba(0,0,0,0.15);}
+._tb-btn._on{background:rgba(200,169,110,0.25);border-color:rgba(200,169,110,0.5);}
+
+/* Color swatches inline */
+._sw{
+  width:18px;height:18px;border-radius:3px;border:1px solid rgba(255,255,255,0.2);
+  cursor:pointer;flex-shrink:0;transition:transform 0.12s;display:inline-block;
+}
+._sw:hover{transform:scale(1.25);}
+._sw._on{outline:2px solid #c8a96e;outline-offset:1px;}
+[data-theme="light"] ._sw{border-color:rgba(0,0,0,0.2);}
+
+/* Font size */
+._fs-num{
+  width:36px;text-align:center;background:var(--bg,#0d0f14);
+  border:1px solid var(--border,#2e3350);border-radius:4px;
+  color:var(--text,#e8eaf0);font-size:12px;font-family:monospace;
+  padding:2px 4px;
+}
+[data-theme="light"] ._fs-num{background:#fff;color:#1a1a1a;border-color:#d0ccc8;}
+
+/* Selected node indicator */
+#_sel-info{
+  font-size:11px;font-family:monospace;color:var(--text-muted,#5a6070);
+  max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  margin-left:8px;flex-shrink:1;
+}
+
+/* Note modal */
+#_np{display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;}
+#_np._o{display:flex;}
+._npb{background:var(--surface,#13161e);border:1px solid var(--border,#2e3350);border-radius:14px;padding:24px;width:100%;max-width:460px;box-shadow:0 12px 40px rgba(0,0,0,0.5);}
+[data-theme="light"] ._npb{background:#fff;border-color:#d8d3c8;}
+._nptitle{font-size:13px;font-weight:600;color:var(--text,#e8eaf0);margin-bottom:12px;}
+._npta{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border,#2e3350);border-radius:8px;padding:12px;font-size:14px;color:var(--text,#e8eaf0);font-family:sans-serif;resize:vertical;min-height:120px;outline:none;line-height:1.6;}
+[data-theme="light"] ._npta{background:#fefce8;color:#1a1a1a;border-color:#d97706;}
+._npact{display:flex;justify-content:flex-end;gap:10px;margin-top:14px;}
+._npcxl{font-size:13px;background:none;border:1px solid var(--border,#2e3350);border-radius:7px;padding:7px 16px;cursor:pointer;color:var(--text-muted,#5a6070);font-family:sans-serif;}
+._npsave{font-size:13px;background:#c8a96e;color:#1a1a1a;border:none;border-radius:7px;padding:7px 16px;cursor:pointer;font-weight:600;font-family:sans-serif;}
+
+@media (max-width: 768px) {
+  #_wtb { overflow-x: auto; padding: 4px 6px; }
+  #_wtb::-webkit-scrollbar { display: none; }
+  #_sel-info { display: none; }
+  .tabs { font-size: 12px; }
+}
+
+/* ── TRACKER INTEGRATION ── */
+#_trk_bar {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border, #1e2330);
+  background: var(--surface, #13161e);
+  flex-shrink: 0;
+}
+[data-theme="light"] #_trk_bar { background: #f0ede8; border-color: #d8d3c8; }
+#_trk_label {
+  font-size: 10px; font-family: monospace; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-muted, #5a6070);
+  display: flex; justify-content: space-between; margin-bottom: 6px;
+}
+#_trk_pct { color: var(--accent, #c8a96e); font-weight: 700; }
+#_trk_track {
+  height: 5px; background: var(--border, #2e3350);
+  border-radius: 3px; overflow: hidden;
+}
+#_trk_fill {
+  height: 100%; background: var(--accent, #c8a96e);
+  border-radius: 3px; transition: width 0.4s ease;
+}
+
+/* Checkbox in sidebar items */
+._chk_wrap {
+  display: flex; align-items: center; gap: 0; width: 100%;
+}
+._chk_wrap input[type=checkbox] {
+  width: 14px; height: 14px;
+  accent-color: var(--accent, #c8a96e);
+  cursor: pointer; flex-shrink: 0;
+  margin-right: 6px; margin-left: 4px;
+}
+._chk_done { opacity: 0.5; text-decoration: line-through; }
+
+/* ══ UI INJECTED ══ */
+body { padding-top: 46px !important; }
+
+#_hdr {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9900;
+  height: 46px; background: var(--surface, #13161e);
+  border-bottom: 1px solid var(--border, #2e3350);
+  display: flex; align-items: center; gap: 8px; padding: 0 12px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.2);
+}
+[data-theme="light"] #_hdr { background: #fff; border-color: #d8d3c8; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+.hbtn {
+  font-size: 12px; font-family: monospace;
+  background: none; border: 1px solid var(--border, #2e3350);
+  border-radius: 6px; padding: 4px 10px; cursor: pointer;
+  color: var(--text, #e8eaf0); white-space: nowrap;
+  transition: background 0.15s; text-decoration: none; display: inline-flex; align-items: center;
+}
+.hbtn:hover { background: var(--surface2, #1c2030); }
+[data-theme="light"] .hbtn { color: #1a1a1a; }
+[data-theme="light"] .hbtn:hover { background: #f0ede8; }
+
+#_htit {
+  font-size: 13px; font-family: monospace;
+  color: var(--muted, #5a6070); flex: 1; text-align: center;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* HIGHLIGHT SWATCHES */
+#_hlbar {
+  display: flex; align-items: center; gap: 5px;
+  padding: 0 6px; border-left: 1px solid var(--border, #2e3350);
+  margin-left: 4px;
+}
+[data-theme="light"] #_hlbar { border-color: #d8d3c8; }
+
+.hlsw {
+  width: 20px; height: 20px; border-radius: 50%; cursor: pointer;
+  border: 2px solid transparent; transition: transform 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.hlsw:hover { transform: scale(1.2); }
+.hlsw.on { border-color: var(--text, #e8eaf0); transform: scale(1.15); }
+[data-theme="light"] .hlsw.on { border-color: #1a1a1a; }
+.hlsw.clr {
+  background: var(--border, #2e3350) !important;
+  font-size: 11px; display: flex; align-items: center; justify-content: center;
+  color: var(--text, #e8eaf0); border-radius: 50%;
+}
+[data-theme="light"] .hlsw.clr { background: #e5e0d5 !important; color: #1a1a1a; }
+
+/* HIGHLIGHT APPLIED STYLES */
+._hly { border-radius: 2px; padding: 0 1px; cursor: pointer; }
+._hly.y { background: rgba(250,204,21,0.45) !important; border-left: 3px solid rgba(202,138,4,0.8); padding-left: 5px; }
+._hly.g { background: rgba(34,197,94,0.3)  !important; border-left: 3px solid rgba(22,163,74,0.8);  padding-left: 5px; }
+._hly.b { background: rgba(59,130,246,0.3) !important; border-left: 3px solid rgba(37,99,235,0.8);  padding-left: 5px; }
+._hly.p { background: rgba(236,72,153,0.3) !important; border-left: 3px solid rgba(219,39,119,0.8); padding-left: 5px; }
+._hly.o { background: rgba(249,115,22,0.3) !important; border-left: 3px solid rgba(234,88,12,0.8);  padding-left: 5px; }
+
+/* SIDEBAR */
+#sidebar { top: 46px !important; height: calc(100vh - 46px) !important; }
+@media(min-width:769px) { #sidebar.sb-off { width:0!important; min-width:0!important; overflow:hidden!important; border-right:none!important; } }
+@media(max-width:768px) {
+  #sidebar { position:fixed!important; left:0!important; z-index:8900!important; }
+  #sidebar.sb-off { transform:translateX(-100%)!important; }
+  #_sbov { display:none; position:fixed; inset:0; z-index:8800; background:rgba(0,0,0,0.4); }
+  #_sbov.open { display:block; }
+}
+
+/* TRACKER in sidebar */
+#_trk_bar { padding:10px 12px; border-bottom:1px solid var(--border,#1e2330); background:var(--surface,#13161e); flex-shrink:0; }
+[data-theme="light"] #_trk_bar { background:#f0ede8; border-color:#d8d3c8; }
+#_trk_label { font-size:10px; font-family:monospace; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted,#5a6070); display:flex; justify-content:space-between; margin-bottom:6px; }
+#_trk_pct { color:#c8a96e; font-weight:700; }
+#_trk_track { height:4px; background:var(--border,#2e3350); border-radius:2px; overflow:hidden; }
+#_trk_fill { height:100%; background:#c8a96e; border-radius:2px; transition:width 0.4s; }
+._chk_wrap { display:flex; align-items:center; width:100%; }
+._chk_wrap input[type=checkbox] { width:14px; height:14px; accent-color:#c8a96e; cursor:pointer; flex-shrink:0; margin-right:6px; margin-left:4px; }
+._chk_done { opacity:0.5; text-decoration:line-through; }
+
+/* LIGHT THEME */
+[data-theme="light"] { --bg:#f8f7f2!important; --surface:#ffffff!important; --surface2:#f0ede8!important; --border:#d8d3c8!important; --text:#1a1a1a!important; --text-muted:#888070!important; --accent:#a07840!important; }
+[data-theme="light"] body { background:#f8f7f2!important; color:#1a1a1a!important; }
+[data-theme="light"] #sidebar,[data-theme="light"] #sidebar-header,[data-theme="light"] #chapter-list,[data-theme="light"] header { background:#eeeae0!important; border-color:#d8d3c8!important; }
+[data-theme="light"] #search,[data-theme="light"] #search-box,[data-theme="light"] input[type=text] { background:#fff!important; color:#1a1a1a!important; border-color:#d8d3c8!important; }
+[data-theme="light"] .node-row:hover,[data-theme="light"] .row:hover { background:rgba(0,0,0,0.04)!important; }
+[data-theme="light"] .ch-item { color:#4a4a4a!important; } [data-theme="light"] .ch-item.active { color:#a07840!important; }
+[data-theme="light"] .tab { color:#4a4a4a!important; }
+</style>
+</head>
+<body>
+<div id="app">
+<nav id="sidebar">
+  <div id="sb-header">
+    <div id="sb-title">⚖ PROC. DO TRABALHO</div>
+    <input id="search" placeholder="buscar em todos os capítulos..." type="text" autocomplete="off">
+  </div>
+  <div id="trk-bar">
+    <div id="trk-label"><span>Revisão</span><span><span id="trk-cnt">0/16</span>&nbsp;<span id="trk-pct">0%</span></span></div>
+    <div id="trk-track"><div id="trk-fill" style="width:0%"></div></div>
+  </div>
+  <div id="tabs"></div>
+</nav>
+<div id="main-area">
+  <div class="match-bar" id="matchBar"></div>
+  <div class="content" id="content">
+    <div id="empty-msg">SELECIONE UM CAPÍTULO</div>
+  </div>
+</div>
+</div>
+<script>
+var _TRK = window._TRK || {done:{}};
+
+const RAW = "{\"cap0\":{\"title\":\"0. Teoria Geral do Processo do Trabalho Principios\",\"children\":[{\"title\":\"Conceito Regras proprias e aplica\u00e7\u00e3o supletiva\",\"children\":[{\"title\":\"Conceito\",\"children\":[{\"title\":\"Conjunto de principios e normas que visam dar cumprimento a normas de direito material\"},{\"title\":\"...aplicando-a aos casos concretos de forma a promover composi\u00e7\u00e3o dos conflitos.\"}]},{\"title\":\"Tem regras proprias e aplica\u00e7\u00e3o supletiva do CPC Art. 769 da CLT Instituto JK - 2024 - Prefeitura de S\u00e3o Jo\u00e3o - MA - Procurador\",\"children\":[{\"title\":\"Nos casos OMISSOS, CPC \u00e9 subsidiario, exceto no q for incompativel\"},{\"title\":\"Em execu\u00e7\u00f5es, \u00e9 a Lei 6.830 e dps chegamos no CPC\"},{\"title\":\"Qual criterio utilziado?\",\"children\":[{\"title\":\"Omiss\u00e3o + Compatibilidade\"}]},{\"title\":\"Decorria do Art. da CLT. O NCPC prev\u00ea tbm como norma supletiva e subsidiariamente\"},{\"title\":\"O CPC n\u00e3o \u00e9 somente na ausencia da norma. \u00c9 tbm qnd tenha a norma incompleta\"},{\"title\":\"Segundo a IN 39/16 s\u00e3o ambos aplicados\"},{\"title\":\"Ex: A\u00e7\u00e3o de Consig. em Pagto. ED\"},{\"title\":\"Aplica-se tbm a Lei do MS e a Lei da ACP ao Processo do Trabalho\"}]}]},{\"title\":\"Formas de Solu\u00e7\u00e3o de Conflitos Trabalhistas VUNESP - 2021 - Bertioga - SP - Procurador Municipal\",\"children\":[{\"title\":\"Autodefesa ou Autotutela\",\"children\":[{\"title\":\"Exercida pelos proprios trabalhadores. Acontece pela greve.\"},{\"title\":\"Importa dizer q o Lockout \u00e9 proibido\"},{\"title\":\"A greve, por si s\u00f3, nao soluciona o conflito, mas ocasiona autocomposi\u00e7\u00e3o\"},{\"title\":\"Greve \u00e9 exemplo cl\u00e1ssico de autodefesa por parte dos trabalhadores.\"}]},{\"title\":\"Autocomposi\u00e7\u00e3o\",\"children\":[{\"title\":\"\u00c9 a negocia\u00e7\u00e3o direta entre as partes, sem intermedia\u00e7\u00e3o de terceiros\"},{\"title\":\"Pode ser unilateral ou bilateral - Renuncia ou Transa\u00e7\u00e3o\"},{\"title\":\"A forma \u00e9, principalmente, neg. coletiva e o acordo ou a concilia\u00e7\u00e3o em conflitos individuais\"}]},{\"title\":\"Heterocomposi\u00e7\u00e3o\",\"children\":[{\"title\":\"\u00c9 media\u00e7\u00e3o, arbitragem ou jurisdi\u00e7\u00e3o. A heterocomposi\u00e7\u00e3o ocorre quando o conflito \u00e9 solucionado atrav\u00e9s da interven\u00e7\u00e3o de um agente exterior \u00e0 rela\u00e7\u00e3o conflituosa original. CLT admite o uso da arbitragem - vide art. 507-A da CLT A cl\u00e1usula compromiss\u00f3ria de arbitragem pode ser fixada por empregado que perceba remunera\u00e7\u00e3o superior a 2x o Teto do RGPS, e n\u00e3o 2x o sal\u00e1rio-m\u00ednimo (vide art. 507-A, da CLT) Nos contratos individuais de trabalho cuja remunera\u00e7\u00e3o seja superior a duas vezes o limite m\u00e1ximo estabelecido para os benef\u00edcios do Regime Geral de Previd\u00eancia Social, poder\u00e1 ser pactuada cl\u00e1usula compromiss\u00f3ria de arbitragem, desde que por iniciativa do empregado ou mediante a sua concord\u00e2ncia expressa, nos termos previstos na Lei no 9.307, de 23 de setembro de 1996)\"}]}]},{\"title\":\"Eficacia da Lei Processual no Tempo e no Espa\u00e7o\",\"children\":[{\"title\":\"Eficacia no Tempo 3 Teorias\",\"children\":[{\"title\":\"Unidade\",\"children\":[{\"title\":\"Uma Lei processual nova nao poderia ser aplicada a um processo em curso...\"},{\"title\":\"...o Proc. \u00e9 tratado como uma unidade, iniciou sobre uma lei deve terminar sobre a mesmaa lei\"}]},{\"title\":\"Fases Processuais\",\"children\":[{\"title\":\"P/ aplica\u00e7\u00e3o de uma Lei nova, deve-se dividir o processo em fases\"},{\"title\":\"A Legisla\u00e7\u00e3o processual somente seria aplicada a prox. fase a ser desenvolvida\"}]},{\"title\":\"Atos Processuais\",\"children\":[{\"title\":\"\u00c9 a teoria mais aceita em raz\u00e3o do art. 14 e 1.046 do NCPC\"},{\"title\":\"A Lei processual nova \u00e9 aplicavel a atos seguintes, n\u00e3o podendo retroagir\"},{\"title\":\"A Lei processual \u00e9 de aplica\u00e7\u00e3o imediata\"},{\"title\":\"OBS - Lei que modifica prazo recursal? Art. 915 da CLT regula a materia\",\"children\":[{\"title\":\"Aplica-se a Lei vigente A E P O C A em que surgiu direito ao recurso\"},{\"title\":\"N\u00e3o ser\u00e3o prejudicados os recursos interpostos com apoio em disposit. alterados\"},{\"title\":\"Ou cujo prazo p/ interposi\u00e7ao esteja em curso a data da vigencia desta CLT\"},{\"title\":\"Ex:\",\"children\":[{\"title\":\"A sofre uma senten\u00e7a e tem prazo de 8 dias p/ o RO\"},{\"title\":\"Durante o prazo surge uma Lei modificando-o para 5 dias\"},{\"title\":\"O RO ser\u00e1 interposto de acordo com a Lei que tinha vigencia na epoca em que surgiu o direito\"},{\"title\":\"Em caso de aumento do prazo a sistematica \u00e9 a mesma\"}]}]}]}]},{\"title\":\"Eficacia no Espa\u00e7o\",\"children\":[{\"title\":\"Aplica-se a Lei Processual em todo territorio nacional\"},{\"title\":\"\u00c9 aplicada a brasileiros e estrangeiros q aqui laboram\"},{\"title\":\"LEI PROCESSUAL estrangeira n\u00e3o se aplica a processos trabalhistas que tramitam no Brasil\"}]}]},{\"title\":\"Principios(24)\",\"children\":[{\"title\":\"Dispostivo/Inercia\",\"children\":[{\"title\":\"O juiz nao pode prestar a tutela sem ser provocado. Est\u00e1 previsto no Art. 2\u02da do NCPC\"},{\"title\":\"Exce\u00e7\u00f5es\",\"children\":[{\"title\":\"1\u02da Exce\u00e7\u00e3o - Art. 878 da CLT\",\"children\":[{\"title\":\"A execu\u00e7\u00e3o pode ser promovida por qlq INTERESSADO ou\"},{\"title\":\"...EX OFFICIO pelo juiz ou Presidente ou Tribunal competente, nos termos do art.\"},{\"title\":\"Somente qnd as partes NAO estiverem COM advogado(Reforma Trab.)\"},{\"title\":\"Trata-se da execu\u00e7\u00e3o definitiva, pois a provisoria depende de requerimento\"},{\"title\":\"Aqui o principio que vigora \u00e9 o INQUISITIVO em que o juiz atua mesmo sem pedido da parte\"}]},{\"title\":\"2\u02da Exce\u00e7\u00e3o - DRT - Art. 39 da CLT\",\"children\":[{\"title\":\"Verificando-se que as alega\u00e7\u00f5es feitas pelo reclamado versam sobre...\"},{\"title\":\"...a N \u00c3 O existencia de Rela\u00e7\u00e3o de emprego OU F A L TA de anota\u00e7\u00e3o da CTPS...\"},{\"title\":\"...sendo impossivel verificar essa condicao pelos meios administrativos...\"},{\"title\":\"...Ser\u00e1 o processo encaminhado a JT ficando, nesse caso, sobrestado...\"},{\"title\":\"...O julgamento do auto de infra\u00e7\u00e3o que foi lavrado.\"},{\"title\":\"O encaminhamento destina-se a inicio da RT\"}]},{\"title\":\"3\u02da Exce\u00e7\u00e3o - Dissidio Coletivo\",\"children\":[{\"title\":\"A instancia ser\u00e1 instaurada mediante representa\u00e7\u00e3o ESCRITA ao Presidente do Tribunal\"},{\"title\":\"Poder\u00e1 tambem ser intaurada por iniciativa do Presidente, ou ainda, A\"},{\"title\":\"Req. da Procuradoria da Justi\u00e7a do Trabalho, sempre q ocorrer suspens\u00e3o do trabalho\"},{\"title\":\"Entende-se que o dispositivo est\u00e1 revogado, mas a banca FCC entende que n\u00e3o\"}]}]}]},{\"title\":\"Inquisitivo - Importantes Desdobramentos(3)\",\"children\":[{\"title\":\"1\u02da desdobramento - Impulso Oficial\",\"children\":[{\"title\":\"Uma vez provocado, o juiz deve conduzir os atos processuais\"},{\"title\":\"H\u00e1 tbm o amplo poder instrutorio do juiz previsto no Art. 370 do NCPC, aplicavel ao DPT\"},{\"title\":\"Art. 765 da CLT\",\"children\":[{\"title\":\"O juiz e Tribunais do Trabalho ter\u00e3o ampla liberdade na direcao do processo\"},{\"title\":\"E velarao pelo andamento rapido das causas\"},{\"title\":\"Podendo determinar qlq diligencia necessaria ao andamento da causa\"}]}]},{\"title\":\"2\u02da desdobramento - Poderes Instrutorios do Juiz\",\"children\":[{\"title\":\"Juiz deve determinar as provas que ser\u00e3o produzidas, independente de pedido das partes\"},{\"title\":\"Art. 130 do CPC\",\"children\":[{\"title\":\"Cabe ao Juiz, de oficio ou a requerimento da parte, determinar as provas necessarias a inst.\"},{\"title\":\"Indeferindo as inuteis ou meramnte protelatorias\"}]},{\"title\":\"Sum. 74, III, do TST\",\"children\":[{\"title\":\"A veda\u00e7\u00e3o a produ\u00e7\u00e3o de prova posterior pela parte confessa somente a ela se aplica...\"},{\"title\":\"...N\u00e3o afetando o exercicio, pelo magistrado, do poder/dever de conduzir o processo.\"}]},{\"title\":\"Art. 852-D da CLT\",\"children\":[{\"title\":\"O juiz dirigira o processo com liberdade para determinar as provas a serem produzidas...\"},{\"title\":\"...Considerando o onus probatorio de cada litigante...\"},{\"title\":\"...Podendo limitar ou excluir as que considerar excessivas, impetinentes ou protelatorias...\"},{\"title\":\"Bem como para aprecia-las e dar especial valor as regras de experiencia comum ou tecnica\"}]}]},{\"title\":\"3\u02da desdobramento - Materias de Ordem Publica\",\"children\":[{\"title\":\"Magistrado pode conhecer de oficio materias de ordem publica\"},{\"title\":\"Ex: Incompetencia Absoluta e MS impetrado apos o prazo\"}]}]},{\"title\":\"Juiz Natural\",\"children\":[{\"title\":\"Ninguem ser\u00e9a processado se\u00e3o pela autoridade competente\"},{\"title\":\"Org\u00e3os judiciarios devem ser preconstituidos e de competencia preestabelecida\"}]},{\"title\":\"Identidade Fisica do Juiz\",\"children\":[{\"title\":\"O magistrado que concluir a instru\u00e7\u00e3o deve julgar a causa\"},{\"title\":\"Principio n\u00e3o era aplicado no DT, mas em 2012 o TST cancelou a sumula\"},{\"title\":\"Previsto no Art. 132 do CPC/73. O art. foi removido no NCPC\"},{\"title\":\"E agora fica a duvida pela sua aplica\u00e7\u00e3o ou nao ao DPT\"}]},{\"title\":\"Imparcialidade\",\"children\":[{\"title\":\"Deve ser dado tratamento igualitario as partes\"},{\"title\":\"Existem casos em que a imparcialidade se torna impossivel, previsto no art. 139, I do NCPC\"},{\"title\":\"Os casos de impacialidade est\u00e3o nos arts. 144 e 145 do NCPC\"},{\"title\":\"No curso da demanda impedimento e suspei\u00e7\u00e3o tem msm tratamento...\"},{\"title\":\"...Apos o TJ, somente o impedimento pode gerar AR.\"},{\"title\":\"A CLT silencia sobre causas de IMPEDIMENTO(tema nao existia no CPC/39)\"}]},{\"title\":\"Concentra\u00e7\u00e3o dos Atos Processuais\",\"children\":[{\"title\":\"Relacionado ao principio da celeridade\"},{\"title\":\"Visa concentrar a materia dos atos processuais em unica audiencia\"},{\"title\":\"No processo do Trabalho a Audiencia \u00e9 UNA - Art. 849\",\"children\":[{\"title\":\"A audiencia de julgamento ser\u00e1 continua, salvo motivo de for\u00e7a maior\"},{\"title\":\"O juiz ou Presidente marcar\u00e1 a sua continua\u00e7\u00e3o para a primeira desimpedida\"},{\"title\":\"Independente de nova notifica\u00e7\u00e3o\"}]}]},{\"title\":\"Oralidade - Ex:\",\"children\":[{\"title\":\"Intro\",\"children\":[{\"title\":\"\u00c9 definido pela doutrina a partir de subprincipios que os caracterizam\"},{\"title\":\"Ex: Imediatidade; Id. Fisica do Juiz; Concentra\u00e7\u00e3o; Irrecorribilidade de Decis\u00f5es Interloc.\"}]},{\"title\":\"Peti\u00e7\u00e3o Inicial\",\"children\":[{\"title\":\"A RT pode ser oral ou escrita\"},{\"title\":\"Verbal\",\"children\":[{\"title\":\"A RT ser\u00e1 reduzida a termo, em 2 vias datadas e assinadas pelo escrivao ou secretario\"},{\"title\":\"Observado no que couber, o art. anterior\"},{\"title\":\"Nessa hipotese ser\u00e1 distribuida, devendo o reclamanete comparecer no prazo de 5 dias para redu\u00e7\u00e3o a termo\"},{\"title\":\"A RT oral \u00e9 DISTRIBUIDA ANTES da Redu\u00e7\u00e3o a Termo\"}]},{\"title\":\"Juiz lera a Peti\u00e7\u00e3o Inicial(RT)\",\"children\":[{\"title\":\"Somente se n\u00e3o for dispensado pelas partes\"}]}]},{\"title\":\"Defesa\",\"children\":[{\"title\":\"N\u00e3o havendo acordo, o reclamado ter\u00e1 20 min para aduzir sua defesa\"},{\"title\":\"Reclamado apresentar\u00e1 defesa oralmente, no prazo de 20 min - Art. 847 da CLT\"},{\"title\":\"Com a reforma trabalhista a possibilidade de DEFSA ESCRITA foi incluida\"},{\"title\":\"A parte pode apresentar defesa escrita pelo sistema de proc. eletronico at\u00e9 a audiencia\"}]},{\"title\":\"Concilia\u00e7\u00e3o\",\"children\":[{\"title\":\"O juiz deve buscar a concilia\u00e7\u00e3o em 2 momentos obrigatorios, sob pena de nulidade\",\"children\":[{\"title\":\"1\u02da Momento - Inicio da Audiencia\",\"children\":[{\"title\":\"Ocorre antes da apresenta\u00e7\u00e3o da defesa\"}]},{\"title\":\"2\u02da Momento - Apos as raz\u00f5es finais\",\"children\":[{\"title\":\"Jurisp.\",\"children\":[{\"title\":\"Abrandou a regra, dizendo que a ausencia do 2\u02da momento \u00e9 q gera nulidade\"}]},{\"title\":\"Art. 850\",\"children\":[{\"title\":\"Terminada a instru\u00e7\u00e3o podem as partes aduzir razoes finais, em prazo nao maior a 10min. p/ cada\"},{\"title\":\"Em seguida, o juiz ou presidnete renovar\u00e1 proposta de concilia\u00e7\u00e3o e n\u00e3o ocrrendo \u00e9 proferida decis\u00e3o\"}]}]}]}]},{\"title\":\"Raz\u00f5es Finais\",\"children\":[{\"title\":\"Razoes Finais ser\u00e3o realizadas em audiencia\"},{\"title\":\"Dizem que n\u00e3o h\u00e1 possibilidade de convers\u00e3o em memoriais escritos\"},{\"title\":\"Porem, diante da complexidade e aplicando o CPC subsidiariamente pode ser convertido\"}]},{\"title\":\"Senten\u00e7a\",\"children\":[{\"title\":\"Senten\u00e7a ser\u00e1 proferida ao termino da audiencia, oralmente - Art. 831 da CLT\"},{\"title\":\"A decis\u00e3o ser\u00e1 proferida depois de rejeitada pelas partes a proposta de concilia\u00e7\u00e3o\"}]},{\"title\":\"Protesto\",\"children\":[{\"title\":\"A parte apresentar\u00e1 protesto em audiencia\"}]},{\"title\":\"Audiencia\",\"children\":[{\"title\":\"Ser\u00e3o publicas. Ser\u00e3o realizadas em dias previamente fixados\"},{\"title\":\"Ocorrera entre 8h e 18h.\"},{\"title\":\"Nao pode ultrapassar 5h de duracao, salvo materia for urgente\"}]}]},{\"title\":\"Irrecorribildiade Imediata de Decis\u00f5es Interlocut\u00f3rias\",\"children\":[{\"title\":\"As partes devem aguardar a senten\u00e7a para recorrer de decis\u00f5es interlocutorias\"},{\"title\":\"N\u00e3o mudou com o NCPC, apenas 1 hip. surgiu\",\"children\":[{\"title\":\"IN 39/2016 - Art. 6\u02da - Cabe IDPJ, sendo que aqui, na fase de exec. o juiz pode de oficio\"},{\"title\":\"Na fase de conhecimento nao cabe AI, mas na fase de execu\u00e7\u00e3o cabe\"}]},{\"title\":\"Em alguns casos, por falta de recurso proprio \u00e9 cabivel MS. Ex: Ttutela Antecipada\"},{\"title\":\"A superveniencia de senten\u00e7a faz perder o objeto do MS. Surge o momento adequado\"},{\"title\":\"Art. 893 \u00a71 da CLT\",\"children\":[{\"title\":\"Os incidentes do processo s\u00e3o resolvidos pelo proprio juizo ou tribunal\"},{\"title\":\"Admitindo-se aprecia\u00e7\u00e3o do merecimento das decisoes interoc. somente\"},{\"title\":\"Em recursos da decis\u00e3o definitiva\"}]},{\"title\":\"Exce\u00e7\u00f5es a regra(2) CESPE / CEBRASPE - 2024 - PGE-RN - Procurador\",\"children\":[{\"title\":\"1\u02da Exce\u00e7\u00e3o - Art. 799 \u00a72 da cLT\",\"children\":[{\"title\":\"Decioes interlocutorias terminativas do feito, CABE RO\"},{\"title\":\"Das decis\u00f5es sobre exce\u00e7oes de suspei\u00e7ao e incompetencia, salvo, quanto a estas, se terminativas do feito\"},{\"title\":\"N\u00e3o caber\u00e1 recurso, podendo no entanto, as partes alega-las novamente no recurso que couber da decis\u00e3o final\"}]},{\"title\":\"Sum. 214 do TST(3)\",\"children\":[{\"title\":\"Decisao de TRT(segundo grau) contraria a OJ ou a Sum. do TST\"},{\"title\":\"Decis\u00e3o suscetivel de impugna\u00e7\u00e3o mediante recurso para o proprio tribunal\"},{\"title\":\"Decis\u00e3o que julga exce\u00e7\u00e3o de incompetencia, determinando remessa dos autos para VT vinculada a outro TRT(se ficar na msm regi\u00e3o o recurso nao \u00e9 imediato)\"}]}]}]},{\"title\":\"Duplo Grau de Jurisdi\u00e7\u00e3o\",\"children\":[{\"title\":\"Possibilidade das partes recorrerem das decis\u00f5es\"},{\"title\":\"A Lei pode impor situa\u00e7\u00f5es em que n\u00e3o caiba recurso. Ex: Dissidios de Al\u00e7ada\"},{\"title\":\"Sum. 303 do TST - Botar nova reda\u00e7\u00e3o de acordo com NCPC\"},{\"title\":\"HA EXCECOES AO PRINCIPIO\"}]},{\"title\":\"Contraditorio e Ampla Defesa\",\"children\":[{\"title\":\"Notifica\u00e7\u00e3o do r\u00e9u n\u00e3o precisa ser expressa na RT. \u00c9 ato automatico\",\"children\":[{\"title\":\"Art. 841 da CLT\",\"children\":[{\"title\":\"Recebida e protocolada a RT, o escrivao ou secretario, dentro de 48 HORAS\"},{\"title\":\"Remeter\u00e1 segunda via da peticao ou do termo ao reclamado notificando-o ao mesmo tempo para\"},{\"title\":\"Comparecer em aud. que ser\u00e1 a primeira desimpedida, depois de 5d(uteis ou n\u00e3o?)\"},{\"title\":\"A Notifica\u00e7\u00e3o ser\u00e1 feita em registro postal com franquia...\"},{\"title\":\"...Se o reclamado criar embaracos ao seu recebimento ou nao for encontrado ser\u00e1 feita por EDITAL\"},{\"title\":\"O EDITAL ser\u00e1 inseto no jornal oficial ou no que publicar o expediente forense, ou, na falta, afixado na sede ou juizo\"},{\"title\":\"O reclamante ser\u00e1 notificado no ato de apresenta\u00e7\u00e3o da RT ou na forma do parag. anterior\"},{\"title\":\"Oferecida a Contestacao, ainda que eltronica, o reclamante nao pode desistir sem consentimento\"}]}]},{\"title\":\"Intima\u00e7\u00f5es s\u00e3o feitas de oficio pelo juizo\"},{\"title\":\"Notifica\u00e7\u00e3o do r\u00e9u n\u00e3o \u00e9 para apresentar defesa, e sim comparecer a audiencia\"},{\"title\":\"As partes podem usar de todos meios processuais legais para demonstra\u00e7\u00e3o do direito inclusive o silencio\"},{\"title\":\"Art. 10 do NCPC destaca a necessidade de contraditorio, msm em materias de ordem publica\"},{\"title\":\"OBS - Igualdade Substancial(Juiz)\",\"children\":[{\"title\":\"Opera-se por meio da PARIDADE DAS ARMAS\"},{\"title\":\"Autoriza-se desequilibrios no direito de a\u00e7\u00e3o como forma de compensa\u00e7\u00e3o da inferioridade do hipotessficiente\"}]}]},{\"title\":\"Concilia\u00e7\u00e3o\",\"children\":[{\"title\":\"O DPT buscar formas de conciliar\"},{\"title\":\"A homologa\u00e7\u00e3o de acordo pelo juiz sempre ocasiona extin\u00e7\u00e3o do processo com julgamento do merito\",\"children\":[{\"title\":\"Juiz \u00e9 obrigado a homologaR?\",\"children\":[{\"title\":\"Nao, conforme sum. 418 do TST\"},{\"title\":\"\u00c9 possivel propor MS?\",\"children\":[{\"title\":\"N\u00e3o\"}]},{\"title\":\"Meio recursal capaz de desconstituir decis\u00e3o homologatoria de Acordo?\",\"children\":[{\"title\":\"AR, por faltar interesse na interposi\u00e7\u00e3o de recurso\"}]}]}]},{\"title\":\"Aplica a regra do NCPC da PI?(conciliar)\",\"children\":[{\"title\":\"N\u00e3o!\"}]},{\"title\":\"Dissidios individuais e coletivos ser\u00e3o SEMPRE objeto de concilia\u00e7\u00e3o\",\"children\":[{\"title\":\"OBS\",\"children\":[{\"title\":\"Nos dissidios individuais\",\"children\":[{\"title\":\"O juiz deve buscar a concilia\u00e7\u00e3o em 2 momentos obrigatorios\"},{\"title\":\"No rito sumarissimo o juiz deve buscar concilia\u00e7\u00e3o em todos momentos da audiencia\"}]},{\"title\":\"Nos dissidios coletivo\",\"children\":[{\"title\":\"O Presidente do Tribunal designar\u00e1 audiencia propria para tentar concliar\"}]},{\"title\":\"Na CCP\",\"children\":[{\"title\":\"\u00c9 obrigatoria a TENTATIVA de CONCILIAR\"}]}]}]},{\"title\":\"N\u00e3o havendo acordo, juizo conciliatorio converte-se em arbitral\"},{\"title\":\"Proferindo decisao na foram prescrita no texto\"},{\"title\":\"Tanto o dissidio coletivo como o individual ser\u00e1o convertidos em Arbitral\"},{\"title\":\"\u00c9 licito as partes celebrar acordo que ponha TERMO ao processo\"},{\"title\":\"Ainda mesmo depois de encerrado o juizo conciliatorio\"}]},{\"title\":\"Prote\u00e7\u00e3o\",\"children\":[{\"title\":\"Visa equilibrar a situa\u00e7\u00e3o do empregado\"},{\"title\":\"\u00c9 um dos mais importantes principio do Direito Material e do Direito Processual\"},{\"title\":\"O principio da prote\u00e7\u00e3o se ramifica em 3\",\"children\":[{\"title\":\"O in dubio pro operario \u00e9 divergente sua aplicac\u00e3o no processo do trabalho.\"},{\"title\":\"Doutrina majoritaria entende que n\u00e3o se aplica\"}]},{\"title\":\"Instrumentos de aplica\u00e7\u00e3o(6)\",\"children\":[{\"title\":\"Gratuidade do Processo - Custas pagas ao final - Art. 789 \u00a71 da CLT\"},{\"title\":\"Arquivamento da RT caso reclamante falte a Audiencia - Art. 844 da CLT\"},{\"title\":\"Invers\u00e3o do Onus da Prova\"},{\"title\":\"Deposito Recursal\"},{\"title\":\"Impulso Oficial na Execu\u00e7\u00e3o\"},{\"title\":\"Efeito meramente devolutivo dos recursos - Art. 899 da CLT\"}]}]},{\"title\":\"Jus Postulandi qual nova hipotese da reforma?\",\"children\":[{\"title\":\"Possibilidade das partes realizarem atos processuais sem representac\u00e3o de advogado\"},{\"title\":\"Art. 791 da CLT\",\"children\":[{\"title\":\"EMPREGADOS E EMPREGADORES podem reclamar pessoalemtne perante a JT e acompanha at\u00e9 o final\"}]},{\"title\":\"Sumula do TST restringiu em algumas situa\u00e7oes\",\"children\":[{\"title\":\"Recursos p/ TST\"},{\"title\":\"A\u00e7\u00e3o Cautelar\"},{\"title\":\"A\u00e7\u00e3o Rescis\u00f3ria\"},{\"title\":\"MS\"}]}]},{\"title\":\"Motiva\u00e7\u00e3o das Decis\u00f5es Judiciais\",\"children\":[{\"title\":\"Todas decisoes judiciais devem sr fundamentadas nos termos do 489 do NCPC\"},{\"title\":\"CLT trata do principio no Art. 832\",\"children\":[{\"title\":\"Da decisao deve constar o nome das partes, resumo do pedido e da defesa\"},{\"title\":\"A apreciacao das provas, os fundamentos da decisao e a conclusao\"}]},{\"title\":\"A senten\u00e7a tem relatorio, fundamenta\u00e7\u00e3o e dispositivo\",\"children\":[{\"title\":\"O relatorio pode ser dispensado em alguns proced., mas nunca fundamenta\u00e7\u00e3o e o dispositivo\"}]},{\"title\":\"Apenas despachos nao precisam ser fundamentados, n\u00e3o possuem forma e nao causa prej\"}]},{\"title\":\"Probidade Processual Rol de condutas quem pode ser litigante de m\u00e1 f\u00e9? Qual a penalidade? como \u00e9 em caso de litis? testemunha pode sofrer? Causas de valor irris\u00f3rio?\",\"children\":[{\"title\":\"Ate a Reforma aplicavamos CPC. Porem, h\u00e1 o Art. 793-A que regula de forma parecida\"},{\"title\":\"Podem ser litigantes de m\u00e1-f\u00e9 o reclamante, reclamado e intervenientes\"},{\"title\":\"Condena\u00e7\u00e3o pode ser de oficio ou a requerimento\"},{\"title\":\"Rol de condutas\",\"children\":[{\"title\":\"Deduzir pretens\u00e3o ou defesa contra texto expresso de Lei ou Fato Incontroverso\"},{\"title\":\"Alterar verdade dos fatos\"},{\"title\":\"Usar processo p/ objetivos ilegais\"},{\"title\":\"Opuser resistencia injustificada ao andamento do processo\"},{\"title\":\"Proceder de modo temerario\"},{\"title\":\"Provocar incidente infundado\"},{\"title\":\"Recursos com intuito protelatorio\"}]},{\"title\":\"Penaldiades (Art. 793-C da CLT)(3)\",\"children\":[{\"title\":\"Multa 1 a 10% do valor corrigido da causa\"},{\"title\":\"Indenizar prejuizos da parte contraria(fixada desde logo ou arbitramento ou artigos - liquid.)\"},{\"title\":\"Arcar com honorarios e despesas que efetuou\"}]},{\"title\":\"Em caso de Litis\",\"children\":[{\"title\":\"A responsa pode ser proporcional ao interesse na causa OU\"},{\"title\":\"Solidaria, qnd as partes se unirem p/ prejudicar\"}]},{\"title\":\"Testemunha pode sofrer a penalidade?\",\"children\":[{\"title\":\"Sim! Se mentir ou omitir infos relevantes. Execu\u00e7\u00e3o da multa \u00e9 nos mesmos autos\"}]},{\"title\":\"Se a causa \u00e9 de valor irris\u00f3rio?\",\"children\":[{\"title\":\"Multa PODE ser fixada em at\u00e9 2x o limite max. do RGPS\"}]}]},{\"title\":\"Eventualidade\",\"children\":[{\"title\":\"Normalmente aplicado ao Direito de Defesa\"},{\"title\":\"Ligado ao Principio da Eventualidade est\u00e1 o Principio da Impugna\u00e7\u00e3o Especifica dos Fatos\"},{\"title\":\"Toda materia de defesa deve ser alegada no momento oportuno\"},{\"title\":\"Alem da defesa de merito o r\u00e9u deve apresentar a defesa processual\"},{\"title\":\"Em rela\u00e7\u00e3o a defesa processual n\u00e3o h\u00e1 preclus\u00e3o, visto que em sua maioria, podem ser\"},{\"title\":\"Reconhecidas de oficio pelo juiz, exceto o compromisso arbitral\"}]},{\"title\":\"Preclus\u00e3o\",\"children\":[{\"title\":\"\u00c9 a perda da possibilidade de realiza\u00e7\u00e3o de um ato processual\"},{\"title\":\"Ocorre por 3 raz\u00f5es\",\"children\":[{\"title\":\"Pratica de ato processual fora do prazo\"},{\"title\":\"Realiza\u00e7\u00e3o de ato processual incompativel\"},{\"title\":\"Realiza\u00e7\u00e3o de ato processual em momento anterior, sem possibilidade de renova\u00e7\u00e3o\"}]},{\"title\":\"N\u00e3o se pode confundir preclus\u00e3o com peremp\u00e7\u00e3o\"},{\"title\":\"Peremp\u00e7\u00e3o \u00e9 a ausencia do reclamante do processo Como \u00e9 a peremp\u00e7\u00e3o no DPT?\",\"children\":[{\"title\":\"Art. 732 da CLT\",\"children\":[{\"title\":\"Por 2x a audiencia, sendo as demandas extintas S E M res. do merito\"}]},{\"title\":\"Art. 731 da CLT\",\"children\":[{\"title\":\"uma unica vez, no ato de redu\u00e7\u00e3o a termo da RT verbal\"}]},{\"title\":\"Retira o direito de a\u00e7ao da parte pelo prazo de 6 meses\"}]}]},{\"title\":\"Busca Pela Verdade Real\",\"children\":[{\"title\":\"Intimamente ligado com o principio da Primazia da Realidade\"},{\"title\":\"D\u00e1 amplo poder ao magistrado de guiar o processo, definir provas e outros\"}]},{\"title\":\"Devido Processo Legal\"},{\"title\":\"Instrumentaldiade das Formas\",\"children\":[{\"title\":\"Visa atingir a finaldiade processual do ato, desconsiderando-se eventual vicio existente\"},{\"title\":\"Retratado na Sum. 427 do TST\"}]},{\"title\":\"Normatiza\u00e7\u00e3o Coletiva\",\"children\":[{\"title\":\"Ligado a uma fun\u00e7\u00e3o anomala exercida pela JT\"},{\"title\":\"Ocorre quando a JT julga um dissidio coletivo de natureza econ.\"},{\"title\":\"\u00c9 o PJ exercendo o poder normativo sobre determinada rela\u00e7\u00e3o\"},{\"title\":\"A EC 45/2004 restringiu o instituto porem n\u00e3o o extinguiu - Art. 114 \u00a72 da CF\"},{\"title\":\"Somente \u00e9 usada se as partes tentaram a negocia\u00e7\u00e3o e se for DE COMUM ACORDO\"}]},{\"title\":\"Inafastabilidade da Jurisdi\u00e7\u00e3o\",\"children\":[{\"title\":\"Na JT o principio remete a CCP\"},{\"title\":\"A Lei da a entender que a submiss\u00e3o a CCP \u00e9 obrigatoria\"},{\"title\":\"O STF entendeu que a submiss\u00e3o a CCP \u00e9 facultativa\"}]},{\"title\":\"Estabilidade da Lide\",\"children\":[{\"title\":\"Previsto nos Art. 264 e 294 do CPC. No DPT \u00e9 necessario adaptar os principios\"},{\"title\":\"A defesa do r\u00e9u \u00e9 em audiencia, nada obsta que no inicio da audiencai seja aditada a inicial\",\"children\":[{\"title\":\"Nessa situa\u00e7\u00e3o a audiencia \u00e9 suspensa e designa-se outra\"}]},{\"title\":\"Apos a defesa do r\u00e9u, com consentimento por ocorrer o aditamento\"},{\"title\":\"Ultrapassdo o momento de defesa, nenhuma altera\u00e7\u00e3o ser\u00e1 possivel\"}]},{\"title\":\"Principio da Extrapeti\u00e7\u00e3o\",\"children\":[{\"title\":\"\u00c9 a inclus\u00e3o na liquida\u00e7\u00e3o de senten\u00e7a de juros de mora e corre\u00e7\u00e3o monetaria\"},{\"title\":\"Ainda que a peti\u00e7\u00e3o e a condena\u00e7\u00e3o tenham sido omissas\"},{\"title\":\"\u00c9 aplicavel ao Direito do Trabalho\"}]},{\"title\":\"Informalidade\",\"children\":[{\"title\":\"INFORMALIDADE: Petic\u0327\u00e3o inicial e contestac\u0327\u00e3o verbais (arts. 840 e 846 da CLT); \u2794Comparecimento das testemunhas independentemente de intimac\u0327\u00e3o (art. 825 da CLT); \u2794 Interposic\u0327\u00e3o de recurso por simples petic\u0327\u00e3o (art. 791 da CLT); \u2794 Jus postulandi das partes (art. 791 da CLT); e \u2794 Imediatidade entre o juiz e a parte na audi\u00eancia.\"}]}]}]},\"cap1\":{\"title\":\"1. Organiza\u00e7\u00e3o da JT e Competencia\",\"children\":[{\"title\":\"Org\u00e3os da JT - Art. 111 da CF\",\"children\":[{\"title\":\"S\u00e3o org\u00e3os da JT\",\"children\":[{\"title\":\"Juiz do Trabalho(Vara do Trabalho) - Art. 116 da CF\",\"children\":[{\"title\":\"OBS - At\u00e9 EC 24/99\",\"children\":[{\"title\":\"Tinhamos a representa\u00e7\u00e3o classista. Juntas de Juglamento\"},{\"title\":\"Tinhamos juiz classistas\"},{\"title\":\"Nao existe mais junta de concilia\u00e7\u00e3o e juglaemtno\"}]}]},{\"title\":\"TRT - Art. 115 da CF\",\"children\":[{\"title\":\"Pelo menos 7 juizes. Idade 30 a 70 Anos. Nomeados pelo PR\"},{\"title\":\"1/5 advogados e membros do MP com mais de 10 anos\"},{\"title\":\"Os demais pro promo\u00e7ao por antiguidade e merecimento\"},{\"title\":\"OBS n\u00e3o tem sabatina pelo SF\"},{\"title\":\"EC 45 excluiu a necessidade de um TRT em cada Estado\"}]},{\"title\":\"TST\",\"children\":[{\"title\":\"Composi\u00e7\u00e3o\",\"children\":[{\"title\":\"27ministros\",\"children\":[{\"title\":\"N\u00e3o \u00e9 MIN. e nem MAX.\"}]},{\"title\":\"Idade de 35 a 70 Anos\"},{\"title\":\"Nomeados pelo PR e Sabatinados pelo SF por Maioria Absoluta\"}]},{\"title\":\"Funcionam junto ao TST(EC 45)\",\"children\":[{\"title\":\"CSJT(semelhante ao CNJ)\"},{\"title\":\"Escola de Forma\u00e7\u00e3o\"}]}]}]},{\"title\":\"Art. 112 da CF - Juiz de Direito como JT\",\"children\":[{\"title\":\"Atua\u00e7\u00e3o do Juiz de Direito como juiz do Trabalho\"},{\"title\":\"A Lei criar\u00e1 varas da JT. Pode nas comarcas n\u00e3o abrangidas, atribuir a Juiz de direito\"},{\"title\":\"O recurso ser\u00e1 para o TRT. A CLT trata do tema no Art. 668 e 669\"},{\"title\":\"Sum. 10 do STJ\",\"children\":[{\"title\":\"RT tramitando na vara civel, a partir do momento da instala\u00e7\u00e3o da VT os autos sao remetidas\"},{\"title\":\"A competencia da JT \u00e9 absoluta, por isso deve haver remessa imediata\"}]}]},{\"title\":\"S\u00e3o incompativeis p/ TRABALHO na mesma VARA\",\"children\":[{\"title\":\"Parentes consanguineos at\u00e9 o 3\u02da grau civil\"}]},{\"title\":\"CCP integram a estrutura da JT? CESPE - 2021 - PGE-AL - Procurador\",\"children\":[{\"title\":\"N\u00e3o! mesmo tendo competencia p/ acordos\"}]}]},{\"title\":\"Competencia Material da JT - Art. 114 da CF FUMARC - 2022 - TRT - 3\u00aa Regi\u00e3o (MG) - Ana.\",\"children\":[{\"title\":\"Inciso I - Rela\u00e7\u00e3o de Trabalho At\u00e9 a EC 45/2004 o dispositivo falava de rela\u00e7\u00e3o de EMPREGO. A competencia se alargou\",\"children\":[{\"title\":\"Agentes P\u00fablicos\",\"children\":[{\"title\":\"Inciso previa que sim, mas houve ADIN. STF decidiu pela exclusao dos estatutarios\"},{\"title\":\"Os estatutarios s\u00f5a julgados na Justica Comum, tanto Federal quanto Estadual\"},{\"title\":\"Temporarios e Servidores em Comiss\u00e3o?\",\"children\":[{\"title\":\"JUSTI\u00c7A COMUM\"}]},{\"title\":\"Empregados P\u00fablicos VUNESP - 2024 - PGE-SP - Procurador do Estado\",\"children\":[{\"title\":\"EMPREGADO P\u00daBLICO. COMPET\u00caNCIA DA JUSTI\u00c7A DO TRABALHO. Versando o pedido inicial decorrente de contrato de trabalho regido pelo regime celetista, a Justi\u00e7a do Trabalho \u00e9 competente para conhecer e julgar a mat\u00e9ria, nos moldes preconizados no art. 114 da CF.\"},{\"title\":\"TST. A Justi\u00e7a do Trabalho \u00e9 competente para examinar pedido de empregado p\u00fablico admitido antes da promulga\u00e7\u00e3o da CF/88, sob regime celetista, e sem concurso p\u00fablico, n\u00e3o obstante a superveni\u00eancia de legisla\u00e7\u00e3o estadual que institui regime jur\u00eddico \u00fanico.\"},{\"title\":\"Tema 1143 STF - A Justi\u00e7a Comum \u00e9 competente para julgar a\u00e7\u00e3o ajuizada por servidor celetista contra o Poder P\u00fablico, em que se pleiteia parcela de natureza administrativa.\"}]}]},{\"title\":\"Profissionais Liberais? Sum. 363 do STJ OBJETIVA - 2022 - Varginha - MG - Procurador\",\"children\":[{\"title\":\"Prof. liberal executa cliente para receber hon., a competencia \u00e9 da Justi\u00e7a Comum\"}]},{\"title\":\"Entes de Direito Publico Externo\",\"children\":[{\"title\":\"Estados Estrangeiros\",\"children\":[{\"title\":\"Estados estrangeiros n\u00e3o possuem imunidade de jurisdi\u00e7\u00e3o. Podem ser r\u00e9us\"},{\"title\":\"N\u00e3o podem ser executados, pois possuem imunidade de execu\u00e7\u00e3o\"}]},{\"title\":\"Organiza\u00e7\u00f5es Internacionais - OJ 416 da SDI\",\"children\":[{\"title\":\"Exemplo\",\"children\":[{\"title\":\"ONU, OIT\"}]},{\"title\":\"Possuem imunidade ABSOLUTA de jurisdic\u00e3o e por consequencia, imunidade de execu\u00e7\u00e3o\"},{\"title\":\"N\u00e3o podem ser partes em processo judicial. OBS - Podem renunciar a IMUNIDADE\"}]}]},{\"title\":\"Trabalhadores e titulares de cartorios judicial FCC - 2022 - TRT - 14\u00aa Regi\u00e3o (RO e AC) - T\u00e9cnico\",\"children\":[{\"title\":\"A rela\u00e7\u00e3o \u00e9 tipicamente de emprego. A JT tem competencia para dirimir conflitos\"},{\"title\":\"Ex: Escreventes\"}]},{\"title\":\"A\u00e7\u00e3o relativa ao cadastramento no PIS - S. 300 TST\",\"children\":[{\"title\":\"OBS\",\"children\":[{\"title\":\"COMPET\u00caNCIA DA JUSTI\u00c7A DO TRABALHO. CADASTRAMENTO NO PIS (mantida) - Res. 121/2003, DJ 19, 20 e 21.11.2003 Compete \u00e0 Justi\u00e7a do Trabalho processar e julgar a\u00e7\u00f5es ajuizadas por empregados em face de empregadores relativas ao cadastramento no Programa de Integra\u00e7\u00e3o Social (PIS).\"}]}]},{\"title\":\"Rela\u00e7\u00e3o de emprego entre Trab. Portuarios e Operadores ou OGMO?\",\"children\":[{\"title\":\"Competencia da JT\"}]},{\"title\":\"Competencia Criminal\",\"children\":[{\"title\":\"JT nao tem competencia criminal\"}]},{\"title\":\"Compet\u00eancia para julgar demanda indenizat\u00f3ria por uso de imagem de jogador de futebol\",\"children\":[{\"title\":\"\u00c9 da Justi\u00e7a do Trabalho (e n\u00e3o da Justi\u00e7a Comum) a compet\u00eancia para processar e julgar a a\u00e7\u00e3o de indeniza\u00e7\u00e3o movida por atleta de futebol em face de editora pelo suposto uso indevido de imagem em \u00e1lbum de figurinhas quando, ap\u00f3s denuncia\u00e7\u00e3o da lide ao clube de futebol (ex-empregador), este alegar que recebeu autoriza\u00e7\u00e3o expressa do jogador para ceder o direito de uso de sua imagem no per\u00edodo de vig\u00eancia do contrato de trabalho. Na ementa oficial do julgado, restou assim consignado: Compete \u00e0 Justi\u00e7a do Trabalho processar e julgar a\u00e7\u00e3o indenizat\u00f3ria movida contra editora, por suposto uso indevido de imagem de atleta de futebol, caracterizado por publica\u00e7\u00e3o, sem autoriza\u00e7\u00e3o, do autor de sua fotografia em \u00e1lbum de figurinhas, na hip\u00f3tese de denuncia\u00e7\u00e3o da lide pela r\u00e9 ao clube empregador. STJ. 2\u00aa Turma. CC 128.610-RS, Rel. Min. Raul Ara\u00fajo, julgado em 22/6/2016 (Info 587)\"}]},{\"title\":\"Fase PRECONTRATUAL de Sele\u00e7ao VUNESP - 2024 - PGE-SP - Procurador do Estado\",\"children\":[{\"title\":\"Tema 992 STF - Compete \u00e0 Justi\u00e7a Comum processar e julgar controv\u00e9rsias relacionadas \u00e0 fase pr\u00e9-contratual de sele\u00e7\u00e3o e de admiss\u00e3o de pessoal e eventual nulidade do certame em face da Administra\u00e7\u00e3o P\u00fablica, direta e indireta, nas hip\u00f3teses em que adotado o regime celetista de contrata\u00e7\u00e3o de pessoas, salvo quando a senten\u00e7a de m\u00e9rito tiver sido proferida antes de 6 de junho de 2018, situa\u00e7\u00e3o em que, at\u00e9 o tr\u00e2nsito em julgado e a sua execu\u00e7\u00e3o, a compet\u00eancia continuar\u00e1 a ser da Justi\u00e7a do Trabalho.\"}]},{\"title\":\"Entidades de Previdencia Complementa\u00e7\u00e3o Aposentadoria VUNESP - 2024 - PGE-SP - Procurador do Estado\",\"children\":[{\"title\":\"TEMA 190 STF - Compete \u00e0 Justi\u00e7a comum o processamento de demandas ajuizadas contra entidades privadas de previd\u00eancia com o prop\u00f3sito de obter complementa\u00e7\u00e3o de aposentadoria, mantendo-se na Justi\u00e7a Federal do Trabalho, at\u00e9 o tr\u00e2nsito em julgado e correspondente execu\u00e7\u00e3o, todas as causas dessa esp\u00e9cie em que houver sido proferida senten\u00e7a de m\u00e9rito at\u00e9 20/2/2013.\"}]}]},{\"title\":\"A\u00e7\u00f5es envolvendo acidente de trabalho\",\"children\":[{\"title\":\"Empregado X empregador\",\"children\":[{\"title\":\"JT\"}]},{\"title\":\"Em face do INSS\",\"children\":[{\"title\":\"Serve p/ autarquia reconhecer a existencia de acidente de trabalho e incapacidade\"},{\"title\":\"Competencia \u00e9 da Justi\u00e7a Comum\"},{\"title\":\"Msm sendo autarquia \u00e9 da competencia da Justi\u00e7a Comum\"},{\"title\":\"Sum. 15 do STJ; Sum. 235 do STF e Sum. 501 do STF\"}]}]},{\"title\":\"Inciso II - A\u00e7\u00f5es decorrentes de GREVE\",\"children\":[{\"title\":\"O Direito de Greve \u00e9 da JT, n\u00e3o importa se direito coletivo ou individual\"},{\"title\":\"A greve do Servidor Estatutario s\u00e3o da competencia da Justi\u00e7a Comum\"},{\"title\":\"A\u00e7\u00e3o Possessoria\",\"children\":[{\"title\":\"Essa a\u00e7\u00e3o possessoria \u00e9 da competencia da JT\"},{\"title\":\"Inicialmente causou estranheza dos Juizes do Trabalho, instaurando diversos conflitos de compt\"},{\"title\":\"SV 23\",\"children\":[{\"title\":\"A greve deve ser na INICIATIVA PRIVADA de empregados regidos pela CLT\"},{\"title\":\"Exemplo\",\"children\":[{\"title\":\"Empregados da Petrobras\"}]}]}]},{\"title\":\"A\u00e7\u00f5es de indeniza\u00e7\u00e3o, obriga\u00e7\u00f5es de fazer e outras em raz\u00e3o da Greve\",\"children\":[{\"title\":\"Tambem s\u00f5a da JT, pois est\u00e3o relacionadas a greve. Competencia \u00e9 do 1\u00ba grau\"}]},{\"title\":\"Dissdio Coletivo de Greve\",\"children\":[{\"title\":\"A competencia \u00e9 de TRT ou de TST\"},{\"title\":\"A competencia \u00e9 do TST qnd a categoria tem abrangencia nacional\"},{\"title\":\"A competencia \u00e9 do TRT se o dissidio envolve abrangencia da regiao do TRT\"}]}]},{\"title\":\"Inciso III - A\u00e7\u00f5es Envolvendo representa\u00e7\u00f5es sindicais\",\"children\":[{\"title\":\"A\u00e7\u00f5es entre sindicatos, entre sindicatos e empregadores e entre sindicatos e empregados\"},{\"title\":\"O termo abarca confedera\u00e7\u00f5es e federa\u00e7\u00f5es\"},{\"title\":\"A\u00e7\u00f5es de qlq assunto ou apenas representac\u00e3o sindical?\",\"children\":[{\"title\":\"\u00c9 afirma\u00e7\u00e3o das bancas de concursos., as a\u00e7\u00f5es s\u00e3o somente s\u00e3o de representa\u00e7\u00e3o sindical\"}]},{\"title\":\"A\u00e7\u00f5es de sindicatos de Servidores Publicos Estatutarios?\",\"children\":[{\"title\":\"Competencia \u00e9 da JUSTICA comum\"}]},{\"title\":\"Ex: A\u00e7\u00f5es de unicidade sindical; Filia\u00e7\u00e3o e desfilia\u00e7\u00e3o\"}]},{\"title\":\"Inciso IV - MS, HC e HD\",\"children\":[{\"title\":\"Sao da competencia trabalhista se for materia trabalhista\"},{\"title\":\"Essas a\u00e7\u00f5es sao incomuns na JT\"},{\"title\":\"Via de regra \u00e9 da justi\u00e7a em 1\u02da grau, mas tem hip. de competencia do TRT e do TST\"},{\"title\":\"Em caso de HC a competenica \u00e9 do VT(particular); TRT(juiz de 1\u02da grau); TST(TRT)\"}]},{\"title\":\"Inciso V - Conflitos de Competencia\",\"children\":[{\"title\":\"TRT\",\"children\":[{\"title\":\"VT X VT, ambas vinculadas ao MESMO TRT\"},{\"title\":\"VT X Juiz de direito COM jurisdi\u00e7\u00e3o trabalhista\"}]},{\"title\":\"TST\",\"children\":[{\"title\":\"TRT X TRT\"},{\"title\":\"TRT X VT(Diferentes regioes)\"},{\"title\":\"TRT X Juiz de Direito com jurisdi\u00e7\u00e3o trabalhista(diferentes jurisdi\u00e7\u00f5es)\"},{\"title\":\"VT X VT de regi\u00e3o diversa\"}]},{\"title\":\"STJ\",\"children\":[{\"title\":\"TRT ou VT e Juiz de dirieto(SEM jurisdi\u00e7\u00e3o trabalhista)\"}]},{\"title\":\"STF\",\"children\":[{\"title\":\"TST X TJ, TRF, ou Juiz de Direito ou Juiz Federal\"}]}]},{\"title\":\"Inciso VI - A\u00e7\u00f5es de Indeniza\u00e7\u00e3o pode Dano Moral ou Material CESPE - 2021 - PGE-AL - Procurador do Estado\",\"children\":[{\"title\":\"Antes da EC 45/2004\"},{\"title\":\"Ainda que a a\u00e7\u00e3o seja proposta por dependentes ou sucessores\"},{\"title\":\"E trabalhador X INSS? Sum. 501 do STF e Sum. 15 do STJ\",\"children\":[{\"title\":\"A competencia \u00e9 da JF, EXCETO a\u00e7\u00f5es decorrentes de Acidante do Trabalho(JC estadual)\"},{\"title\":\"Essa competencia abrange o beneficio decorrente desse acidente\"}]},{\"title\":\"SV. 22\",\"children\":[{\"title\":\"A Justi\u00e7a do Trabalho \u00e9 competente para processar e julgar as a\u00e7\u00f5es de indeniza\u00e7\u00e3o por danos morais e patrimoniais decorrentes de acidente de trabalho propostas por empregado contra empregador, inclusive aquelas que ainda n\u00e3o possu\u00edam senten\u00e7a de m\u00e9rito em primeiro grau quando da promulga\u00e7\u00e3o da Emenda Constitucional n\u00ba 45/04.\"}]}]},{\"title\":\"Inciso VII - A\u00e7\u00f5es Relativas as Penalidades Impostas pelos Org\u00e3os de Fiscalizac\u00e3o do Trabalho FISCALIZA\u00c7\u00c3O DO TRABALHO E N\u00c3O FISCAL\",\"children\":[{\"title\":\"At\u00e9 a EC45/2004 a competencia era da JF, ap\u00f3s a EC veio pra JT, inclsuive pelo MTE\"},{\"title\":\"Execu\u00e7\u00e3o das multas aplicadas pela fiscaliza\u00e7\u00e3o trabalhista\",\"children\":[{\"title\":\"\u00c9 da competencia da Uni\u00e3o. Sua execu\u00e7\u00f5a deve ser proposta na JT\"},{\"title\":\"O eventual recurso \u00e9 o Ag. de Peti\u00e7\u00e3o por ser o recurso cabivel contra execu\u00e7\u00e3o\"}]},{\"title\":\"Fiscal do Trabalho pode reconhecer vinculo?\",\"children\":[{\"title\":\"Sim!\"}]},{\"title\":\"Conselhos Profissionais\",\"children\":[{\"title\":\"A atividade fiscalizat\u00f3ria exercida pelos conselhos profissionais N \u00c3 O pode ser inclu\u00edda entre as compet\u00eancias estabelecidas no art. 114 da Constitui\u00e7\u00e3o Federal, uma vez que \\\"n\u00e3o h\u00e1 rela\u00e7\u00e3o de trabalho entre o Conselho de Fiscaliza\u00e7\u00e3o Profissional e os profissionais perante ele registrados.\"}]}]},{\"title\":\"Inciso VIII - Execu\u00e7\u00e3o, de oficio, das Contrib. Sociais DAS SENTENCAS q proferir CESPE / CEBRASPE - 2021 - PGE-AL - Procurador do Estado CESPE / CEBRASPE - 2021 - PGE-CE - Procurador do Estado FGV - 2022 - TRT - 16\u00aa REGI\u00c3O (MA) - Analista Judici\u00e1rio\",\"children\":[{\"title\":\"Mesmo que a senten\u00e7a seja declaratoria, a competencia pode ser por esse inciso da CF. A JT n\u00e3o aceita isso, e editou a sumula abaixo\"},{\"title\":\"execu\u00e7\u00e3o, de of\u00edcio, das contribui\u00e7\u00f5es previdenci\u00e1rias que constituam reflexo de condena\u00e7\u00e3o em verbas trabalhistas.\"},{\"title\":\"Essa competencia \u00e9 desde a EC 20/98. Com a EC 45/04 alterou a ordem somente\"},{\"title\":\"Imposto de Renda?\",\"children\":[{\"title\":\"N\u00e3o \u00e9 competencia trabalhista, \u00e9 da JF\"}]},{\"title\":\"SAT\",\"children\":[{\"title\":\"Competencia da JT\"}]},{\"title\":\"Contribui\u00e7oes PREVIDENCIARIAS destinadas ao Sistema S\",\"children\":[{\"title\":\"\u00c9 competencia da JT sua execu\u00e7\u00e3o\"}]},{\"title\":\"Contribui\u00e7\u00f5es ao SISTEMA S N\u00e3o PREVIDENCIARIAS\",\"children\":[{\"title\":\"N\u00e3o \u00e9 da competencia da JT\"}]},{\"title\":\"Art. 876 da CLT\",\"children\":[{\"title\":\"JT executa de oficio e acrescimos legais, das senten\u00e7as que proferir e acordos que homologar\"}]}]},{\"title\":\"Inciso IX - Outras Competencias\",\"children\":[{\"title\":\"Sum. 300 do TST\",\"children\":[{\"title\":\"N\u00e3o cadastramento no PIS\"}]},{\"title\":\"Sum. 389 do TST\",\"children\":[{\"title\":\"Recebimento do Seguro Desemprego por erro da empresa que n\u00e3o forneceu as guias\"}]},{\"title\":\"Sum. 19 do TST\",\"children\":[{\"title\":\"A\u00e7\u00f5es fundadas em quadro de carreira de emrpesas\"}]},{\"title\":\"Sum. 376 do STF\",\"children\":[{\"title\":\"Todos pedidos relacionados a Meio Ambiente do Trabalho\"}]},{\"title\":\"OJ 26 SDI - Complementa\u00e7\u00e3o de pens\u00e3o\",\"children\":[{\"title\":\"obs\",\"children\":[{\"title\":\"26. COMPET\u00caNCIA DA JUSTI\u00c7A DO TRABALHO. COMPLEMENTA\u00c7\u00c3O DE PENS\u00c3O REQUERIDA POR VI\u00daVA DE EX-EMPREGADO (inserido dispositivo) - Res. 129/2005, DJ 20, 22 e 25.04.2005 A Justi\u00e7a do Trabalho \u00e9 competente para apreciar pedido de complementa\u00e7\u00e3o de pens\u00e3o postulada por vi\u00fava de ex-empregado, por se tratar de pedido que deriva do contrato de trabalho.\"}]}]},{\"title\":\"OJ 130 da SDI-2 - Competencia de ACP\",\"children\":[{\"title\":\"OBS\",\"children\":[{\"title\":\"130. A\u00c7\u00c3O CIVIL P\u00daBLICA. COMPET\u00caNCIA. LOCAL DO DANO. LEI N\u00ba 7.347/1985, ART. 2\u00ba. C\u00d3DIGO DE DEFESA DO CONSUMIDOR, ART. 93 (reda\u00e7\u00e3o alterada na sess\u00e3o do Tribunal Pleno realizada em 14.09.2012) \u2013 Res. 186/2012, DEJT divulgado em 25, 26 e 27.09.2012 I \u2013 A compet\u00eancia para a A\u00e7\u00e3o Civil P\u00fablica fixa-se pela extens\u00e3o do dano. II \u2013 Em caso de dano de abrang\u00eancia regional, que atinja cidades sujeitas \u00e0 jurisdi\u00e7\u00e3o de mais de uma Vara do Trabalho, a compet\u00eancia ser\u00e1 de qualquer das varas das localidades atingidas, ainda que vinculadas a Tribunais Regionais do Trabalho distintos. III \u2013 Em caso de dano de abrang\u00eancia suprarregional ou nacional, h\u00e1 compet\u00eancia concorrente para a A\u00e7\u00e3o Civil P\u00fablica das varas do trabalho das sedes dos Tribunais Regionais do Trabalho. IV \u2013 Estar\u00e1 prevento o ju\u00edzo a que a primeira a\u00e7\u00e3o houver sido distribu\u00edda.\"}]}]},{\"title\":\"Sumula 192 TST\",\"children\":[{\"title\":\"obs\",\"children\":[{\"title\":\"S\u00famula n\u00ba 192 do TST A\u00c7\u00c3O RESCIS\u00d3RIA. COMPET\u00caNCIA (atualizada em decorr\u00eancia do CPC de 2015) - Res. 212/2016, DEJT divulgado em 20, 21 e 22.09.2016 I - Se n\u00e3o houver o conhecimento de recurso de revista ou de embargos, a compet\u00eancia para julgar a\u00e7\u00e3o que vise a rescindir a decis\u00e3o de m\u00e9rito \u00e9 do Tribunal Regional do Trabalho, ressalvado o disposto no item II. II - Ac\u00f3rd\u00e3o rescindendo do TST que n\u00e3o conhece de recurso de embargos ou de revista, analisando argui\u00e7\u00e3o de viola\u00e7\u00e3o de dispositivo de lei material ou decidindo em conson\u00e2ncia com s\u00famula de direito material ou com iterativa, not\u00f3ria e atual jurisprud\u00eancia de direito material da Se\u00e7\u00e3o de Diss\u00eddios Individuais (S\u00famula n\u00ba 333), examina o m\u00e9rito da causa, cabendo a\u00e7\u00e3o rescis\u00f3ria da compet\u00eancia do TST. III \u2013 Sob a \u00e9gide do art. 512 do CPC de 1973, \u00e9 juridicamente imposs\u00edvel o pedido expl\u00edcito de desconstitui\u00e7\u00e3o de senten\u00e7a quando substitu\u00edda por ac\u00f3rd\u00e3o do Tribunal Regional ou superveniente senten\u00e7a homologat\u00f3ria de acordo que puser fim ao lit\u00edgio. IV \u2013 Na vig\u00eancia do CPC de 1973, \u00e9 manifesta a impossibilidade jur\u00eddica do pedido de rescis\u00e3o de julgado proferido em agravo de instrumento que, limitando-se a aferir o eventual desacerto do ju\u00edzo negativo de admissibilidade do recurso de revista, n\u00e3o substitui o ac\u00f3rd\u00e3o regional, na forma do art. 512 do CPC. (ex-OJ n\u00ba 105 da SBDI-2 - DJ 29.04.2003) V- A decis\u00e3o proferida pela SBDI, em agravo regimental, calcada na S\u00famula n\u00ba 333, substitui ac\u00f3rd\u00e3o de Turma do TST, porque emite ju\u00edzo de m\u00e9rito, comportando, em tese, o corte rescis\u00f3rio. (ex-OJ n\u00ba 133 da SBDI-2 - DJ 04.05.2004).\"}]}]},{\"title\":\"REVIS\u00c3O DE TAC\",\"children\":[{\"title\":\"\\\"Nas rela\u00e7\u00f5es jur\u00eddicas de trato sucessivo, entre as quais se inserem as constitu\u00eddas por meio da celebra\u00e7\u00e3o de um TAC em que previstas obriga\u00e7\u00f5es de fazer e n\u00e3o fazer com efeitos permanentes e prospectivos, a altera\u00e7\u00e3o do estado de fato ou de direito autoriza a retifica\u00e7\u00e3o do quanto ajustado, com fundamento no art. 471 do CPC de 1973 (atual art. 501 do CPC de 2015) c/c o art. 769 da CLT\\\" (RR - 1030-74.2010.5.08.0001 , Relator Ministro: Douglas Alencar Rodrigues, Data de Julgamento: 16/11/2016, 7\u00aa Turma, Data de Publica\u00e7\u00e3o: DEJT 19/12/2016). MPT - 2022 - MPT - Procurador do Trabalho\"}]},{\"title\":\"JUSTI\u00c7A DO TRABALHO E FALENCIA - Ler Art. 76\"}]}]},{\"title\":\"Competencia Territorial da JT - Art. 651 da CLT FCC - 2022 - Prefeitura de Teresina - PI - Procurador\",\"children\":[{\"title\":\"Local do Ajuizamento da A\u00e7ao - Caput Art. 651 Qual \u00e9 a regra geral?\",\"children\":[{\"title\":\"REGRA GERAL: Local da Prestac\u00e3o dos Servi\u00e7os FCC - 2022 - TRT - 9\u00aa REGI\u00c3O (PR) - Analista\",\"children\":[{\"title\":\"\u00a71 - Agente ou Viajante comercial (Regras s\u00e3o sucessivas)\",\"children\":[{\"title\":\"Regra 1 - Local da agencia ou filial a que estiver subordinado\"},{\"title\":\"Regra 2 (OCASIONA UMA OPCAO)\",\"children\":[{\"title\":\"Domicilio do empregado OU\"},{\"title\":\"Local mais proximo\"}]}]},{\"title\":\"\u00a72 - Empregado Brasileiro (Nato ou Naturalizado) q trabalha no exterior\",\"children\":[{\"title\":\"Pode ajuizar a A\u00e7\u00e3o no Brasil, mas qual vara do Trabalho?\"},{\"title\":\"Em regra\",\"children\":[{\"title\":\"Local em que a empresa tenha sede ou filial no Brasil\"},{\"title\":\"Exceto em caso de Tratado\"}]},{\"title\":\"Que dirieto do trabalho ele pode postular? Direito do exterior ou direito nacional?\"},{\"title\":\"A sum. 207 do TST que dizia que o legisla\u00e7\u00e3o seria a do local da presta\u00e7\u00e3o dos servi\u00e7os\"},{\"title\":\"A Sum. 207 foi cancelada. Entendimento passa a ser a ado\u00e7\u00e3o da norma mais favoravel\"},{\"title\":\"Atualmente adota-se a TEORIA DO CONGLOBAMENTO(o que \u00e9 mais favoravel)\"}]},{\"title\":\"\u00a73 - Empregador que promove presta\u00e7\u00e3o dos fora do local da celeb. do contrato H\u00e1 op\u00e7\u00e3o p/ o EMPREGADO LOCAL DA C LOCAL DA P\",\"children\":[{\"title\":\"Local da Contrata\u00e7\u00e3o\"},{\"title\":\"Local da Prestac\u00e3o dos servi\u00e7o\"}]}]}]},{\"title\":\"EXCECOES de SUSPEI\u00c7\u00c3O E INCOMPETENCIA Art. 799 CLT\",\"children\":[{\"title\":\"Intro\",\"children\":[{\"title\":\"Nas causas da JT, somente podem ser opostas, C O M (TEM) S U S P E N S \u00c3 O do feito, as exce\u00e7\u00f5es de suspei\u00e7\u00e3o ou incompet\u00eancia. SenDo que: \u00a7 2\u00ba - Das decis\u00f5es sobre exce\u00e7\u00f5es de suspei\u00e7\u00e3o e incompet\u00eancia, salvo, quanto a estas, se terminativas do feito, n\u00e3o caber\u00e1 recurso, podendo, no entanto, as partes aleg\u00e1-las novamente no recurso que couber da decis\u00e3o final. A decisao da exce\u00e7\u00e3o de incompetencia \u00e9 uma das hipoteses q desafia recurso imediato. \u00c9 uma decisao interlocut\u00f3ria que foge ao principio da irrecorribilidade imediata das decis\u00f5es interlocut\u00f3rias\"},{\"title\":\"\u00c9 silente em rela\u00e7\u00f5a a exce\u00e7\u00e3o de impedimento TODAVIA AS DEMAIS EXCE\u00c7OES SER\u00c3O ALEGADAS COMO MATERIA DE DEFESA\"}]},{\"title\":\"Exce\u00e7\u00e3o de INCOMPETENCIA ou DECLINATORIA DE FORO acarreta suspens\u00e3o? como \u00e9 apresentada? qual prazo? qual procedimento? apresentada a parte pode arguir conflito de competencia? FEPESE - 2022 - Florian\u00f3polis - SC - Procurador Municipal ATEN\u00c7\u00c3O SUMULA 214 TST FCC - 2022 - TRT - 5\u00aa Regi\u00e3o (BA) - Analista Judici\u00e1rio FGV - 2022 - TRT - 13\u00aa Regi\u00e3o (PB) - T\u00e9cnico Judici\u00e1rio FUNDATEC - 2022 - Prefeitura de Porto Alegre - RS - Procurador FCC - 2022 - TRT - 23\u00aa REGI\u00c3O (MT) - Analista Judici\u00e1rio FCC - 2022 - TRT - 17\u00aa Regi\u00e3o (ES) - Analista Judici\u00e1rio - \u00c1rea Judici\u00e1ria VUNESP - 2022 - Docas - PB - Advogado VUNESP - 2023 - Prefeitura de S\u00e3o Jos\u00e9 do Rio Preto - SP - Procurador do Munic\u00edpio FUNDATEC - 2024 - Prefeitura de Crici\u00fama - SC - Procurador do Munic\u00edpio\",\"children\":[{\"title\":\"Ser\u00e1 apresentada qnd desrespeitadas regras sobre competencia territorial\"},{\"title\":\"A reforma trabalhista alterou o Art. 800\"},{\"title\":\"Sua n\u00e3o apresentacao gera prorrogacao da competencia MPT - 2022 - MPT - Procurador do Trabalho\"},{\"title\":\"O processo fica suspenso at\u00e9 o julgamento da exce\u00e7\u00e3o\"},{\"title\":\"Sua mera apresenta\u00e7\u00e3o j\u00e1 acarreta SUSPENSAO\"},{\"title\":\"Forma de Apresenta\u00e7\u00e3o\",\"children\":[{\"title\":\"Apresentadaa em pe\u00e7a(n\u00e3o \u00e9 em PRELIMINAR) q sinalize existencia dessa dela\"}]},{\"title\":\"Oposta a exce\u00e7\u00e3o de INCOMPETENCIA \u00e9 vedado a parte arguir conflito de Jurisdi\u00e7\u00e3o\"},{\"title\":\"Prazo\",\"children\":[{\"title\":\"5d a CONTAR da notificac\u00e3o, antes da audiencia\"}]},{\"title\":\"Procedimento\",\"children\":[{\"title\":\"Protocolada a peti\u00e7\u00e3o, suspende-se o processo e n\u00e3o realiza audiencia at\u00e9 resolver a exce\u00e7\u00e3o\"},{\"title\":\"Autos v\u00e3o conclusos ao juiz q intima o reclamante p/ MANIFSTA\u00c7\u00c3O EM 5D\"},{\"title\":\"Juiz pode designar prova oral, inclusive por precatoria\"},{\"title\":\"Decide a exce\u00e7\u00e3o de incompetencia territorial, e o processo retoma seu curso\"}]},{\"title\":\"O Art. 305 do CPC n\u00e3o \u00e9 aplicavel ao Processo Trabalhista\",\"children\":[{\"title\":\"Esbarra na sistematica trabalhista, pois a defesa deve ser apresentada em audiencia\"}]}]},{\"title\":\"EXCECOES DE SUSPEICAO e IMPEDIMENTO\",\"children\":[{\"title\":\"Causas de Suspei\u00e7\u00e3o Art. 801 da CLT\",\"children\":[{\"title\":\"Inimizade Pessoal\"},{\"title\":\"Amizade Intima\"},{\"title\":\"Parentesco at\u00e9 3\u02da grau\"},{\"title\":\"Interesse Particular na causa\"}]},{\"title\":\"Art. 802 - Apresentada a exce\u00e7\u00e3o de suspei\u00e7\u00e3o, o juiz ou Tribunal designar\u00e1 audi\u00eancia dentro de 48 (quarenta e oito) horas, para instru\u00e7\u00e3o e julgamento da exce\u00e7\u00e3o.\"}]}]}]},{\"title\":\"Org\u00e3os Auxiliares\",\"children\":[{\"title\":\"Varas de Trabalho - Art. 652 da CLT VUNESP - 2021 - Guaruj\u00e1 - SP - Procurador\",\"children\":[{\"title\":\"Art. 116 da CF\",\"children\":[{\"title\":\"Nas varas de Trabalho a jurisdi\u00e7\u00e3o \u00e9 exercida por 1 juiz singular\",\"children\":[{\"title\":\"N\u00e3o tem nada de juiz classista\"}]}]},{\"title\":\"Competencia\",\"children\":[{\"title\":\"Competencia das Varas\",\"children\":[{\"title\":\"a) conciliar e julgar:\",\"children\":[{\"title\":\"Reconhecimento da estabilidade de empregado;\"},{\"title\":\"Remunera\u00e7\u00e3o, f\u00e9rias e indeniza\u00e7\u00f5es por motivo de rescis\u00e3o do CT;\"},{\"title\":\"Contratos de empreitadas em que o empreiteiro seja oper\u00e1rio ou art\u00edfice;\"},{\"title\":\"IV - os demais diss\u00eddios concernentes ao contrato individual de trabalho;\"}]},{\"title\":\"b) processar e julgar os inqu\u00e9ritos para apura\u00e7\u00e3o de falta grave;\"},{\"title\":\"c) julgar os embargos opostos \u00e0s suas pr\u00f3prias decis\u00f5es;\"},{\"title\":\"d) julgar os recursos interpostos das decis\u00f5es do presidente, nas execu\u00e7\u00f5es;\"},{\"title\":\"d) impor multas e demais penalidades relativas aos atos de sua compet\u00eancia;\"},{\"title\":\"V - as a\u00e7\u00f5es entre trabalhadores portu\u00e1rios e os operadores portu\u00e1rios ou o OGMO decorrentes da rela\u00e7\u00e3o de trabalho;\"},{\"title\":\"Homolog. de Acordo Extrajud. em materia da JT\"}]},{\"title\":\"Compete ainda\",\"children\":[{\"title\":\"a) requisitar \u00e0s autoridades competentes a realiza\u00e7\u00e3o das dilig\u00eancias necess\u00e1rias ao esclarecimento dos feitos sob sua aprecia\u00e7\u00e3o, representando contra aquelas que n\u00e3o atenderem a tais requisi\u00e7\u00f5es;\"},{\"title\":\"b) realizar as dilig\u00eancias e praticar os atos processuais ordenados pelos TRT ou tST\"},{\"title\":\"c) julgar as suspei\u00e7\u00f5es arg\u00fcidas contra os seus membros;\"},{\"title\":\"d) julgar as exce\u00e7\u00f5es de incompet\u00eancia que lhes forem opostas;\"},{\"title\":\"e) expedir precat\u00f3rias e cumprir as que lhes forem deprecadas;\"},{\"title\":\"f) exercer, em geral, no interesse da JT qLQ outras atribui\u00e7\u00f5es que decorram da sua jurisdi\u00e7\u00e3o.\"}]},{\"title\":\"Tem preferencia p/ julgamento\",\"children\":[{\"title\":\"Dissidios sobre pagtos de slarios\"},{\"title\":\"Aqueles que derivem da falencia do empregador\"},{\"title\":\"Pode o Pres. da Junta, a pedido, constituir processo em separado, sempre que a RT\"},{\"title\":\"Tiver outros assuntos\"},{\"title\":\"OBS - N\u00e3o se aplica a RECUP. JUDICIAL\"}]}]}]},{\"title\":\"Servi\u00e7os Aux. da JT\",\"children\":[{\"title\":\"Intro\",\"children\":[{\"title\":\"MPT - Mapa de Organiza\u00e7\u00e3o do MPT\"},{\"title\":\"Servico da JT\",\"children\":[{\"title\":\"\u00c9 relevante e obrigatorio\"},{\"title\":\"S\u00f3 h\u00e1 dispensa por motivo justo\"}]}]},{\"title\":\"Secretarias\",\"children\":[{\"title\":\"Secretaria das Varas\",\"children\":[{\"title\":\"Cada vara deve ter 1 secretaria\"},{\"title\":\"A dire\u00e7\u00e3o \u00e9 de um servidor designado pelo Presidente(juiz da vara)\"},{\"title\":\"Responsaveis por trabalhos burocraticos das varas\"},{\"title\":\"Competencias das Secretarias - Art. 711\",\"children\":[{\"title\":\"Contagem das custas\"}]},{\"title\":\"Competencias dos Secretarios - Art. 712\",\"children\":[{\"title\":\"Promover rapido andamento de proc., especialmente execu\u00e7\u00f5es...\"},{\"title\":\"Descumprimento de atos, sem motivo\",\"children\":[{\"title\":\"Ocasiona desconto dos vencimentos, em tantos dias quanto o excesso\"}]}]},{\"title\":\"Juiz de Direito com Competencia Trab. - Art. 716 e 717\",\"children\":[{\"title\":\"Investidos na admin. da JT\"},{\"title\":\"Tem competencia igual da secretaria das juntas\"},{\"title\":\"Mais de um cartorio no juiz a distrib. \u00e9 alternada e sucessiva de RT's\"}]}]},{\"title\":\"Secretaria dos TRT - 718, 719 e 720\",\"children\":[{\"title\":\"Cada TRT tem 1 secretaria\"},{\"title\":\"Esta sob dire\u00e7\u00e3o do funcionario designado para a fun\u00e7\u00e3o\"},{\"title\":\"Competencias - Art. 719 da CLT\"},{\"title\":\"Competem aos secretarios a competencia do Art. 712\"},{\"title\":\"RI pode criar outras atribui\u00e7\u00f5es\"}]}]},{\"title\":\"Distribuidores\",\"children\":[{\"title\":\"Onde houver mais de uma junta(VARA) haver\u00e1 distribuidores\"},{\"title\":\"Competencias - Art. 714\",\"children\":[{\"title\":\"distrib. pela ordem rigorosa...\"}]},{\"title\":\"S\u00e3o designados como?\",\"children\":[{\"title\":\"Pelo Pres. do TRT dentre funcionarios das Varas e do TRT\"},{\"title\":\"Existentes na mesma localidade e submetidos ao mesmo presidente\"}]}]},{\"title\":\"Oficiais de Diligencia - Art. 721 FCC - 2022 - TRT - 9\u00aa REGI\u00c3O (PR) - Analista Judici\u00e1rio - \u00c1rea Judici\u00e1ria\",\"children\":[{\"title\":\"Incumbencia dos OJ e OJ Avaliadores da JT\",\"children\":[{\"title\":\"Realiza\u00e7\u00e3o de atos decorrentes da execu\u00e7\u00e3o dos julgados das juntas e dos TRT\"},{\"title\":\"Que lhes forem cometidos sobre o respectivo presidente\"},{\"title\":\"CPC/15 Art. 154 - Realizar pessoalmente... Cita\u00e7\u00f5es, penhoras(+ 2 testemunhas, se possivel)\"}]},{\"title\":\"Distrib. dos Atos\",\"children\":[{\"title\":\"P/ efeito de distribui\u00e7\u00e3o dos atos Os OJ's funcionar\u00e3o perante uma junta\"},{\"title\":\"Salvo, qnd da existencia, nos TRT, de org\u00e3os especificos, destinados a distrib. mandatos\"}]},{\"title\":\"Onde houver mais de uma JUNTA\",\"children\":[{\"title\":\"Atrib. p/ cumprimento do ato deprecado ao OJ ser\u00e1 transferida a outro oficial\"},{\"title\":\"Sempre que, apos o decurso de 9dias, sem razoes que o justifiquem\"},{\"title\":\"Nao tiver cumprido o ato, sujeitando-se os serventuarios as penalidades da Lei\"}]},{\"title\":\"Prazo p/ o OJ Avaliador Avaliar\",\"children\":[{\"title\":\"Prazo do Art. 888 da CLT. 10 dias?\"}]},{\"title\":\"Faculta-se aos Presidentes dos TRT\",\"children\":[{\"title\":\"Cometer a qlq OJ realiza\u00e7\u00e3o de atos de execu\u00e7\u00e3o das decisoes dos Tribunais\"}]},{\"title\":\"Falta ou Impedimento do OJ e OJ Aval.\",\"children\":[{\"title\":\"Presidente da Junta pode atribuir a aprecia\u00e7\u00e3o a qlq serventuario\"}]}]}]},{\"title\":\"Art. 678 - TRT - Competencias\",\"children\":[{\"title\":\"Pleno\"},{\"title\":\"Turmas\"}]}]}]},\"cap2\":{\"title\":\"3. Partes e Procuradores\",\"children\":[{\"title\":\"Capacidades\",\"children\":[{\"title\":\"Capacidade para Ser Parte ou Capacidade de Direito\",\"children\":[{\"title\":\"Aptidao para ser titular de direitos e deveres\"},{\"title\":\"Ocorre com o nascimento com vida\"},{\"title\":\"Em rela\u00e7\u00e3o PJ ocorre com a inscri\u00e7\u00e3o dos atos no registro\"}]},{\"title\":\"Capacidade Processual o que se pode fazer com 16 anos como \u00e9 a representa\u00e7\u00e3o do menor?\",\"children\":[{\"title\":\"\u00c9 a pratica de atos processuais. No processo do trabalho \u00e9 PLENA AOS 18 ANOS\"},{\"title\":\"Com 16 anos posso ser empregado, mas em processo \u00e9 necessario representa\u00e7\u00e3o/assistencia\"},{\"title\":\"Com 16 N\u00c3O posso dar quita\u00e7\u00e3o em rescis\u00e3o\"},{\"title\":\"A representa\u00e7\u00e3o/assist. do menor \u00e9 pela PGT, sindicato, MP ou curador(793)(+MPT MPE) FEPESE - 2022 - Florian\u00f3polis - SC - Procurador Municipal\"},{\"title\":\"Contra os menores de 18 anos nao corre prescri\u00e7\u00e3o(440 CLT)\"},{\"title\":\"Se sao representados o MP n\u00e3o precisa atuar como custos legis\"}]},{\"title\":\"Capacidade Postulat\u00f3ria - Art. 791 da CLT e Sum. 425 do TST\",\"children\":[{\"title\":\"Juspostulandi dissidios coletivos? Ro contra senten\u00e7a? CESPE - 2021 - PGE-CE - Procurador do Estado\",\"children\":[{\"title\":\"\u00c9 a necessidade de interven\u00e7\u00f5a do advogado. N\u00e3o h\u00e1 obrigatoriedade no DPT\"},{\"title\":\"A sumula disse que em algumas situa\u00e7\u00f5es o advogado \u00e9 indispensavel\",\"children\":[{\"title\":\"MS\"},{\"title\":\"A\u00e7\u00e3o Rescis\u00f3ria\"},{\"title\":\"A\u00e7\u00e3o Cautelar\"},{\"title\":\"Recursos para TST\"}]},{\"title\":\"RO interposto contra senten\u00e7a em RT\",\"children\":[{\"title\":\"Incide o JUSPOSTULANDI\"}]},{\"title\":\"Dissidios Coletivos?\",\"children\":[{\"title\":\"Nos diss\u00eddios coletivos \u00e9 facultada aos interessados a assist\u00eancia por advogado.\"}]},{\"title\":\"Art. 843 da CLT - Em situa\u00e7\u00f5es urgentes o reclamante pode\",\"children\":[{\"title\":\"Ser representado por emrpegado da categoria ou da mesma empresa na audiencia\"},{\"title\":\"Independe de previa comunica\u00e7\u00e3o a JT\"}]}]},{\"title\":\"Emancipa\u00e7\u00e3o na esfera civil ocasiona impactos no DPT?\",\"children\":[{\"title\":\"Doutrina diz que sim. Incidindo o juspostulandi ao menor\"},{\"title\":\"O art. 440 da CLT nao deve ser aplicado. A prescri\u00e7\u00e3o corre\"},{\"title\":\"AS veda\u00e7\u00f5es de saude(noturno, insalubridade) permanecem\"}]},{\"title\":\"Assistencia Judiciaria\",\"children\":[{\"title\":\"\u00c9 prestada ao trabalhador que esteja representado pelo sindicato da categoria...\"},{\"title\":\"E receba valor menor que 2 SM. Receber quantia superior nao impede, desde que comprove\"},{\"title\":\"Depende de filia\u00e7\u00e3o ao sindicato?\",\"children\":[{\"title\":\"N\u00e3o!\"}]}]},{\"title\":\"Substitui\u00e7\u00e3o Processual\",\"children\":[{\"title\":\"Tbm chamada de leg. extraordinaria, prevista no Art. 18 do CPC\"},{\"title\":\"Depende de autoriza\u00e7\u00e3o de Lei, Ex: Sindicatos\"},{\"title\":\"Serve p/ qlq direito ou apenas nas hip. da Lei?\",\"children\":[{\"title\":\"Segundo STF, a legitimidade \u00e9 ampla. Qlq direito relacionado ao vinculo empregaticio\"}]},{\"title\":\"N\u00e3o acontece apenas no polo ativo, como reconhece a Sum. 406 do TST. Ex: AR\"},{\"title\":\"H\u00e1 tbm direitos coletivos pelo MPT e Associa\u00e7\u00f5es\"}]},{\"title\":\"Sucess\u00e3o Processual\",\"children\":[{\"title\":\"Ex: Morte do Emrpegado, Extin\u00e7\u00e3o da empresa\"},{\"title\":\"Sendo PF, o espolio, representado pelo inventariamente assume\"},{\"title\":\"Se nao h\u00e1 inventario pode haver habilita\u00e7\u00e3o dos herdeiros\"},{\"title\":\"Se o obito ocorrer antes da a\u00e7\u00e3o n\u00e3o h\u00e1 sucessao processual\"},{\"title\":\"Se os herdeiros s\u00e3o menores?\",\"children\":[{\"title\":\"Se os pais sao representados o MP n\u00e3o precisa atuar como custos legis\"}]},{\"title\":\"Quanto a PJ aplica-se o Art. 10 e 448 da CLT\"}]}]},{\"title\":\"Assitencia Judiciaria Gratuita - Art. 790, \u00a73 da CLT pode ser de oficio ou a requerimento? existe algum criterio objetivo? precisa ter poderes especificos? CESPE / CEBRASPE - 2023 - PGE-SE - Procurador do Estado\",\"children\":[{\"title\":\"Pode ser concedida de oficio ou a requerimento. \u00c9 um afaculdade do Juiz ou Pres. de TRT\"},{\"title\":\"Pode ser dada em qlq instancia. Abrange traslados e instrumentos\"},{\"title\":\"A quem perceba salario at\u00e9 40% do limite max. do benef. do RGPS\"},{\"title\":\"Ou se perceberem quantia maior, comprovarem\"},{\"title\":\"N\u00e3o precisa ter advogado com poderes especificos p/ pedir.(logico, juspost.)\"}]}]},{\"title\":\"Representac\u00e3o por Advogado\",\"children\":[{\"title\":\"Intro\",\"children\":[{\"title\":\"Em regra, o adv. deve apresentar procura\u00e7\u00e3o, mas no DPT tal regra \u00e9 relativizada pelo...\"},{\"title\":\"Mandato tacito e juspostulandi\"}]},{\"title\":\"Procura\u00e7\u00e3o/Mandato\",\"children\":[{\"title\":\"Proc. p/ RT abrange AR e MS?\",\"children\":[{\"title\":\"A outorga de procura\u00e7\u00e3o especifica p/ RT abrange AR ou \u00e9 necessario nova procura\u00e7\u00e3o? A procura\u00e7\u00e3o outorgada com poderes espec\u00edficos para ajuizamento de RT n\u00e3o autoriza a propositura de AR e MS, bem como n\u00e3o se admite sua regulariza\u00e7\u00e3o quando verificado o defeito de representa\u00e7\u00e3o processual na fase recursal, nos termos da S\u00famula n\u00ba 383, item II, do TST.\"}]},{\"title\":\"Mandato T\u00e1cito(Apud Acta) Art. 791, \u00a73 da CLT FEPESE - 2022 - Florian\u00f3polis - SC - Procurador\",\"children\":[{\"title\":\"Procura\u00e7\u00e3o que n\u00e3o foi outorgada expressamente\"},{\"title\":\"O ADV. foi em audiencia e est\u00e1 praticando atos processuais em nome da parte\"},{\"title\":\"Com anuencia da parte representada\"},{\"title\":\"Constando o nome do adv. na ata de audiencia o adv. \u00e9 representante legitimo\"},{\"title\":\"Mandato tacito outorga poderes gerais aos advogados\"},{\"title\":\"O advogado deve fazer requerimento verbal, COM anuencia da parte\"}]}]},{\"title\":\"Honorarios Advocaticios - Art. 791-A da CLT FCC - 2022 - TRT - 4\u00aa REGI\u00c3O (RS) - Analista Jud. FCC - 2022 - TRT - 5\u00aa Regi\u00e3o (BA) - Analista Jud. FCC - 2022 - TRT - 5\u00aa Regi\u00e3o (BA) - Analista Jud. FEPESE - 2022 - Florian\u00f3polis - SC - Procurador Municipal FEPESE - 2022 - Florian\u00f3polis - SC - Procurador Municipal Instituto Access - 2022 - CELEPAR - PR - Advogado Pleno\",\"children\":[{\"title\":\"OJ 345 da SDI-1 do TST - Incidencia VALOR LIQUIDO OU BRUTO?\",\"children\":[{\"title\":\"Os hon. advocaticios devem incidir sobre o Valor Liquido da Condena\u00e7\u00e3o\"},{\"title\":\"Apurado na fase de liquid. da sentenca, com dedu\u00e7\u00e3o de descontos fiscais e previd.\"}]},{\"title\":\"Incluiu-se o Art. 791-A na CLT q tbm traz o parametros de fixa\u00e7\u00e3o entre 5 e 15%.\"},{\"title\":\"Institui a condena\u00e7\u00e3o ao pagto de honorarios pela mera sucumbencia, msm sistema do NCPC\"},{\"title\":\"At\u00e9 a reforma, somente o sindicato recebia sucumbencia(Sum. 219 do TST)\"},{\"title\":\"Apos a reforma, a parcela ficou automatica, decorrente da mera sucumbencia da parte\"},{\"title\":\"Prev\u00ea tbm que sao devidos honorarios da RECONVENCAO\"},{\"title\":\"O advogado, mesmo que em causa propria tem dirieto aos honorarios\"},{\"title\":\"A reforma trouxe a condena\u00e7\u00e3o em honorarios contra fazenda e em caso de subst. pelo sindicato\"},{\"title\":\"Calculado sobre o proveito econ. obtido, valor que resultar da liquid. OU n\u00e3o sendo possivel mensura-lo, sobre o valor att. da causa\"},{\"title\":\"Em caso de sucumbencia RECIPROCA?\",\"children\":[{\"title\":\"(reforma) as 2 partes sao condenadas a pagar honorarios, com base em proveito econ. do proc.\"},{\"title\":\"Sendo que \u00e9 VEDADA a compensa\u00e7\u00e3o\"}]},{\"title\":\"Sucumbencia da Parte que tem Justi\u00e7a Gratuita\",\"children\":[{\"title\":\"A parte que teve esse beneficio, \u00e9 condenada aos honorarios, mas a cobran\u00e7a \u00e9 suspensa por 2 anos. Apos 2 anos a cobran\u00e7a \u00e9 extinta e nao pode ser cobrada\"}]}]},{\"title\":\"Amicus Curiae\",\"children\":[{\"title\":\"Previsto na IN 39/2016. Aplica-se ao Processo do Trabalho\"}]}]},{\"title\":\"Preposto 843 CLT\",\"children\":[{\"title\":\"Regra Geral\",\"children\":[{\"title\":\"Preposto NAO tem que ser empregado MAS DEVE TER conhecimento dos fatos CEBRASPE - 2022 - PGM Recife - PE - Procurador Judicial Municipal CESPE / CEBRASPE - 2024 - CAU-BR - Advogado\"},{\"title\":\"Presen\u00e7a a audiencia deve ser pessoal, se for PJ pode estar representada por preposto\"},{\"title\":\"Precisar ter conhecimento e n\u00e3o ter TESTEMUNHADO os FATOS\"},{\"title\":\"Carta de Preposi\u00e7\u00e3o\",\"children\":[{\"title\":\"Deve ser juntada, sob pena de revelia\"}]},{\"title\":\"Ausencia do preposto em audiencia\",\"children\":[{\"title\":\"REVELIA, ainda que o adv. esteja munido de procura\u00e7\u00e3o\"}]},{\"title\":\"Empregado doente ou outro motivo, pode ser representado por sindicato ou empregado da categoria\"}]},{\"title\":\"Exce\u00e7\u00f5es\",\"children\":[{\"title\":\"MEI e EPP\",\"children\":[{\"title\":\"N\u00e3o h\u00e1 necessidade de que o preposto seja empregado\"},{\"title\":\"E o contratante precisa estar presente ou pode ser familia?\"},{\"title\":\"Pode ser qlq membro da familia\"}]},{\"title\":\"Empregador Domestico\",\"children\":[{\"title\":\"N\u00e3o h\u00e1 necessidade de que o preposto seja empregado\"}]}]},{\"title\":\"Caso a Uni\u00e3o seja PARTE - Lei 9.028/1995\",\"children\":[{\"title\":\"\u00c9 obrigatorio conhecimento de preposto que tenha conhecimento da causa\"},{\"title\":\"Ausente o representante oficial da uni\u00e3o pode o proposto assinar e entregar a contesta\u00e7\u00e3o?\"},{\"title\":\"N\u00e3o pode assinar, somente entrega-la se subscrita pelo representante\"}]}]},{\"title\":\"Juiz\",\"children\":[{\"title\":\"Aplica-se ao DPT o Art. 139 do NCPC - Poderes do Juiz\"},{\"title\":\"O inciso V, parte final(preferencialmente com concliliadores e mediadores judiciais) nao se aplica\"},{\"title\":\"A JT n\u00e3o tem esse tipo de servidor em seus quadros\"},{\"title\":\"Atentar para o Art. 140 do NCPC e 141\"},{\"title\":\"Existem materias que podem ser decididas msm sem pedido do autor - Sum. 211 do TST\"},{\"title\":\"Atos do Juiz, Despachos, Dec. Interloc, Senten\u00e7as, Acord\u00e3os\"},{\"title\":\"O art. 489 do NCPC \u00e9 aplicavel na esfera trab.(Fundamentac\u00e3o das senten\u00e7as)\"},{\"title\":\"Interessanete que o art. 832 da CLT traz os req. da senten\u00e7a, mas msm assim aplica-se o 489\"}]},{\"title\":\"MPT - LC 75\",\"children\":[{\"title\":\"Mapa Proprio\"},{\"title\":\"Atua como parte ou fiscal da Lei\"},{\"title\":\"Atua judicial e extrajudicialmente(Inq. Civil e TAC)\"},{\"title\":\"Ex de Atua\u00e7\u00e3o:\",\"children\":[{\"title\":\"ACP(trab. escravo, crian\u00e7as...)\"},{\"title\":\"Sum. 407 do TST\"},{\"title\":\"A\u00e7\u00e3o de dissidio coletivo em greves em ativ. essenciais\"},{\"title\":\"pode propor e realizar acordos entre trabalhadores e empregadores, sem envolver a Justi\u00e7a do Trabalho ou sequer iniciar um processo trabalhista.\"}]}]},{\"title\":\"Presen\u00e7a das Partes em Audiencia CESPE - 2021 - PGE-MS - Procurador do Estado CEBRASPE - 2022 - PGM Recife - PE - Procurador FUNDATEC - 2024 - AL-RS - Procurador\",\"children\":[{\"title\":\"Atraso do Juiz - Art. 815 da CLT e OJ 245 da SDI-1 do TST 2023 CLT foi alterada\",\"children\":[{\"title\":\"\u00a7 1\u00ba - Atraso de 15 minutos\",\"children\":[{\"title\":\"Aus\u00eancia do juiz ou presidente at\u00e9 15 minutos ap\u00f3s a hora marcada\"},{\"title\":\"Presentes podem se retirar\"},{\"title\":\"Ocorrido deve constar no livro de registro das audi\u00eancias\"}]},{\"title\":\"\u00a7 2\u00ba - Atraso de 30 minutos\",\"children\":[{\"title\":\"Audi\u00eancia n\u00e3o iniciada injustificadamente at\u00e9 30 minutos ap\u00f3s a hora marcada\"},{\"title\":\"Partes e advogados podem se retirar\"},{\"title\":\"Ocorrido deve constar no livro de registro das audi\u00eancias\"}]},{\"title\":\"\u00a7 3\u00ba - Remarca\u00e7\u00e3o da Audi\u00eancia\",\"children\":[{\"title\":\"Na hip\u00f3tese do \u00a7 2\u00ba, audi\u00eancia deve ser remarcada para a data mais pr\u00f3xima poss\u00edvel\"},{\"title\":\"Vedada aplica\u00e7\u00e3o de penalidade \u00e0s partes\"}]}]},{\"title\":\"Atestado M\u00e9dico\",\"children\":[{\"title\":\"Atestado medico \u00e9 capaz de afastar revelia ou arquivamento?\"},{\"title\":\"N\u00e3o \u00e9 todo e qlq atestado medico afastar\u00e1 os efeitos\"},{\"title\":\"O atestado deve comprovar expressamente a IMPOSSIB. DE LOCOMO\u00c7AO NO DIA da Aud.\"}]},{\"title\":\"Ausencia das Partes - Art. 844 do CLT\",\"children\":[{\"title\":\"Efeitos Ordinarios\",\"children\":[{\"title\":\"Falta do Reclamante\",\"children\":[{\"title\":\"Arquiva-se o processo e condena as custas AINDA q beneficiario da justi\u00e7a gratuita\"},{\"title\":\"Comprovar em 15d motivo LEGALMENTE JUSTIFICAVEL\",\"children\":[{\"title\":\"N\u00e3o \u00e9 a criterio do Juiz. \u00e9 a LEI\"}]},{\"title\":\"O pagto dessas custas \u00e9 condi\u00e7\u00e3o p/ ajuizamento da demanda\"}]},{\"title\":\"Falta do Reclamado\",\"children\":[{\"title\":\"Revelia e Confisss\u00e3o, EXCETO SE O DIREITO \u00c9 INDISPONIVEL\",\"children\":[{\"title\":\"N\u00e3o ocorre a REVELIA se:\",\"children\":[{\"title\":\"I - havendo pluralidade de reclamados, algum deles contestar a a\u00e7\u00e3o;\"},{\"title\":\"II - o lit\u00edgio versar sobre direitos indispon\u00edveis;\"},{\"title\":\"III - a RT n\u00e3o estiver acompanhada de instrumento que a lei considere indispens\u00e1vel \u00e0 prova do ato;\"},{\"title\":\"IV - as alega\u00e7\u00f5es de fato formuladas pelo reclamante forem inveross\u00edmeis ou estiverem em contradi\u00e7\u00e3o com prova constante dos autos.\"}]}]},{\"title\":\"SE o adv. estiver presente? SERAO ACEITOS a contesta\u00e7\u00e3o e docs.\"}]},{\"title\":\"Falta de Ambas Partes\",\"children\":[{\"title\":\"Arquiva-se o processo(aplica-se a pena do reclamante)\"}]}]},{\"title\":\"Peremp\u00e7\u00e3o\",\"children\":[{\"title\":\"Ocorre no caso de ausencia das partes por 2 vzs na audiencia\"},{\"title\":\"A peremp\u00e7\u00e3o ocorre por 6 meses\"}]}]}]},{\"title\":\"Litiscons\u00f3rcio Art. 842 da CLT Quadrix - 2022 - SEDF - Professor - Direito - Edital n\u00ba 31\",\"children\":[{\"title\":\"O litiscons\u00f3rcio se configura quando h\u00e1 a pluralidade de partes no mesmo polo da demanda. Ele pode ser ativo, quando h\u00e1 mais de um autor, ou passivo, quando houver mais de um r\u00e9u. O litiscons\u00f3rcio pode ocorrer nos seguintes formatos: Facultativo: quando as partes se re\u00fanem para propor a demanda em conjunto por livre e espont\u00e2nea vontade. Pode ocorrer na modalidade ativa ou passiva. CLT, \u201cArt. 842 \u2013 Sendo v\u00e1rias as reclama\u00e7\u00f5es e havendo identidade de mat\u00e9ria, poder\u00e3o ser acumuladas num s\u00f3 processo, se se tratar de empregados da mesma empresa ou estabelecimento.\u201d\"},{\"title\":\"Art. 611-A \u00a7 5o Os sindicatos subscritores de CCT ou de ACT dever\u00e3o participar, como litisconsortes necess\u00e1rios, em a\u00e7\u00e3o individual ou coletiva, que tenha como objeto a anula\u00e7\u00e3o de cl\u00e1usulas desses instrumentos.\"}]},{\"title\":\"Comiss\u00e3o de Concilia\u00e7\u00e3o Previa quem pode instituir? pode ser por grupo? qual tipo de composi\u00e7ao? qual composi\u00e7ao em empresas? e no embito dos sindicatos? prazo de conciliar? o que acontece com o prazo presc?\",\"children\":[{\"title\":\"Intro\",\"children\":[{\"title\":\"Inserida na CLT no ano 2000 visando desafogar o PJ\"},{\"title\":\"Era uma tentativa obrigatoria para as partes, antes de entrar no PJ\"},{\"title\":\"A cria\u00e7\u00e3o da CCP \u00e9 facultativa j\u00e1 a cria\u00e7\u00e3o da CIPA \u00e9 obrigat\u00f3ria(19)\"}]},{\"title\":\"Suas regras art. 625A a H da CLT\",\"children\":[{\"title\":\"Art. 625-A - Composi\u00e7\u00e3o\",\"children\":[{\"title\":\"As empresas e sindicatos PODEM instituir CCP\",\"children\":[{\"title\":\"OBS\",\"children\":[{\"title\":\"N\u00f5a \u00e9 de composi\u00e7\u00e3o obrigatoria\"},{\"title\":\"O dispositvo fala em PODEM\"},{\"title\":\"Criacao da CCP \u00e9 facultativa\"}]}]},{\"title\":\"Com representante dos empregados e emrpegadores(composi\u00e7ao paritaria)\"},{\"title\":\"Com atribui\u00e7\u00e3o de tentar conciliar conflitos(somente dissidios individuais)\"},{\"title\":\"AS CCPs podem ser constituidas por GRUPOS DE EMRPESAS ou TER CARATER inter SINDICAL\"},{\"title\":\"OBS - Composi\u00e7\u00e3o Paritaria\",\"children\":[{\"title\":\"Representantes dos Empregados s\u00e3o ELEITOS\"},{\"title\":\"Representantes dos Empregadores s\u00e3o ESCOLHIDOS\"}]}]},{\"title\":\"Art. 625-B - CCP formadas no ambito da EMPRESA\",\"children\":[{\"title\":\"A CCP instituida NO AMBITO DA EMPRESA ser\u00e1 composta POR\"},{\"title\":\"NO MINIMO 2 e no max. 10 memb e deve observar que\"},{\"title\":\"Haver\u00e1 tantos suplentes quantos forem os representantes titulares\"},{\"title\":\"O mandato dos membros eleitos titulares e suplentes \u00e9 de 1 anos + UMA recondu\u00e7\u00e3o\"},{\"title\":\"Representantes dos EMPREGADOS tem ESTABILIDADE\"},{\"title\":\"OBS - Exercem sua fun\u00e7\u00f5a normalmente na empresa\"},{\"title\":\"devendo-se ser afastado apenas quando convocado para atuar como conciliador\"},{\"title\":\"O tempo despendido na atividade \u00e9 tempo de traalho efetivo(INTERRUPCAO CONTRATUAL)\"}]},{\"title\":\"Art. 625-C - CCP formada nos Sindicatos\",\"children\":[{\"title\":\"Tem sua constitui\u00e7\u00e3o e normas reguladas por CCT ou ACT\"},{\"title\":\"N\u00e3o h\u00e1 numero min. definido pela CLT\"}]},{\"title\":\"Art. 625-D - Obrigatoriedade\",\"children\":[{\"title\":\"Qlq demanda de nat. trabalhista ser\u00e1 submetida a CCP se, na LOCALIDADE da prestac\u00e3o dos servicos, houver CCP no ambito da empresa ou sindicato. A demanda ser\u00e1 formulada por escrito ou reduzida a termo pelos membros da CCP, sendo entregue copia data e assinada pelo membro aos interessados. N\u00e3o prosperando a concilia\u00e7\u00e3o, ser\u00e1 fornecida ao empregado e ao empregador declara\u00e7\u00e3o da tentativa conciliat\u00f3ria frustada com a descri\u00e7\u00e3o de seu objeto, firmada pelos membros da Comiss\u00e3o, que devera ser juntada \u00e0 eventual RT. Em caso de motivo relevante que impossibilite a observ\u00e2ncia do procedimento previsto no caput deste artigo, ser\u00e1 a circunst\u00e2ncia declarada na peti\u00e7\u00e3o da a\u00e7\u00e3o intentada perante a JT. Caso exista, na mesma localidade e para a mesma categoria, Comiss\u00e3o de empresa e Comiss\u00e3o sindical, o interessado optar\u00e1 por uma delas submeter a sua demanda, sendo competente aquela que primeiro conhecer do pedido. Havendo Acordo - Tem eficacia de titulo extrajudicial\"},{\"title\":\"Decis\u00f5es do STF\",\"children\":[{\"title\":\"CCP n\u00e3o \u00e9 de pasagem obrigatoria\"},{\"title\":\"A demanda pode ser ajuizda antes da submissao a CCP\"},{\"title\":\"Se ajuizasse a demanda sem passar na CCP, a a\u00e7\u00e3o era extinta sem res. do merito\"}]}]},{\"title\":\"Art. 625-E - Termo de concilia\u00e7\u00e3o\",\"children\":[{\"title\":\"Aceita a concilia\u00e7\u00f5a \u00e9 lavrado termo assinado pelo\"},{\"title\":\"empregado, empregador e conciliador, fornecendo-se copia as partes\"},{\"title\":\"O termo \u00e9 titulo extrajudicial e tem EFICACIA LIBERATORIA GERAL,\"},{\"title\":\"Exceto parcelas ressalvadas\"}]},{\"title\":\"Art. 625-F - Prazo p/ CCP conciliar\",\"children\":[{\"title\":\"As CCP tem prazo de 10 dias para\"},{\"title\":\"a realiza\u00e7\u00e3o da sess\u00e3o de concilia\u00e7\u00e3o a partir da provoca\u00e7\u00e3o do interessado\"},{\"title\":\"Esgotado o prazo sem realiza\u00e7\u00e3o da sess\u00e3o, \u00e9 fornecida, no ultimo dia do prazo,\"},{\"title\":\"Declarac\u00e3o de tentativa conciliatoria frsutrada\"}]},{\"title\":\"Art. 625-G - SUSPENSAO\",\"children\":[{\"title\":\"O prazo prescricional fica suspenso a partir da provoca\u00e7\u00e3o da CCP\"},{\"title\":\"Recome\u00e7a fluir pelo que lhe resta, a partir da tentativa frustrada\"}]},{\"title\":\"Art. 625-H\",\"children\":[{\"title\":\"Aplicam-se aos N\u00facleos Intersindicais de Concilia\u00e7\u00e3o Trabalhista em funcionamento ou\"},{\"title\":\"Aos que vierem a ser criados\"},{\"title\":\"no que couber, as disposi\u00e7\u00f5es previstas neste T\u00edtulo,\"},{\"title\":\"desde que observados os princ\u00edpios da paridade e da negocia\u00e7\u00e3o coletiva na sua constitui\u00e7\u00e3o\"}]}]}]}]},\"cap3\":{\"title\":\"3. Atos, Custas e Prazos\",\"children\":[{\"title\":\"Custas Processuais qual porcentagem e o teto das custas? quando s\u00e3o pagas? quem tem isen\u00e7\u00e3o das custas? e os honorarios periciais?\",\"children\":[{\"title\":\"Momento de Pagamento - 789 \u00a71\",\"children\":[{\"title\":\"Em regra \u00e9 no momento do transito em julgado\"},{\"title\":\"Se a parte recorrer?\",\"children\":[{\"title\":\"As custas s\u00e3o pagas no prazo recursal\"}]},{\"title\":\"No caso do Proc. de Execu\u00e7\u00e3o?\",\"children\":[{\"title\":\"S\u00e3o pagas ao final do processo\"}]}]},{\"title\":\"As custas destinam-se a quem?\",\"children\":[{\"title\":\"Uni\u00e3o\"}]},{\"title\":\"Valor Art. 789 da CLT\",\"children\":[{\"title\":\"2% sobre\",\"children\":[{\"title\":\"Valor do Acordo\",\"children\":[{\"title\":\"Cada PARTE pagar\u00e1 METADE\"},{\"title\":\"Pode ser estipulado em sentido diverso\"}]},{\"title\":\"Valor da Condena\u00e7\u00e3o\",\"children\":[{\"title\":\"Ser\u00e1 paga exclusivamente pelo vencido, nos termos do Art. 789 da CLT\"}]},{\"title\":\"Valor da Causa\",\"children\":[{\"title\":\"Ocorre na hipotese de ARQUIV. do processo OU IMPROCEDENCIA DO PEDIDO\"},{\"title\":\"Quem paga \u00e9 quem deu causa ao arquivamento ou improcedencia\"}]},{\"title\":\"Valor que o Juiz Definir\",\"children\":[{\"title\":\"Causas em que o valor \u00e9 indeterminado. Qnd n\u00e3o \u00e9 liquida a condenac\u00e3o\"},{\"title\":\"Juiz arbitra o valor e fixa o montante das custas\"}]},{\"title\":\"Valor Arbitrado na Decis\u00e3o em Dissidios Coletivos\",\"children\":[{\"title\":\"A sentenca normativa tem um valor e sobre ele incide as custas\"}]},{\"title\":\"Custas em A\u00e7\u00f5es Pl\u00farimas(Litisconsorcio) - Sum. 53 do TST\",\"children\":[{\"title\":\"Custas s\u00e3o calculadas sobre o valor total\"},{\"title\":\"N\u00e3o faz o calculo individualizado\"}]}]},{\"title\":\"Empregado que n\u00e3o obteve justica gratuita e o sindicato interveio no proc.\",\"children\":[{\"title\":\"A responsa pelas custas \u00e9 SOLIDARIA pelo sindicato\"}]}]},{\"title\":\"Isen\u00e7\u00e3o das custas Art. 790-A Conselhos de Fiscaliza\u00e7\u00e3o profissional? Beneficiarios da justi\u00e7a gratuita de oficio? FCC - 2022 - TRT- PR - T\u00e9cnico Jud.\",\"children\":[{\"title\":\"U, E, DF e M\"},{\"title\":\"Autarquias e Funda\u00e7\u00f5es que N\u00c3O explorem atividade econ.\"},{\"title\":\"MPT - Fiscal da Lei ou Parte\"},{\"title\":\"Conselhos de fiscaliza\u00e7\u00e3o de ex. profissional?\",\"children\":[{\"title\":\"N\u00e3o s\u00e3o isentos\"}]},{\"title\":\"Benef. da Justi\u00e7a Gratuita (790 \u00a73 da CLT(reforma)\",\"children\":[{\"title\":\"Pode ser concedido de oficio pelo Juiz, mesmo que n\u00e3o haja pedido\"},{\"title\":\"Pode ser em qlq momento do processo, inclusive em grau recursal\"},{\"title\":\"Com a reforma, quem recebe at\u00e9 o valor max. de 40% do valor max. dos benef. do RGPS\"}]}]},{\"title\":\"Assistencia Judiciaria Gratuita - Art. 5.584/1970 FGV - 2024 - C\u00e2mara dos Deputados - Analista Legislativo\",\"children\":[{\"title\":\"Esta ligada a atua\u00e7\u00e3o do sindicato\"},{\"title\":\"O sindicato precisa representar o reclamante para que se tenha a assist. gratuita\"},{\"title\":\"Deferida aquele que recebe at\u00e9 2 SM ou se receber mais, declarar pobreza\"},{\"title\":\"Prestada pelo Sindicato ao empregado INDEPENDENTEMENTE de filia\u00e7\u00e3o\"},{\"title\":\"Caso o empregado nnao obtenha, o Sindicato \u00e9 responsavel SOLIDARIO pelas custas\"}]},{\"title\":\"Honorarios Periciais - 790-B FEPESE - 2022 - Floripa - SC - Procurador\",\"children\":[{\"title\":\"Parte sucumbente na pretens\u00e3o OBJETO DA PERICIA, AINDA QUE BENEF. da JUSTICA GRATUITA\"},{\"title\":\"Limite max. \u00e9 estabelecido pelo CSJT\"},{\"title\":\"Juiz pode deferir o ser parcelados dos honorarios periciais\"},{\"title\":\"Responsa da Uni\u00e3o\",\"children\":[{\"title\":\"Somente caso o Benef. da Justi\u00e7a Gratuita n\u00e3o tenha obtido em juizo\"},{\"title\":\"Creditos capazes de suportar a defesa, ainda que em outro processo, a U responder\u00e1\"}]},{\"title\":\"OBS - Rela\u00e7\u00e3o de Trabalho - IN 27/2005\",\"children\":[{\"title\":\"Juiz tem a faculdade de determinar o deposito de honorarios processuais previos\"}]},{\"title\":\"Na execu\u00e7\u00e3o?\",\"children\":[{\"title\":\"J\u00e1 se sabe quem \u00e9 o executado. Logo esse paga\"}]}]}]},{\"title\":\"Nulidades Processuais\",\"children\":[{\"title\":\"Classifica\u00e7\u00e3o das Nulidades\",\"children\":[{\"title\":\"Inexistencia\",\"children\":[{\"title\":\"Sem elementos min. de forma\u00e7\u00e3o\"},{\"title\":\"Exemplo\",\"children\":[{\"title\":\"Senten\u00e7a assinada por quem n\u00e3o \u00e9 juiz\"}]}]},{\"title\":\"Nulidade Absoluta\",\"children\":[{\"title\":\"Ato existe, mas fere normas de interesse publico\"},{\"title\":\"Pode ser reconhecido de oficio a qlq momento do procesos\"},{\"title\":\"O ato decis\u00f3rio \u00e9 anulado, os demais s\u00e3o mantidos\"},{\"title\":\"Exemplo\",\"children\":[{\"title\":\"Incompetencia Absoluta\"}]}]},{\"title\":\"Nulidade Relativa\",\"children\":[{\"title\":\"Ato existe, mas fere norma de interesse das partes\"},{\"title\":\"\u00c9 causa de prorroga\u00e7\u00e3o de competencia que \u00e9 o efeito da preclus\u00e3o\"},{\"title\":\"As partes tem legitimidade para alegar\"}]},{\"title\":\"Mera Irregularidade\",\"children\":[{\"title\":\"N\u00e3o gera nenhum efeito processual\"},{\"title\":\"Exemplo\",\"children\":[{\"title\":\"Numera\u00e7\u00e3o errada de pag. do processo\"}]}]}]},{\"title\":\"Principios das Nulidades\",\"children\":[{\"title\":\"Transcendencia ou Prejuizo - Art. 794 da CLT\",\"children\":[{\"title\":\"S\u00f3 h\u00e1 nulidade se houver MANIFESTO prejuizo\"},{\"title\":\"Nulidades absolutas o prejuizo \u00e9 presumido\"}]},{\"title\":\"Convalida\u00e7\u00e3o ou Preclus\u00e3o - Art. 795 da CLT\",\"children\":[{\"title\":\"Aplicabilidade somente nas nulidades relativas\"},{\"title\":\"As absolutas devem ser declaradas de oficio\"},{\"title\":\"Incompetencia de FORO \u00e9 absoluta\"},{\"title\":\"N\u00f5a alegando a nulidade relativa o vicio \u00e9 convalidado, ocorrendo preclus\u00e3o\"},{\"title\":\"N\u00e3o sao declaradas sen\u00e3o mediante provoca\u00e7\u00e3o das partes\"},{\"title\":\"Devem ser manifestadas no primeiro momento em que falar nos autos\"}]},{\"title\":\"Economia Processual - Art. 796 \\\"a\\\" da CLT\",\"children\":[{\"title\":\"Possibilidade do vicio ser suprido ou o ato ser repetido, evitando-se a declara\u00e7\u00f5a de nulidade\"},{\"title\":\"Se houver a possibilidade o juiz deve suprir ou repeti-lo\"}]},{\"title\":\"Interesse - Art. 796 \\\"b\\\" da CLT\",\"children\":[{\"title\":\"Quem deu causa a NULIDADE n\u00e3o pode alega-la\"},{\"title\":\"Quem deu causa n\u00e3o tem interesse em alega-la\"},{\"title\":\"\u00c9 somente aplicavel a nulidade relativa\"}]},{\"title\":\"Principio da UTILIDADE\",\"children\":[{\"title\":\"Art. 797 da CLT\",\"children\":[{\"title\":\"Deve-se aproveitar atos processuais que n\u00e3o foram atingidos pela nulidade\"}]},{\"title\":\"Art. 798 da CLT - Causalidade\",\"children\":[{\"title\":\"Somente atos posteriores a nulidade ser\u00e3o atingidos, desde que ligados ao mesmo\"}]}]},{\"title\":\"Principio da Instrumentalidade das Formas\",\"children\":[{\"title\":\"Art. 154 do CPC\",\"children\":[{\"title\":\"Finalidade do ato importa mais que a forma\"},{\"title\":\"SE o ato atingiu o fim pretendido n\u00e3o se pronuncia sua nulidade\"}]}]}]}]},{\"title\":\"Prazos\",\"children\":[{\"title\":\"Contagem VUNESP - 2021 - Prefeitura - SP - Proc. M\",\"children\":[{\"title\":\"Inicio do Prazo e Inicio da Contagem do Prazo\",\"children\":[{\"title\":\"Inicio do Prazo\",\"children\":[{\"title\":\"Data do Conhecimento, data da intima\u00e7\u00e3o\"}]},{\"title\":\"Inicio da Contagem do Prazo\",\"children\":[{\"title\":\"Exclui-se o dia de INICIO e inclui o VENCIMENTO\"}]},{\"title\":\"Nao se aplica ao DPT o art. 231 do NCPC\"}]},{\"title\":\"Notifica\u00e7\u00e3o recebida no Sabado?\",\"children\":[{\"title\":\"PRESUME-SE que foi recebida no 1\u02da dia util seguinte\"},{\"title\":\"O prazo inicia a contagem na ter\u00e7a feira\"},{\"title\":\"Presume-se que foi recebida na segunda-feira\"}]},{\"title\":\"Prazo em Dias Uteis?\",\"children\":[{\"title\":\"Com a Reforma trabalhista o sistema do NCPC \u00e9 aplicado ao DPT(775 CLT)\"}]},{\"title\":\"Cita\u00e7\u00e3o por Edital\",\"children\":[{\"title\":\"Prazo \u00e9 contado da data em que publicado o edital\"},{\"title\":\"Ou do dia em que afixado na sede da unidade judiciaria\"}]}]},{\"title\":\"Prerrogativas de Prazo - Prazos diferenciados - DL n\u02da 779/69 FCC - 2022 - PGE-AM - Procurador VUNESP - 2022 - HORTOPREV - SP - Assessor Jur\u00eddico\",\"children\":[{\"title\":\"PJ de Direito Publico + Correios + MP - Prerrogativas processuais OBS - Excetua-se SEM e EP\",\"children\":[{\"title\":\"Processo de conhecimento - Art. 841 da CLT (Prazo de formula\u00e7\u00e3o da defesa) Prazo em Quadruplo para Contestar\"},{\"title\":\"Prazo de Dobro para Recorrer\"},{\"title\":\"OBS\",\"children\":[{\"title\":\"N\u00e3o se aplica p/ contrarrazoes\"}]}]},{\"title\":\"NCPC diz que o prazo \u00e9 em DOBRO para todos atos processuais. Essa \u00e9 a corrente a adotar\"},{\"title\":\"MP tem prazo em 4x?\",\"children\":[{\"title\":\"N\u00e3o! Aplica-se o NCPC(ex: recursos s\u00e3o 16d)\"}]},{\"title\":\"Litisconsortes com Procuradores diferentes - Art. 191 do CPC\",\"children\":[{\"title\":\"NAO SE APLICA AO PROCESSO DO TRABALHO\"},{\"title\":\"A Dobra do Prazo fere a principio da Celeridade, essencial ao DT\"},{\"title\":\"Segundo o CPC, os prazos s\u00e3o em dobro\"}]}]},{\"title\":\"Recesso forense e Ferias Coletivas - Sum. 262 II do TST e 775-A da CLT FCC - 2022 - TRT - 9\u00aa REGI\u00c3O (PR) - T\u00e9cnico Judici\u00e1rio\",\"children\":[{\"title\":\"Suspendem o PRAZO recursal. Ocorre entre o dia 20/12 e 20/01\"},{\"title\":\"Mesmo assim, membros do PJ exercem suas fun\u00e7\u00f5es\"},{\"title\":\"Durante esse prazo nao se realizam audiencia e nem julgamento\"}]}]},{\"title\":\"Atos Processuais\",\"children\":[{\"title\":\"Hora de Realiza\u00e7\u00e3o - Art. 770 da CLT VUNESP - 2021 - Guaruj\u00e1 - SP - Procurador FCC - 2022 - TRT - 9\u00aa REGI\u00c3O (PR) - T\u00e9cnico Judici\u00e1rio FCC - 2022 - TRT - 17\u00aa Regi\u00e3o (ES) - Analista Judici\u00e1rio\",\"children\":[{\"title\":\"Os atos processuais ser\u00e3o p\u00fablicos salvo quando o contr\u00e1rio determinar o interesse social\"},{\"title\":\"Realizar-se-\u00e3o nos dias \u00fateis das 6 (seis) \u00e0s 20 (vinte) horas.\"}]},{\"title\":\"Penhora em Domingo ou Feriado?\",\"children\":[{\"title\":\"Pode realizar-se em domingo ou feriado COM autoriza\u00e7\u00e3o expressa do juiz ou presidente.\"}]},{\"title\":\"NOTIFICA\u00c7\u00c3O POSTAL E DEVOLU\u00c7\u00c3O\",\"children\":[{\"title\":\"Tratando-se de notifica\u00e7\u00e3o postal\"},{\"title\":\"No caso de nao ser encontrado o destinatario ou recusa no recebimento\"},{\"title\":\"O correio fica obrigado, sob pena de responsa do servidor\"},{\"title\":\"devolve-la no prazo de 48hrs, ao Trib. de Origem\"}]},{\"title\":\"Realiza\u00e7\u00e3o - Atos e Termos Processuais - 771 da CLT\",\"children\":[{\"title\":\"Podem ser realizados a TINTA, DATILOGRAFADOS ou a CARIMBO\"},{\"title\":\"Assinados por procuradores, partes ou 2 testemunhas(772)\"},{\"title\":\"Movimento processual ser\u00e1 datado e rubricado por secretarios, escrivaes, certificando o ocorrido(773)\"}]},{\"title\":\"Prazos podem ser prorrogados? QUEM prorroga \u00e9 o JUIZO FCC - 2022 - TRT - 9\u00aa REGI\u00c3O (PR) - T\u00e9cnico Judici\u00e1rio\",\"children\":[{\"title\":\"Sim, qnd juizo entender necessario ou for\u00e7a maior devidaente comprovada\"},{\"title\":\"Juiz pode dilatar prazos alterar ordem de provas adequando ao conflito, visando maior efetividade(n\u00e3o h\u00e1 limite na dilata\u00e7\u00e3o)\"}]},{\"title\":\"Certid\u00e3o\",\"children\":[{\"title\":\"Partes podem requerer certidoes de processos findos ou em curso\"},{\"title\":\"S\u00e3o lavradas pelos secretarios ou escrivaes\"},{\"title\":\"Processos em Seg. de Justi\u00e7a?\",\"children\":[{\"title\":\"Dependem de despacho do Juiz ou Presidente\"}]}]}]}]},\"cap4\":{\"title\":\"4. Procedimento Ordin\u00e1rio\",\"children\":[{\"title\":\"Peti\u00e7\u00e3o Inicial\",\"children\":[{\"title\":\"Forma\",\"children\":[{\"title\":\"A RT pode ser escrita ou verbal/ORAL\"},{\"title\":\"Sendo Verbal\",\"children\":[{\"title\":\"Ser\u00e1 reduzida a TERMO em 2 vias datadas e assinadas pelo escrivao ou secretario\"},{\"title\":\"Proposta oralmente ser\u00e1 DISTRIBUIDA e depois REDUZIDA A TERMO\"},{\"title\":\"Prazo para comparecimento a redu\u00e7\u00e3o a TERMO \u00e9 de 5 DIAS\"}]},{\"title\":\"OBS - Importantes\",\"children\":[{\"title\":\"Dissidios Coletivos podem ser propostos oralmente?\",\"children\":[{\"title\":\"Nao, de acordo com o art. 856 da CLT\"},{\"title\":\"A inst\u00e2ncia ser\u00e1 instaurada mediante representa\u00e7\u00e3o escrita ao Presidente do Tribunal\"}]},{\"title\":\"Inquerito para apura\u00e7\u00f5a de falta grave pode ser proposto verbalemnte?\",\"children\":[{\"title\":\"N\u00e3o, nos termos do Art. 853 da CLT. Deve ser RT escrita\"}]}]}]},{\"title\":\"Req. da PI FCC - 2022 - TRT - 4\u00aa REGI\u00c3O (RS) - Analista Jud\",\"children\":[{\"title\":\"CLT\",\"children\":[{\"title\":\"Designa\u00e7\u00e3o do Presidente da Junta ou do Juiz de Direito a quem \u00e9 dirigida\"},{\"title\":\"Local do Ajuizamento da A\u00e7ao - Caput\"},{\"title\":\"Qualificac\u00f5es\"},{\"title\":\"Breve exposi\u00e7\u00e3o dos FATOS\"},{\"title\":\"PEDIDO\",\"children\":[{\"title\":\"Vinculam o pedido do magistrado, pois existe o principio da CONGRUENCIA\"}]},{\"title\":\"DATA e Assinatura do Reclamante ou Representante\"}]},{\"title\":\"Aplica-se o CPC?\",\"children\":[{\"title\":\"A redac\u00e3o do dispositvo mostra ausencia de alguns requisitos do CPC\"},{\"title\":\"Por essa raz\u00e3o surge essa duvida\"}]},{\"title\":\"E os demais requisitos?\",\"children\":[{\"title\":\"Fundamentos Juridicos\"},{\"title\":\"Pedido de notificac\u00e3o do reclamado\",\"children\":[{\"title\":\"N\u00e3o h\u00e1 necessidade desse pedido, por ser ato AUTOMATICO\"}]},{\"title\":\"Provas\",\"children\":[{\"title\":\"Entende-se que n\u00e3o \u00e9 necess\u00e1rio, pois sua produ\u00e7\u00e3o \u00e9 em AUDIENCIA\"},{\"title\":\"As testemunhas ser\u00e3o levadas a audiencia sem necessidade de intima\u00e7\u00e3o\"},{\"title\":\"Eventual pericia ser\u00e1 deferida em audiencia\"},{\"title\":\"OBS - N\u00e3o comparecimento de testemunhas\",\"children\":[{\"title\":\"As que n\u00e3o comparecerem ser\u00e3o intimadas de oficio ou a requerimento da parte\"},{\"title\":\"Em caso de n\u00e3o comparecimento ficam sujeitas a condu\u00e7\u00f5a coercitiva\"},{\"title\":\"Ficam sujeitas tambem as penalidades do Art. 730, caos sem motivo justificado n\u00e3o atendam\"}]}]},{\"title\":\"Juros e Corre\u00e7\u00e3o Monet\u00e1ria\",\"children\":[{\"title\":\"Incluem-se na condena\u00e7\u00e3o, ainda que sem pedido expresso na inicial(S. 211 do TST)\"}]}]}]},{\"title\":\"Indeferimento da PI\",\"children\":[{\"title\":\"Emenda\",\"children\":[{\"title\":\"\u00c9 sempre a primeira op\u00e7\u00e3o do Processo do Trabalho, inclusive na AR\"},{\"title\":\"Antes de indeferir a pe\u00e7a o juiz deve conceder a oportunidade de emenda no prazo de 15d\"},{\"title\":\"MS caso falte prova presconstituida nao admite emenda(TST)\"},{\"title\":\"OBS\",\"children\":[{\"title\":\"Obrigatoriedade de Emenda\",\"children\":[{\"title\":\"\u00c9 norma de ordem publica\"},{\"title\":\"Deve ser dada oportunidade de Emenda, \u00e9 obrigat\u00f3rio\"},{\"title\":\"Salvo nos casos do art. 330 do NCPC(indeferimento da PI)\"}]},{\"title\":\"Prazo\",\"children\":[{\"title\":\"15 dias, contados de sua intima\u00e7\u00e3o\"}]},{\"title\":\"Consequencia da Inercia\",\"children\":[{\"title\":\"A PI ser\u00e1 indeferida com extin\u00e7\u00e3o sem res. do merito\"}]}]}]},{\"title\":\"Posi\u00e7\u00f5es doutrinarias e juris(2)\",\"children\":[{\"title\":\"Caso falte algum requisito essencia deve abrir prazo p corre\u00e7\u00e3o\"},{\"title\":\"Essa restri\u00e7\u00e3o ao indeferimento decorre tambem dos poucos req. exigidos pela CLT\"},{\"title\":\"Indeferimento pode ocorrer na propria audiencia\"},{\"title\":\"Extingue com ou sem res. do merito, nas mesmas hipoteses do CPC\"},{\"title\":\"N\u00e3o se pode confundir indeferimento com improcedencia liminar do Art. 332 do NCPC\"},{\"title\":\"No rito Sumarissimo\",\"children\":[{\"title\":\"Lembrando que o pedido deve ser certo e determinado, pois nesse proced. n\u00e3o h\u00e1 liquida\u00e7\u00e3o\"},{\"title\":\"O pedido n\u00e3o pode ser generico\"},{\"title\":\"Nome e endere\u00e7o devem ser exportos corretamente, pois n\u00e3o se faz notifica\u00e7\u00e3o por edital\"},{\"title\":\"Previs\u00e3o da Lei - Art. 852-B da CLT\"},{\"title\":\"NESSE CASO NAO CABE EMENDA, a RT \u00e9 arquivada!\"}]}]},{\"title\":\"Recurso\",\"children\":[{\"title\":\"No caso de INDEFERIMENTO DA INICIAL cabe RO interposto com as peculiaridades do CPC\"},{\"title\":\"Pode o magistrado RETRATAR-SE da senten\u00e7a no prazo de 5d\"},{\"title\":\"N\u00e3o havendo retratac\u00e3o Juiz intima o r\u00e9u p/ CR\"},{\"title\":\"Sendo reformada a senten\u00e7a o prazo da contestac\u00e3o come\u00e7a a correr da intima\u00e7\u00e3o do retorno autos\"},{\"title\":\"Nao interposta apela\u00e7\u00e3o o reu \u00e9 intimado do TJ\"}]},{\"title\":\"Improcedencia Liminar ou Prima Facie - Art. 332 do NCPC IN 39 TST\",\"children\":[{\"title\":\"Aplica-se ao DT\"},{\"title\":\"Requisitos\",\"children\":[{\"title\":\"Materia unicamente de direito\"},{\"title\":\"Materia analisada outras vezes pelo PJ concluindo pela total improced. dos pedidos do autor\"},{\"title\":\"Enunciado do STF ou TST\"},{\"title\":\"IRDR do STF ou TST\"},{\"title\":\"Sum. de TRT DE direIto local, CCT, ACT, Senten\u00e7a Normativa ou reg. empresarial\"}]},{\"title\":\"Dispositivo pode ser usado em tribunais, em competencia originaria\"}]}]},{\"title\":\"Julgamento Antecipado Parcial do M\u00e9rito\",\"children\":[{\"title\":\"Art. 5\u00b0 Aplicam-se ao Processo do Trabalho as normas do art. 356, \u00a7\u00a7 1\u00ba a 4\u00ba, do CPC que regem o julgamento antecipado parcial do m\u00e9rito, cabendo recurso ordin\u00e1rio de imediato da senten\u00e7a.\"}]},{\"title\":\"Aditamento\",\"children\":[{\"title\":\"Adota-se o CPC com no Processo do Trabalho \u00e9 necessario adaptar os principios\"},{\"title\":\"A Defesa do r\u00e9u \u00e9 em audiencia, nada obsta que no inicio da audiencai seja aditada a inicial\",\"children\":[{\"title\":\"Nessa situa\u00e7\u00e3o a audiencia \u00e9 suspensa e designa-se outra\"}]},{\"title\":\"Apos a defesa do r\u00e9u, com consentimento por ocorrer o aditamento\"},{\"title\":\"Ultrapassdo o momento de defesa, nenhuma altera\u00e7\u00e3o ser\u00e1 possivel\"}]},{\"title\":\"Antecipa\u00e7\u00e3o de Tutela na JT\",\"children\":[{\"title\":\"\u00c9 plenamente possivel. A CLT h\u00e1 havia men\u00e7\u00e3o antes do CPC/73 prev\u00ea-la em 94\"},{\"title\":\"A previs\u00e3o do art. 659, IX e X deu-se em 1975 com a Lei 6.203\"},{\"title\":\"A CLT fala em LIMINAR em REINTEGRACAO(dirigente sindical) e TRANSF.\"},{\"title\":\"Cabe em rela\u00e7\u00e3o ao FGTS?\",\"children\":[{\"title\":\"A Lei propria do FGTS diz que n\u00e3o, nem mesmo liminar\"}]},{\"title\":\"Tutela de Urgencia na JT CESPE / CEBRASPE - 2024 - PGE-RN - Procurador\",\"children\":[{\"title\":\"Antecip. de Tutela na sentenca, qual recurso?\",\"children\":[{\"title\":\"RO. Nao CABE MS\"}]},{\"title\":\"Antecip. de Tutela antes da senten\u00e7a, qual recurso?\",\"children\":[{\"title\":\"Cabe MS\"}]},{\"title\":\"Superveniencia da sentenca faz perder o objeto do MS?\",\"children\":[{\"title\":\"Sim!\"}]}]}]}]},{\"title\":\"Notifica\u00e7\u00e3o do Reclamado FCC - 2022 - TRT - 9\u00aa PR - Analista\",\"children\":[{\"title\":\"Termo usado genericamente no DT, enquanto que no CC \u00e9 cita\u00e7\u00e3o e intima\u00e7\u00e3o\"},{\"title\":\"Utiliza-se notfica\u00e7\u00e3o tanto para o autor como para o reu\"},{\"title\":\"\u00c9 a comunica\u00e7\u00e3o sobre ajuizamento da demanda e ciencia de ato processual a realizar\"},{\"title\":\"Apenas na execu\u00e7\u00e3o a CLT trouxe o termo CITACAO do executado\"},{\"title\":\"\u00c9 ato automatico realizado por servidor da JT no PRAZO DE 48H a contar do recebimento da RT\",\"children\":[{\"title\":\"OBS\",\"children\":[{\"title\":\"N\u00e3o h\u00e1 despacho determinando a notifica\u00e7\u00e3o pelo Juiz\"}]}]},{\"title\":\"A notifica\u00e7\u00e3o \u00e9 para comparecimento em audiencia e APRESENTE DEFESA, sob pena de revelia\"},{\"title\":\"Em caso de exce\u00e7\u00e3o, deve ser apresentada no prazo abaixo.\"},{\"title\":\"Deve ser apresentada em at\u00e9 5d a contar do recebimento da notifica\u00e7\u00e3o, antes da audiencia\"},{\"title\":\"Prazo entre Notifica\u00e7\u00e3o e Audiencia\",\"children\":[{\"title\":\"(Art. 841, CLT) - Primeira desimpedida dps de 5d. Admin. P\u00fablica 4x maior.\"},{\"title\":\"Em caso de nulidade pode o reclamado comparecer em audiencia somente para alega-la\"},{\"title\":\"descumprimento desse prazo gera nulidade\"}]},{\"title\":\"Forma da Notifica\u00e7\u00e3o\",\"children\":[{\"title\":\"No processo de conhecimento \u00e9 feito pela VIA POSTAL com AR\"},{\"title\":\"N\u00e3o h\u00e1 necessidade de ser pessoal(SOMENTE NA EXECU\u00c7\u00c3O)\"},{\"title\":\"TST entende q a entrega no endere\u00e7o do reclamado a qlq pessoa ou na caixa postal \u00e9 valida\"},{\"title\":\"Notifica\u00e7\u00e3o por Edital Art. 841 \u00a71 da CLT\",\"children\":[{\"title\":\"A notifica\u00e7\u00e3o ser\u00e1 feita em registro postal com franquia.\"},{\"title\":\"Se o reclamado criar embara\u00e7os ao seu recebimento ou n\u00e3o for encontrado\"},{\"title\":\"far-se-\u00e1 a notifica\u00e7\u00e3o por edital, inserto no jornal oficial ou no que publicar o expediente forense,\"},{\"title\":\"ou, na falta, afixado na sede da Junta ou Ju\u00edzo.\"},{\"title\":\"OBS - Sumarissimo\",\"children\":[{\"title\":\"N\u00e3o cabe citac\u00e3o por EDITAL\"}]}]},{\"title\":\"Carta Precatoria?\",\"children\":[{\"title\":\"N\u00e3o \u00e9 necessaria, porque a CLT entende que pode ser por via postal em todas as comarcas\"},{\"title\":\"Se for em outro pais - Ocorrer\u00e1 por CARTA ROGATORIA\"}]},{\"title\":\"MP\",\"children\":[{\"title\":\"Tem como prerrogativa a intima\u00e7\u00e3o pessoal dos atos trabalhistas\"}]}]}]},{\"title\":\"Audiencia\",\"children\":[{\"title\":\"Introdu\u00e7\u00e3o\",\"children\":[{\"title\":\"\u00c9 o principal ao do procedimento trabalhista\"},{\"title\":\"OBS - N\u00e3o se aplica ao DPT a necessidade de audiencia de media\u00e7\u00e3o(IN 39)\"}]},{\"title\":\"Caracteristicas(4)\",\"children\":[{\"title\":\"Ato Publico\",\"children\":[{\"title\":\"Somente ser\u00e1 realizada a portas fechadas se necessario a intimidade ou interese publcio\"}]},{\"title\":\"Regras Gerais\",\"children\":[{\"title\":\"Art. 813 da CLT - Hora e dura\u00e7\u00e3o\",\"children\":[{\"title\":\"Realizar-se-\u00e3o na sede do Ju\u00edzo ou Tribunal em dias \u00fateis previamente fixados,\"},{\"title\":\"entre 8 (oito) e 18 (dezoito) horas, n\u00e3o podendo ultrapassar 5 (cinco) horas seguidas,\"},{\"title\":\"SALVO QND HOUVER MATERIA URGENTE.\"},{\"title\":\"Casos especiais e designa\u00e7ao de outros locais\",\"children\":[{\"title\":\"Edital afixado na sede do Ju\u00edzo ou Tribunal, com a anteced\u00eancia m\u00ednima de 24 (vinte e quatro) horas.\"}]},{\"title\":\"Audiencias Extraordinarias\",\"children\":[{\"title\":\"Possivel sempre que necessaria. Adota-se prazo do parag. anterior(24hrs)\"}]}]},{\"title\":\"Art. 814 da CLT - Presen\u00e7a de Escrivaes e Secretarios\",\"children\":[{\"title\":\"Devem estar presentes nas audiencias e comparecer com antecedencia\"}]},{\"title\":\"Art. 817 da CLT - Reg. das Audiencias\",\"children\":[{\"title\":\"O registro das audi\u00eancias ser\u00e1 feito em livro pr\u00f3prio,\"},{\"title\":\"constando de cada registro os processos apreciados e a respectiva solu\u00e7\u00e3o\"},{\"title\":\"bem como as ocorr\u00eancias eventuais.\"},{\"title\":\"Do registro das audi\u00eancias poder\u00e3o ser fornecidas certid\u00f5es \u00e0s pessoas que o requererem.\"}]}]},{\"title\":\"Tolerancia das partes\",\"children\":[{\"title\":\"O atraso de 15min. \u00e9 somente p/ o juiz. Nao h\u00e1 previsao p/ atraso das partes\"},{\"title\":\"Caso a audiencia atrase com presen\u00e7a do juiz aplica-se os efeitos da ausencia\"},{\"title\":\"reclamante - arquiva-se o processo\"},{\"title\":\"Corrente radical diz que n\u00e3o h\u00e1 tolerancia prevista para partes\",\"children\":[{\"title\":\"\u00c9 a corrente adotada pelo TST\"}]},{\"title\":\"E o juiz?\",\"children\":[{\"title\":\"Se o juiz atrasar 15min. as partes podem registrar e se retirar(CLT)\"},{\"title\":\"E a regra da Lei da OAB? Doutrina diz que aplica CLT por ser mais especifica\"}]},{\"title\":\"Destaca-se a inaplicabilidade do Art. 362 do NCPC\",\"children\":[{\"title\":\"A audiencia n\u00e3o \u00e9 adiada por ter inicio atrasado. Seja por 30min., 1h, 2 h e por ai vai\"}]}]},{\"title\":\"Audiencia UNA\",\"children\":[{\"title\":\"A audiencia \u00e9 una em todos procedimentos trabalhistas\"},{\"title\":\"Havendo for\u00e7a maior, o juiz pode fracionar o ato\"}]}]},{\"title\":\"Fases da Audiencia\",\"children\":[{\"title\":\"Preg\u00e3o\",\"children\":[{\"title\":\"Comparecimento das Partes\"},{\"title\":\"PF devem apresentar-se pessoalmente\"},{\"title\":\"As PJ devem ser representadas por GERENTE OU PREPOSTO(declara\u00e7oes obrigam)\"},{\"title\":\"Em a\u00e7\u00f5es plurimas ou a\u00e7\u00f5es de cumprimento\",\"children\":[{\"title\":\"Reclamantes em n\u02da consideravel, podem ser representados por Comiss\u00e3o de Trab. ou Sindic.\"}]},{\"title\":\"Ausencia das Partes em Audiencia\",\"children\":[{\"title\":\"Reclamante\",\"children\":[{\"title\":\"Arquivamento do feito\",\"children\":[{\"title\":\"Exce\u00e7\u00e3o ao Arquivamento\",\"children\":[{\"title\":\"Fazendo-se representar por outro empregado que perten\u00e7a \u00e0 mesma profiss\u00e3o, ou pelo seu sindicato.\"},{\"title\":\"Nessa hipotese a audiencia ser\u00e1 suspensa, designando-se nova data\"}]},{\"title\":\"Condena\u00e7\u00e3o ao pagto de custas processuais FUMARC - 2022 - TRT - 3\u00aa Regi\u00e3o (MG) - Analista JuD.\",\"children\":[{\"title\":\"Calculadas em 2% do valor da causa\"},{\"title\":\"Havendo pedido de justi\u00e7a gratuita, magistrado pode dexar de aplicar\"},{\"title\":\"Aplicada mesmo que seja beneficiario da justi\u00e7a gratuita\"},{\"title\":\"Pode ser isento das custas se comprovar em 15d que a ausencia foi justificada\"}]},{\"title\":\"A A\u00e7\u00e3o pode ser proposta novamente\",\"children\":[{\"title\":\"Com a reforma\",\"children\":[{\"title\":\"O pagto das custas \u00e9 condi\u00e7\u00e3o p/ esse novo ajuizamento\"}]}]}]}]},{\"title\":\"Reclamado\",\"children\":[{\"title\":\"Importa REVELIA, alem de confiss\u00e3o qnt a mat\u00e9ria de FATO\"},{\"title\":\"A revelia surge msm que o adv. esteja presente sem a parte\"},{\"title\":\"Nesse caso, com a reforma, aceita-se os documentos e defesa da partes, mas o efeito nao mudou\"}]},{\"title\":\"Se ambas as partes faltam?\",\"children\":[{\"title\":\"Aplica-se a pena do RECLAMANTE\"}]}]},{\"title\":\"Ausencia a Audienca em Prosseguimento\",\"children\":[{\"title\":\"Nao \u00e9 caso de arquivamento, mas confiss\u00e3o da parte\"},{\"title\":\"A ausencia do reclamado ocasiona revelia\"},{\"title\":\"Se na concilia\u00e7\u00e3o vai os 2, mas na instru\u00e7\u00e3o os 2 faltaram?\",\"children\":[{\"title\":\"Confiss\u00e3o RECIPROCA(qnt aos pedidos depende de quem era o onus)\"}]},{\"title\":\"OBS - S\u00fam. 74\",\"children\":[{\"title\":\"Aplica-se a confiss\u00e3o se a parte iria depor\"}]}]},{\"title\":\"Ambas estando presentes, inicia-se a audiencia\"}]},{\"title\":\"Tenta-se a concilia\u00e7\u00e3o\",\"children\":[{\"title\":\"\u00c9 obrigatoria. \u00c9 o 1\u02da ato apos o preg\u00e3o\"},{\"title\":\"Havendo acordo, o juiz homologa e extingue com res. do merito\",\"children\":[{\"title\":\"Homolog. \u00e9 obrigatoria ou n\u00e3o? Sum. 418 do TST diz que n\u00e3o, nao sendo cabivel MS\"}]},{\"title\":\"Situa\u00e7\u00e3o - Quest\u00e3o de Juiz\",\"children\":[{\"title\":\"Se A pleiteou 3 direito em a\u00e7\u00e3o e fez acordo com quita\u00e7\u00e3o geral das parcelas sem ressalva\"},{\"title\":\"Se tiver outros direitos, nao pode ajuizar nova a\u00e7\u00e3o com outros dirietos\"}]},{\"title\":\"Acordo homolog. com erro de consentimento\",\"children\":[{\"title\":\"Somente \u00e9 impugnavel por AR\"}]}]},{\"title\":\"N\u00e3o havendo acordo apresenta a DEFESA\",\"children\":[{\"title\":\"Pode ser apresentada oralmente no prazo de 20 min\"},{\"title\":\"Com a reforma h\u00e1 previs\u00e3o expressa de poder ser escrita\"},{\"title\":\"Pode englobar contesta\u00e7\u00e3o, reconven\u00e7\u00e3o e exce\u00e7\u00f5es\"},{\"title\":\"Sendo a defesa indireta do m\u00e9rito, o autor pode apresentar manif. oral, que ser\u00e1 reduzida a termo na ata da audiencia\"}]},{\"title\":\"Protesto\",\"children\":[{\"title\":\"A insurgencia fica consignada em ata deaudiencia\"},{\"title\":\"Garante a possib. de ser renovado e discutido em recurso\"},{\"title\":\"\u00c9 importante pois dec. interlo. s\u00e3o irrecorriveis no processo do trabalho\"}]},{\"title\":\"Passa-se a INSTRU\u00c7AO\",\"children\":[{\"title\":\"Nesse momento magistrado pode deferir ou detemrinar prova pericial\"}]},{\"title\":\"Alegac\u00f5es Finais\",\"children\":[{\"title\":\"Em regra s\u00e3o orais e pelo prazo de 10min\"},{\"title\":\"Apos a oitiva de testemunhas\"},{\"title\":\"Ao seu final deve ser realizada nova tentativa de concilia\u00e7\u00e3o\"},{\"title\":\"Retrata\u00e7\u00e3o do principio da oralidade\"}]},{\"title\":\"Senten\u00e7a\",\"children\":[{\"title\":\"Pode ser proferida oralmente pelo magistrado, n\u00f5a \u00e9 comum, mas pode existir\"},{\"title\":\"No rito ordinario o RELATORIO n\u00e3o \u00e9 dispensado\"}]}]}]},{\"title\":\"Revelia\",\"children\":[{\"title\":\"Ausencia do RECLAMADO em audiencia gera revelia, desde q n\u00e3o haja motivo relevante\",\"children\":[{\"title\":\"Alem da CONFISSAO qnt a materia de fato(CLT)\"}]},{\"title\":\"A revelia no DPT ocorre na AUSENCIA do reclamado em audiencia\"},{\"title\":\"A presen\u00e7a apenas do advogado tambem gera revelia FCC - 2022 - TRT - 9\u00aa REGI\u00c3O (PR) - Analista Judici\u00e1rio CESPE - 2022 - FUNPRESP-EXE - Analista de Previd\u00eancia FCC - 2022 - PGE-AM - Procurador do Estado da 3\u00aa Classe\",\"children\":[{\"title\":\"Pq? OAB proibe atua\u00e7\u00e3o como preposto e advogado ao mesmo tempo\"},{\"title\":\"Reforma Trab. trouxe a possib. do recebimento da defesa e dos docs. do r\u00e9u revel...\"},{\"title\":\"Qnd advogado estiver presente em audiencai, o que N \u00c3 O exclui a revelia\"}]},{\"title\":\"O \u00a74 do Art. 844 trouxe hip. em que nao se presumem verdadeiros os fatos CESPE / CEBRASPE - 2021 - PGE-MS - Procurador do Estado VUNESP - 2022 - HORTOPREV - SP - Assessor Jur\u00eddico\",\"children\":[{\"title\":\"Pluralidade de reclamados um deles contestar\"},{\"title\":\"Litigio sbre direitos indisponiveis\"},{\"title\":\"PI nao acompanhada de documento indispensavel\"},{\"title\":\"Alegac\u00f5es inverossimeis ou em contradi\u00e7\u00e3o com prova dos autos\"}]},{\"title\":\"Efeitos da revelia(3)\",\"children\":[{\"title\":\"Presu\u00e7\u00f5a da VERACIDADE DOS FATOS e n\u00e3o do direito\"},{\"title\":\"Julgamento Antecipado da Lide\"},{\"title\":\"Desnecessidade de INTIMACAO do r\u00e9u dos atos processuais, com fluencia automatica dos prazos\",\"children\":[{\"title\":\"OBS\",\"children\":[{\"title\":\"A CLT prev\u00ea necessidade de intima\u00e7\u00e3o da senten\u00e7a j\u00e1 q pode recorrer\"}]},{\"title\":\"OBS\",\"children\":[{\"title\":\"O revel que tenha advogado nos autos tem dirieto a ser intimados dos atos\"}]},{\"title\":\"OBS\",\"children\":[{\"title\":\"Somente pode alterar pedido com nova notifica\u00e7\u00e3o\"}]}]}]}]},{\"title\":\"Defesas do Reclamado\",\"children\":[{\"title\":\"Introducao\",\"children\":[{\"title\":\"A Defesa sera apresentada caso a concilia\u00e7\u00e3o seja infrutifera\"},{\"title\":\"Deve ser ORAL no prazo de 20min com todas as possivels defesas, apos a leitura da RT\"},{\"title\":\"Essa leitura da RT pode ser dispensada pelas partes\"},{\"title\":\"Com a reforma possibilitou-se a defesa escrita ate a audiencia em sistema eletronico\"}]},{\"title\":\"especies\",\"children\":[{\"title\":\"Reclamado pode apresentar diversas pe\u00e7as de defesa\"},{\"title\":\"Contesta\u00e7\u00e3o\",\"children\":[{\"title\":\"Preliminares de Merito\",\"children\":[{\"title\":\"Podem ser aduzidas em contesta\u00e7ao as PRELIMINARES DE MERITO(Art. 301 do CPC)\"},{\"title\":\"Nao h\u00e1 ordem na alega\u00e7\u00e3o das preliminares de merito ou as defesa de merito\"},{\"title\":\"Por logica, \u00e9 preferivell que as pleliminares venham antes\"},{\"title\":\"De todas as materias do CPC, somente o compromisso arbitral n\u00e3o \u00e9 de ordem publica\"},{\"title\":\"Preliminares s\u00e3o classificadas em DILATORIAS e PEREMPTORIAS\"}]},{\"title\":\"Defesas de M\u00e9rito\",\"children\":[{\"title\":\"2 regras a serem consideradas\"},{\"title\":\"P. da Impugna\u00e7\u00e3o Especifica dos Fatos\",\"children\":[{\"title\":\"A n\u00e3o impugna\u00e7\u00e3o de todo o alegado gera REVELIA, mas h\u00e1 exce\u00e7\u00f5es!\"}]},{\"title\":\"Principio da Eventualidade\",\"children\":[{\"title\":\"Depois da contesta\u00e7\u00e3o, s\u00f3 \u00e9 licito deduzir novas aelga\u00e7\u00f5es quando\",\"children\":[{\"title\":\"Relativas a Direito Superveniente\"},{\"title\":\"Competir ao Juiz conhece-las de oficio\"},{\"title\":\"Por expressa autoriza\u00e7\u00e3o legal, puderem ser formuladas em qlq tempo e juizo\"}]},{\"title\":\"Reclamado deve reunir todos os argumentos e doc. apresentado todos de uma vez\"},{\"title\":\"Impede a realiza\u00e7\u00e3o de defesa por etapas ou por partes\"}]}]},{\"title\":\"Compensa\u00e7\u00e3o, dedu\u00e7\u00e3o e Reten\u00e7\u00e3o como Mat\u00e9rias de Defesa VUNESP - 2021 - Prefeitura de Guaruj\u00e1 - SP - Procurador Jur\u00eddico\",\"children\":[{\"title\":\"Compensa\u00e7\u00e3o\",\"children\":[{\"title\":\"Momento Processual Adequado para Alega\u00e7ao\",\"children\":[{\"title\":\"\u00c9 a DEFESA\"}]},{\"title\":\"Art. 767 do TST\",\"children\":[{\"title\":\"A COMPENSA\u00c7AO OU RETENCAO, s\u00f3 podem ser arguidas como mat\u00e9ria de defesa\"}]}]},{\"title\":\"Dedu\u00e7\u00e3o\",\"children\":[{\"title\":\"R\u00e9u demonstra que ja foram efetuados pagtos relacionados as parcelas pleiteadas\"},{\"title\":\"Pode ser requerida a qlq tempo e grau e ser reconhecida de oficio\"}]},{\"title\":\"Retenc\u00e3o\",\"children\":[{\"title\":\"O empregador retem objeto da titularidade do empregado\"},{\"title\":\"Art. 767 do TST\",\"children\":[{\"title\":\"A COMPENSA\u00c7AO OU RETENCAO, s\u00f3 podem ser arguidas como mat\u00e9ria de defesa\"}]}]}]},{\"title\":\"DESISTENCIA: MOMENTO\",\"children\":[{\"title\":\"Art. 841 - Recebida e protocolada a reclama\u00e7\u00e3o, o escriv\u00e3o ou secret\u00e1rio, dentro de 48 (quarenta e oito) horas, remeter\u00e1 a segunda via da peti\u00e7\u00e3o, ou do termo, ao reclamado, notificando-o ao mesmo tempo, para comparecer \u00e0 audi\u00eancia do julgamento, que ser\u00e1 a primeira desimpedida, depois de 5 (cinco) dias. \u00a7 1\u00ba - A notifica\u00e7\u00e3o ser\u00e1 feita em registro postal com franquia. Se o reclamado criar embara\u00e7os ao seu recebimento ou n\u00e3o for encontrado, far-se-\u00e1 a notifica\u00e7\u00e3o por edital, inserto no jornal oficial ou no que publicar o expediente forense, ou, na falta, afixado na sede da Junta ou Ju\u00edzo. \u00a7 2\u00ba - O reclamante ser\u00e1 notificado no ato da apresenta\u00e7\u00e3o da reclama\u00e7\u00e3o ou na forma do par\u00e1grafo anterior. \u00a7 3 Oferecida a contesta\u00e7\u00e3o, ainda que eletronicamente, o reclamante n\u00e3o poder\u00e1, sem o consentimento do reclamado, desistir da a\u00e7\u00e3o. FCC - 2022 - TRT - 14\u00aa Regi\u00e3o (RO e AC) - T\u00e9cnico Judici\u00e1rio - \u00c1rea Administrativa\"}]}]},{\"title\":\"Exce\u00e7\u00f5es - Art. 799 FCC - 2022 - TRT - 9\u00aa PR - Analista FCC - 2022 - TRT - 4\u00aa RS - Analista FCC - 2022 - TRT - 4\u00aa RS - T\u00e9cnico\",\"children\":[{\"title\":\"\u00c9 silente em rela\u00e7\u00f5a a exce\u00e7\u00e3o de impedimento\"},{\"title\":\"Podem ser opostas exce\u00e7\u00f5a de suspei\u00e7\u00e3o e incompetencia. SUSPENDEM o FEITO\"},{\"title\":\"Devem ser apresentadas oralmente em audiencia\"},{\"title\":\"A reforma trabalhista alterou o rito da exce\u00e7\u00e3o de incompetencia\"},{\"title\":\"Deve ser apresentada em at\u00e9 5d a contar do recebimento da notifica\u00e7\u00e3o, antes da audiencia\"},{\"title\":\"em pe\u00e7a apartada, tendo o autor id\u00eantico prazo para manifesta\u00e7\u00e3o ap\u00f3s a audi\u00eancia\"},{\"title\":\"Ao ser apresentada a pe\u00e7a QUE SINALIZE ESSA EXCE\u00c7\u00c3O suspende-se a audiencia/processo\"},{\"title\":\"Juiz intima parte contraria e litis p/ manifestac\u00e3o em 5d e pode designar audiencia, se necessario\"},{\"title\":\"OBS - Produ\u00e7\u00e3o de provas pode ser realizada onde foi afirmado pelo autor que o juiz era competente\"},{\"title\":\"INCOMPETENCIA Territorial ou DECLINATORIA DE FORO\",\"children\":[{\"title\":\"Ser\u00e1 apresentada qnd desrespeitadas regras sobre competencia territorial\"},{\"title\":\"Sua n\u00e3o apresentacao gera prorrogacao da competencia\"},{\"title\":\"O processo fica suspenso at\u00e9 o julgamento da exce\u00e7\u00e3o(mera interposi\u00e7\u00e3o)\"},{\"title\":\"Art. 800 - Apresentada a exce\u00e7\u00e3o de incompet\u00eancia\"},{\"title\":\"abrir-se-\u00e1 vista dos autos ao exceto, por 24 (vinte e quatro) horas improrrog\u00e1veis\"},{\"title\":\"devendo a decis\u00e3o ser proferida na primeira audi\u00eancia ou sess\u00e3o que se seguir.\"},{\"title\":\"O Art. 305 do CPC n\u00e3o \u00e9 aplicavel ao Processo Trabalhista\",\"children\":[{\"title\":\"Esbarra na sistematica trabalhista, pois a defesa deve ser apresentada em audiencia\"}]},{\"title\":\"Oposta a exce\u00e7\u00e3o de INCOMPETENCIA \u00e9 vedado a parte arguir conflito de Jurisdi\u00e7\u00e3o\"}]},{\"title\":\"Suspei\u00e7\u00e3o e Impedimento\",\"children\":[{\"title\":\"Ocorre quandou houver quebra da imparcialidade do julgador\"},{\"title\":\"Aplicam-se as normas do Art. 144 e 145 do CPC\"}]}]},{\"title\":\"Reconven\u00e7\u00e3o\",\"children\":[{\"title\":\"Reu n\u00e3o \u00e9 obrigado a apresenta-la, o contraataque pode ser feito por a\u00e7\u00e3o autonoma(315 CPC)\"},{\"title\":\"Requisitos para Reconvir s\u00e3o os do CPC\"},{\"title\":\"Pode ser apresentada no RITO SUMARIO ou SUMARISSIMO?\",\"children\":[{\"title\":\"N\u00c3O!!!!!!!!\"}]},{\"title\":\"A\u00e7\u00e3o Principal e Reconven\u00e7\u00f5a s\u00e3o tratadas ocmo a\u00e7\u00f5es independentes\",\"children\":[{\"title\":\"A extin\u00e7\u00e3o, at\u00e9 por desistencia, de uma n\u00e3o obsta o prosseguimento da outra\"}]},{\"title\":\"Nao se aplica a extensao subjetiva da reconven\u00e7\u00e3o ao Proc. do Trabalho(343 \u00a73 do NCPC)\"}]}]}]},{\"title\":\"Senten\u00e7a e CJ\",\"children\":[{\"title\":\"Sentenca\",\"children\":[{\"title\":\"Intro\",\"children\":[{\"title\":\"Poe fim a fase cognitiva com fundamento no art. 485 e 487 do NCPC\"},{\"title\":\"O professor traz a classificac\u00e3o das senten\u00e7as\"}]},{\"title\":\"Partes da Sentenca\",\"children\":[{\"title\":\"Deve sempre mencionar o valor das custas a serem pagas - Art. 789 da CLT\"},{\"title\":\"Erros materiais podem ser corrigidos de oficio pelo juiz\"},{\"title\":\"O Art. 832 da CLt traz os requisitos de forma, assim como art. 489 do NCPC\"}]},{\"title\":\"Sendo REVEL \u00e9 necessario intimar da senten\u00e7a? Art. 852\",\"children\":[{\"title\":\"Ocorre NOTIFICA\u00c7AO, da forma definida na CLT\"}]},{\"title\":\"Fundamenta\u00e7ao da Senten\u00e7a - NCPC - Art. 489\",\"children\":[{\"title\":\"IN 39 do TST diz que \u00e9 totalmente aplicavel\"}]}]},{\"title\":\"Participa\u00e7\u00e3o da Uni\u00e3o - Peculiaridade Trab. Art. 832\",\"children\":[{\"title\":\"Deve mencionar se as verbas sao salariais ou indenizatorias, tanto na senten\u00e7a homologat\u00f3ria quanto na senten\u00e7a condenatoria, Visando aferir a incidencia de Contribui\u00e7\u00e3o, IR e outros\"},{\"title\":\"Previs\u00f5es da Lei\"},{\"title\":\"Havendo parcela indenizatoria, a Uni\u00e3o ser\u00e1 intimada, podendo interpor recurso caso discorde\"},{\"title\":\"Havendo acordo apos transito em julgado, tal fato nao prejudicara a Uni\u00e3o\"}]}]}]}}";
+const DATA = JSON.parse(RAW);
+
+const CHAPTERS = ["cap0", "cap1", "cap2", "cap3", "cap4"];var nb=parseInt(b.replace(/^Cap__/,""));return na-nb;});
+const LABELS = {"cap0": "0. Teoria Geral do Proc. do Trabalho", "cap1": "1. Organização da JT e Competência", "cap2": "2. Partes e Procuradores", "cap3": "3. Prazos, Custas e Nulidades", "cap4": "4. Procedimento Ordinário"};
+
+let cur = CHAPTERS[0];
+let expanded = new Set();
+let term = "";
+let hits = 0;
+
+function detectType(t){
+  const s=(t||"").toLowerCase();
+  if(/cespe|cebraspe|fgv|vunesp|fundatec|ibfc|prova/.test(s)) return "cespe";
+  if(/stj|stf|resp|adi|adpf|adc|\bre\b|rms|agrg|info \d|súmula|sumula|julgado/.test(s)) return "stj";
+  return "obs";
+}
+
+function extractText(n,d=0){
+  if(d>4) return n.title||"";
+  let p=[n.title||""];
+  (n.children||[]).forEach(c=>p.push(extractText(c,d+1)));
+  (n.callouts||[]).forEach(c=>p.push(extractText(c,d+1)));
+  return p.filter(Boolean).join(" • ");
+}
+
+function matches(n,t){
+  if(!t) return true;
+  if((n.title||"").toLowerCase().includes(t)) return true;
+  if((n.children||[]).some(c=>matches(c,t))) return true;
+  if((n.callouts||[]).some(c=>matches(c,t))) return true;
+  return false;
+}
+
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+
+function hilite(s,t){
+  if(!t) return esc(s);
+  const re=new RegExp(`(${t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")})`,"gi");
+  return esc(s).replace(re,"<mark>$1</mark>");
+}
+
+function renderCallout(node){
+  const tipo=detectType(node.title||"");
+  const label={cespe:"CESPE/CEBRASPE",stj:"STF/STJ",obs:"OBS"}[tipo];
+  const text=extractText(node);
+  const isTrivial=!node.title||/^(obs|callout|atenção)$/i.test((node.title||"").trim());
+  const titleHtml=isTrivial?"":(`<div class="callout-title">${hilite(node.title,term)}</div>`);
+  return `<div class="callout-box ${tipo}"><div class="callout-label">${label}</div>${titleHtml}<div class="callout-body">${esc(text)}</div></div>`;
+}
+
+function renderNode(n,depth,path){
+  const id=path;
+  const hasKids=(n.children&&n.children.length)||(n.callouts&&n.callouts.length);
+  const isExp=expanded.has(id)||(term&&matches(n,term));
+  const isHit=term&&(n.title||"").toLowerCase().includes(term);
+  if(isHit) hits++;
+
+  if(n.callout) return renderCallout(n);
+
+  const tog=hasKids?(isExp?"▾":"▸"):"·";
+  const dc=depth===0?"d0":depth===1?"d1":depth===2?"d2":"dn";
+  const rowCls=`row${isHit?" hit":""}`;
+  const titleHtml=`<span class="txt ${dc}">${hilite(n.title||"",term)}</span>`;
+
+  let childHtml="";
+  if(isExp&&hasKids){
+    childHtml='<div class="children">';
+    (n.children||[]).forEach((c,i)=>{if(!term||matches(c,term)) childHtml+=renderNode(c,depth+1,path+"_"+i);});
+    (n.callouts||[]).forEach((c,i)=>{if(!term||matches(c,term)) childHtml+=renderNode({...c,callout:true},depth+1,path+"_c"+i);});
+    childHtml+="</div>";
+  }
+  return `<div class="node" id="n${id}"><div class="${rowCls}" onclick="toggle('${id}')"><span class="tog">${tog}</span>${titleHtml}</div>${childHtml}</div>`;
+}
+
+function render(){
+  const tree=DATA[cur];
+  hits=0;
+  let html="";
+  if(tree.children){
+    tree.children.forEach((n,i)=>{
+      if(!term||matches(n,term)) html+=renderNode(n,0,"r"+i);
+    });
+  }
+  document.getElementById("content").innerHTML=html||`<p class="no-res">Nenhum resultado para "${esc(term)}"</p>`;const em=document.getElementById("empty-msg");if(em)em.remove();
+  const mb=document.getElementById("matchBar");
+  if(term){mb.style.display="block";mb.textContent=`${hits} ocorrência(s) para "${term}"`;}
+  else{mb.style.display="none";}
+}
+
+function renderTabs(){
+  document.getElementById("tabs").innerHTML=CHAPTERS.map((k,i)=>{
+    const cid='ptrabalho_'+i;
+    const isDone=_TRK&&_TRK.done&&_TRK.done[cid];
+    return `<div class="tab${k===cur?' active':''}" onclick="selChap('${k}')">
+      <input type="checkbox" class="_trk_chk" data-cid="${cid}" ${isDone?'checked':''} onclick="event.stopPropagation();_trkToggle('${cid}',this.checked,this)"/>
+      <span>${LABELS[k]||k}</span>
+    </div>`;
+  }).join("");
+}
+
+function selChap(k){cur=k;expanded.clear();document.getElementById("search").value="";term="";document.getElementById("matchBar").style.display="none";renderTabs();render();}
+function toggle(id){if(expanded.has(id))expanded.delete(id);else expanded.add(id);render();}
+function expandAll(){function add(n,p){expanded.add(p);(n.children||[]).forEach((c,i)=>add(c,p+"_"+i));(n.callouts||[]).forEach((c,i)=>add(c,p+"_c"+i));}const t=DATA[cur];(t.children||[]).forEach((n,i)=>add(n,"r"+i));render();}
+function collapseAll(){expanded.clear();render();}
+
+let deb;
+document.getElementById("search").addEventListener("input",function(){
+  clearTimeout(deb);
+  deb=setTimeout(()=>{term=this.value.toLowerCase().trim();render();},250);
+});
+
+renderTabs();
+render();
+</script>
+
+<button id="theme-toggle-btn" onclick="toggleMapTheme()">☀️ Claro</button>
+<script>
+(function(){
+  const saved = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  window.addEventListener('DOMContentLoaded', function(){
+    const btn = document.getElementById('theme-toggle-btn');
+    if(btn) btn.textContent = saved === 'dark' ? '☀️ Claro' : '🌙 Escuro';
+  });
+})();
+function toggleMapTheme(){
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  const btn = document.getElementById('theme-toggle-btn');
+  if(btn) btn.textContent = next === 'dark' ? '☀️ Claro' : '🌙 Escuro';
+}
+</script>
+
+<!-- WORD-STYLE TOOLBAR -->
+<div id="_wtb">
+  <!-- Theme -->
+  <div class="_grp">
+    <button class="_tb-btn" id="_tb" onclick="_tT()" title="Alternar tema">☀️</button>
+  <a href="index.html" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;text-decoration:none;white-space:nowrap;">← Portal</a>
+  <a href="index.html" onclick="try{sessionStorage.setItem('_gotoTab','tracker')}catch(e){}" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;text-decoration:none;white-space:nowrap;">📊 Tracker</a>
+  <button class="_tb-btn" id="_mm_btn" onclick="window.__MM&&window.__MM.toggle(window.__MM_getData())" title="Mapa Mental" style="font-size:15px;padding:2px 8px;">🌐</button>
+  <button onclick="_doLogout()" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;cursor:pointer;white-space:nowrap;">Sair</button>
+  </div>
+  <div class="_sep"></div>
+
+  <!-- Highlight -->
+  <div class="_grp">
+    <span class="_grp-label">Destaque</span>
+    <span class="_sw" style="background:rgba(250,204,21,0.7)" onclick="_hl('yellow')" id="_sw_y" title="Amarelo"></span>
+    <span class="_sw" style="background:rgba(34,197,94,0.65)" onclick="_hl('green')"  id="_sw_g" title="Verde"></span>
+    <span class="_sw" style="background:rgba(59,130,246,0.65)" onclick="_hl('blue')"  id="_sw_b" title="Azul"></span>
+    <span class="_sw" style="background:rgba(239,68,68,0.65)"  onclick="_hl('red')"   id="_sw_r" title="Vermelho"></span>
+    <button class="_tb-btn" onclick="_hl(null)" title="Remover destaque">✕</button>
+  </div>
+  <div class="_sep"></div>
+
+  <!-- Font Color -->
+  <div class="_grp">
+    <span class="_grp-label">Cor</span>
+    <span class="_sw" style="background:#fbbf24" onclick="_fc('#fbbf24')" id="_fc_1" title="Amarelo"></span>
+    <span class="_sw" style="background:#34d399" onclick="_fc('#34d399')" id="_fc_2" title="Verde"></span>
+    <span class="_sw" style="background:#60a5fa" onclick="_fc('#60a5fa')" id="_fc_3" title="Azul"></span>
+    <span class="_sw" style="background:#f87171" onclick="_fc('#f87171')" id="_fc_4" title="Vermelho"></span>
+    <span class="_sw" style="background:#c084fc" onclick="_fc('#c084fc')" id="_fc_5" title="Roxo"></span>
+    <span class="_sw" style="background:#fb923c" onclick="_fc('#fb923c')" id="_fc_6" title="Laranja"></span>
+    <button class="_tb-btn" onclick="_fc(null)" title="Cor padrão">✕</button>
+  </div>
+  <div class="_sep"></div>
+
+  <!-- Font Size -->
+  <div class="_grp">
+    <span class="_grp-label">Tamanho</span>
+    <button class="_tb-btn" onclick="_fs(-1)" title="Diminuir">A−</button>
+    <input class="_fs-num" id="_fsv" type="text" value="—" readonly title="Tamanho atual">
+    <button class="_tb-btn" onclick="_fs(1)" title="Aumentar">A+</button>
+    <button class="_tb-btn" onclick="_fs(0)" title="Reset">↺</button>
+  </div>
+  <div class="_sep"></div>
+
+  <!-- Flags -->
+  <div class="_grp">
+    <span class="_grp-label">Flag</span>
+    <button class="_tb-btn" id="_f0" onclick="_fl('hard')"   title="Difícil">🔴</button>
+    <button class="_tb-btn" id="_f1" onclick="_fl('review')" title="Revisar">🟡</button>
+    <button class="_tb-btn" id="_f2" onclick="_fl('done')"   title="Dominado">🟢</button>
+    <button class="_tb-btn" onclick="_fl(null)" title="Remover flag">✕</button>
+  </div>
+  <div class="_sep"></div>
+
+  <!-- Note -->
+  <div class="_grp">
+    <button class="_tb-btn" id="_ntbtn" onclick="_on()" title="Adicionar nota">✏️ Nota</button>
+  </div>
+
+  <!-- Selected node info -->
+  <div id="_sel-info">← Clique num nó para marcar</div>
+</div>
+
+<!-- NOTE MODAL -->
+<div id="_np">
+  <div class="_npb">
+    <div class="_nptitle" id="_npt">📝 Nota</div>
+    <textarea class="_npta" id="_npta" placeholder="Escreva sua anotação..."></textarea>
+    <div class="_npact">
+      <button class="_npcxl" onclick="_cn()">Cancelar</button>
+      <button class="_npsave" onclick="_sn()">Salvar nota</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ── THEME ──
+(function(){
+  var s=localStorage.getItem('theme')||'dark';
+  document.documentElement.setAttribute('data-theme',s);
+  window.addEventListener('DOMContentLoaded',function(){
+    var b=document.getElementById('_tb');
+    if(b)b.textContent=s==='dark'?'☀️':'🌙';
+  });
+})();
+function _tT(){
+  var h=document.documentElement;
+  var n=h.getAttribute('data-theme')==='dark'?'light':'dark';
+  h.setAttribute('data-theme',n);localStorage.setItem('theme',n);
+  var b=document.getElementById('_tb');if(b)b.textContent=n==='dark'?'☀️':'🌙';
+}
+
+// ── AUTH via URL hash token ──
+var _sb=supabase.createClient('https://qseismabfaonggrwzuiu.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzZWlzbWFiZmFvbmdncnd6dWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzU4MTMsImV4cCI6MjA5Mzc1MTgxM30.eYnWJo9NI_-wGJCd2HalmnCGMhMvlKZxmZKuTpx3xS0', {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: false,
+    storage: {
+      getItem: (k) => { try { return localStorage.getItem(k); } catch(e) { return null; } },
+      setItem: (k,v) => { try { localStorage.setItem(k,v); } catch(e) {} },
+      removeItem: (k) => { try { localStorage.removeItem(k); } catch(e) {} }
+    }
+  }
+});
+var _mid='ptrabalho';
+var _u=null,_m={},_sid=null,_sel=null;
+
+// Auth: read directly from Supabase localStorage (same domain, same storage)
+window.addEventListener('DOMContentLoaded',function(){
+  _sb.auth.getSession().then(function(r){
+    if(r.data&&r.data.session&&r.data.session.user){
+      _u=r.data.session.user;
+      _lm().then(_aa);
+    }
+  });
+});
+
+// ── LOAD MARKS ──
+async function _lm(){
+  if(!_u)return;
+  try{
+    var opts={headers:{'Authorization':'Bearer '+(_u._token||''),'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzZWlzbWFiZmFvbmdncnd6dWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzU4MTMsImV4cCI6MjA5Mzc1MTgxM30.eYnWJo9NI_-wGJCd2HalmnCGMhMvlKZxmZKuTpx3xS0'}};
+    var [a,b,c,d]=await Promise.all([
+      _sb.from('highlights').select('node_id,color').eq('user_id',_u.id).eq('map_id',_mid),
+      _sb.from('node_flags').select('node_id,flag').eq('user_id',_u.id).eq('map_id',_mid),
+      _sb.from('node_notes').select('node_id,content').eq('user_id',_u.id).eq('map_id',_mid),
+      _sb.from('node_style').select('node_id,font_color,font_size').eq('user_id',_u.id).eq('map_id',_mid),
+    ]);
+    _m={};
+    if(a.data)a.data.forEach(function(r){if(!_m[r.node_id])_m[r.node_id]={};_m[r.node_id].hl=r.color;});
+    if(b.data)b.data.forEach(function(r){if(!_m[r.node_id])_m[r.node_id]={};_m[r.node_id].fl=r.flag;});
+    if(c.data)c.data.forEach(function(r){if(!_m[r.node_id])_m[r.node_id]={};_m[r.node_id].nt=r.content;});
+    if(d.data)d.data.forEach(function(r){if(!_m[r.node_id])_m[r.node_id]={};_m[r.node_id].fc=r.font_color;_m[r.node_id].fs=r.font_size;});
+  }catch(e){console.warn('load err',e);}
+}
+
+// ── APPLY MARKS TO DOM ──
+function _aa(){Object.keys(_m).forEach(function(nid){var el=document.querySelector('[data-mnid="'+nid+'"]');if(el)_am(el,nid);});}
+
+function _txt(el){return el.querySelector('.node-text,.txt,.node-content>span')||el.querySelector('span')||el;}
+
+function _am(el,nid){
+  var mk=_m[nid]||{};
+  var t=_txt(el);
+  t.classList.remove('hl-yellow','hl-green','hl-blue','hl-red');
+  el.querySelectorAll('._fb2,._nb3').forEach(function(e){e.remove();});
+  if(mk.hl)t.classList.add('hl-'+mk.hl);
+  if(mk.fc)t.style.color=mk.fc; else t.style.removeProperty('color');
+  if(mk.fs)t.style.fontSize=mk.fs+'px'; else t.style.removeProperty('font-size');
+  if(mk.fl){var fb=document.createElement('span');fb.className='_fb2';fb.style.cssText='margin-left:5px;font-size:12px;';fb.textContent=mk.fl==='hard'?'🔴':mk.fl==='review'?'🟡':'🟢';t.after(fb);}
+  if(mk.nt&&mk.nt.trim()){var nb=document.createElement('span');nb.className='_nb3';nb.style.cssText='margin-left:4px;cursor:help;font-size:11px;';nb.title=mk.nt;nb.textContent='📝';t.after(nb);}
+}
+
+// ── NODE SELECTION ──
+function _mkid(el){
+  var t=_txt(el);
+  var lbl=(t?t.textContent:'').trim().slice(0,40);
+  return lbl.replace(/\s+/g,'_').replace(/[^a-z0-9_]/gi,'').toLowerCase()+'__'+_mid;
+}
+
+document.addEventListener('click',function(e){
+  if(e.target.closest('#_wtb,#_np'))return;
+  var row=e.target.closest('.node-row,.row,.node-content');
+  if(!row)return;
+  if(_sel)_sel.classList.remove('_sel');
+  var nid=row.getAttribute('data-mnid');
+  if(!nid){nid=_mkid(row);row.setAttribute('data-mnid',nid);}
+  _sid=nid;_sel=row;row.classList.add('_sel');
+  var t=_txt(row);
+  var lbl=(t?t.textContent:'').trim().slice(0,50);
+  var si=document.getElementById('_sel-info');if(si)si.textContent=lbl||'Nó selecionado';
+  // Update flag buttons
+  document.querySelectorAll('#_f0,#_f1,#_f2').forEach(function(b){b.classList.remove('_on');});
+  var mk=_m[nid]||{};
+  if(mk.fl){var fi={hard:'_f0',review:'_f1',done:'_f2'};var fb=document.getElementById(fi[mk.fl]);if(fb)fb.classList.add('_on');}
+  // Update font size display
+  var fv=document.getElementById('_fsv');if(fv)fv.value=mk.fs?(mk.fs+'px'):'—';
+  // Update color swatches
+  document.querySelectorAll('._sw').forEach(function(s){s.classList.remove('_on');});
+  if(mk.hl){var sw=document.getElementById('_sw_'+mk.hl[0]);if(sw)sw.classList.add('_on');}
+  if(mk.fc){var fcb=document.querySelector('._sw[onclick*="'+mk.fc+'"]');if(fcb)fcb.classList.add('_on');}
+});
+
+// ── ACTIONS ──
+function _uid(){return _u?_u.id:null;}
+
+async function _hl(color){
+  if(!_sid)return;if(!_u){alert('Faça login para usar marcações');return;}
+  if(!_m[_sid])_m[_sid]={};_m[_sid].hl=color;
+  if(_sel)_am(_sel,_sid);
+  document.querySelectorAll('._sw[id^="_sw_"]').forEach(function(s){s.classList.remove('_on');});
+  if(color){var sw=document.getElementById('_sw_'+color[0]);if(sw)sw.classList.add('_on');await _sb.from('highlights').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,color:color},{onConflict:'user_id,map_id,node_id'});}
+  else await _sb.from('highlights').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
+}
+
+async function _fc(color){
+  if(!_sid)return;if(!_u){alert('Faça login para usar marcações');return;}
+  if(!_m[_sid])_m[_sid]={};_m[_sid].fc=color;
+  if(_sel)_am(_sel,_sid);
+  document.querySelectorAll('._sw[id^="_fc_"]').forEach(function(s){s.classList.remove('_on');});
+  if(color){var fcb=document.querySelector('._sw[onclick*="'+color+'"]');if(fcb)fcb.classList.add('_on');}
+  var sz=(_m[_sid]&&_m[_sid].fs)||null;
+  if(color||sz)await _sb.from('node_style').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,font_color:color,font_size:sz},{onConflict:'user_id,map_id,node_id'});
+  else await _sb.from('node_style').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
+}
+
+async function _fs(delta){
+  if(!_sid)return;if(!_u){alert('Faça login para usar marcações');return;}
+  if(!_m[_sid])_m[_sid]={};
+  var t=_sel?_txt(_sel):null;
+  var cur=(_m[_sid].fs)||(t?parseInt(window.getComputedStyle(t).fontSize)||13:13);
+  var nv=delta===0?null:Math.max(8,Math.min(28,cur+delta));
+  _m[_sid].fs=nv;
+  if(_sel)_am(_sel,_sid);
+  var fv=document.getElementById('_fsv');if(fv)fv.value=nv?(nv+'px'):'—';
+  var fc=(_m[_sid]&&_m[_sid].fc)||null;
+  if(nv||fc)await _sb.from('node_style').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,font_color:fc,font_size:nv},{onConflict:'user_id,map_id,node_id'});
+  else await _sb.from('node_style').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
+}
+
+async function _fl(flag){
+  if(!_sid)return;if(!_u){alert('Faça login para usar marcações');return;}
+  if(!_m[_sid])_m[_sid]={};_m[_sid].fl=flag;
+  if(_sel)_am(_sel,_sid);
+  document.querySelectorAll('#_f0,#_f1,#_f2').forEach(function(b){b.classList.remove('_on');});
+  if(flag){var fi={hard:'_f0',review:'_f1',done:'_f2'};var fb=document.getElementById(fi[flag]);if(fb)fb.classList.add('_on');await _sb.from('node_flags').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,flag:flag},{onConflict:'user_id,map_id,node_id'});}
+  else await _sb.from('node_flags').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
+}
+
+function _on(){
+  if(!_sid)return;
+  var mk=_m[_sid]||{};
+  document.getElementById('_npta').value=mk.nt||'';
+  var si=document.getElementById('_sel-info');
+  document.getElementById('_npt').textContent='📝 Nota: '+(si?si.textContent:'');
+  document.getElementById('_np').classList.add('_o');
+}
+function _cn(){document.getElementById('_np').classList.remove('_o');}
+async function _sn(){
+  if(!_sid||!_u)return _cn();
+  var content=document.getElementById('_npta').value;
+  if(!_m[_sid])_m[_sid]={};_m[_sid].nt=content;
+  if(_sel)_am(_sel,_sid);
+  if(content.trim())await _sb.from('node_notes').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,content:content},{onConflict:'user_id,map_id,node_id'});
+  else await _sb.from('node_notes').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
+  _cn();
+}
+</script>
+
+<script>
+async function _doLogout(){
+  var sb2=supabase.createClient('https://qseismabfaonggrwzuiu.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzZWlzbWFiZmFvbmdncnd6dWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzU4MTMsImV4cCI6MjA5Mzc1MTgxM30.eYnWJo9NI_-wGJCd2HalmnCGMhMvlKZxmZKuTpx3xS0');
+  await sb2.auth.signOut();
+  window.location.href='index.html';
+}
+</script>
+
+<script>
+// ── TRACKER INTEGRATION ──
+var _TRK = {
+  mapId: 'ptrabalho',
+  total: 5,
+  done: {},  // chapter_id -> true
+  user: null,
+};
+
+// Auth
+window.addEventListener('DOMContentLoaded', function(){
+  _sb.auth.getSession().then(function(r){
+    if(r.data&&r.data.session&&r.data.session.user){
+      _TRK.user = r.data.session.user;
+      _trkLoad();
+    }
+  });
+});
+
+async function _trkLoad(){
+  try{
+    var r = await _sb.from('progress')
+      .select('chapter_id,done')
+      .eq('user_id', _TRK.user.id);
+    _TRK.done = {};
+    if(r.data) r.data.forEach(function(row){
+      if(row.done && row.chapter_id.startsWith(_TRK.mapId+'_'))
+        _TRK.done[row.chapter_id] = true;
+    });
+    try{ Object.keys(_TRK.done).forEach(function(cid){ localStorage.setItem('_pgprog_'+cid,JSON.stringify({done:true,date:null})); }); }catch(_){}
+    _trkRender();
+  }catch(e){ console.warn('tracker load err', e); }
+}
+
+function _trkRender(){
+  var count = Object.keys(_TRK.done).length;
+  var pct = _TRK.total ? Math.round(count/_TRK.total*100) : 0;
+  // Update both injected header bar and sidebar bar
+  ['_trk_fill','trk-fill'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.width=pct+'%';});
+  ['_trk_pct','trk-pct'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=pct+'%';});
+  ['_trk_cnt','trk-cnt'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=count+'/'+_TRK.total;});
+  // Update checkboxes
+  document.querySelectorAll('._trk_chk').forEach(function(chk){
+    var cid = chk.getAttribute('data-cid');
+    chk.checked = !!_TRK.done[cid];
+    var w = chk.closest('._chk_wrap');
+    if(w) w.classList.toggle('_chk_done', !!_TRK.done[cid]);
+  });
+  renderTabs();
+}
+
+async function _trkToggle(chapterId, done, chk){
+  if(!_TRK.user){
+    // Try to recover session
+    try {
+      const r = await _sb.auth.getSession();
+      if(r.data && r.data.session && r.data.session.user){
+        _TRK.user = r.data.session.user;
+      } else {
+        console.warn('No session found, cannot save tracker');
+        return;
+      }
+    } catch(e) { console.error('getSession error:', e); return; }
+  }
+  var now = done ? new Date().toISOString() : null;
+  if(done) _TRK.done[chapterId] = true;
+  else delete _TRK.done[chapterId];
+  _trkRender();
+  try{
+    await _sb.from('progress').upsert({
+      user_id: _TRK.user.id,
+      chapter_id: chapterId,
+      done: done,
+      done_at: now
+    }, {onConflict: 'user_id,chapter_id'});
+  }catch(e){ console.warn('tracker save err', e); }
+  try{ localStorage.setItem('_pgprog_'+chapterId, JSON.stringify({done, date:now})); }catch(_){}
+}
+</script>
+
+<style id="_mm_css">
+#_mm_wrap{display:none;position:fixed;z-index:500;}
+#_mm_svg{width:100%;height:100%;display:block;}
+._mm_on{background:rgba(240,180,41,0.12)!important;color:var(--accent,#f0b429)!important;border-color:rgba(240,180,41,0.4)!important;}
+[data-theme="light"] #_mm_wrap{background:#f4f5f8;}
+</style>
+<script id="_mm_js">
+;(function(){
+var _P=['#3b82f6','#10b981','#ef4444','#f97316','#8b5cf6','#eab308','#14b8a6','#ec4899','#6366f1','#22c55e'];
+var _GX=30,_GY=8,_MXW=175,_MNW=90,_FS=11,_CW=6.2,_LH=15,_VP=10;
+var _col=new Set(),_nid=0,_cur=null,_tr={x:0,y:0,sc:1},_act=false;
+
+function _norm(n){
+  var t=(typeof n==='object'&&n)?(n.text||n.title||n.label||n.t||''):'';
+  var c=n.children||n.c||[];
+  return{text:t,children:c.map(_norm)};
+}
+function _wt(s,mw){
+  var mc=Math.floor(mw/_CW),ws=(s||'').split(/\s+/),ls=[],c='';
+  ws.forEach(function(w){var t=c?c+' '+w:w;if(t.length>mc&&c){ls.push(c);c=w;}else c=t;});
+  if(c)ls.push(c);
+
+  return ls.length?ls:[''];
+}
+function _di(s,d){
+  if(d===0){var t=(s||'').length>22?s.slice(0,21)+'…':s;return{lines:[t],w:Math.max(100,(t.length||5)*8+24),h:42};}
+  var mw=d===1?_MXW:Math.min(_MXW,155);
+  var ls=_wt(s,mw);
+  var w=Math.min(mw,Math.max(_MNW,Math.max.apply(null,ls.map(function(l){return l.length*_CW+24;}))));
+  return{lines:ls,w:w,h:ls.length*_LH+_VP};
+}
+function _meta(n,d){n._id=_nid++;n._depth=d;var di=_di(n.text,d);n._lines=di.lines;n._w=di.w;n._h=di.h;if(n.children)n.children.forEach(function(c){_meta(c,d+1);});}
+function _ac(n,ci){n._ci=ci;if(n.children)n.children.forEach(function(c){_ac(c,ci);});}
+function _ic(n){if(n._depth>=2&&n.children&&n.children.length)_col.add(n._id);if(n.children)n.children.forEach(_ic);}
+function _vc(n){return _col.has(n._id)?[]:(n.children||[]);}
+function _sh(n){var ch=_vc(n);if(!ch.length)return n._h+_GY;return ch.reduce(function(s,c){return s+_sh(c);},0);}
+function _td(n){if(!n.children||!n.children.length)return 0;return n.children.reduce(function(s,c){return s+1+_td(c);},0);}
+function _lay(n,y0,ex,sd){
+  var sh=_sh(n),cy=y0+sh/2;n._cy=cy;n._y=cy-n._h/2;n._side=sd;
+  if(sd===1)n._x=ex;else n._x=ex-n._w;
+  var ne=sd===1?n._x+n._w+_GX:n._x-_GX;
+  var cy2=y0;_vc(n).forEach(function(c){c._side=sd;_lay(c,cy2,ne,sd);cy2+=_sh(c);});
+}
+function _layR(r){
+  r._cy=0;r._y=-r._h/2;r._x=-r._w/2;r._side=0;
+  var ac=_vc(r),ul=ac.length>3,rn=ul?Math.ceil(ac.length/2):ac.length;
+  var rc=ac.slice(0,rn),lc=ac.slice(rn);
+  ac.forEach(function(c,i){_ac(c,i%_P.length);});
+  var ry=-rc.reduce(function(s,c){return s+_sh(c);},0)/2;
+  rc.forEach(function(c){c._side=1;_lay(c,ry,r._w/2+_GX,1);ry+=_sh(c);});
+  if(lc.length){var ly=-lc.reduce(function(s,c){return s+_sh(c);},0)/2;lc.forEach(function(c){c._side=-1;_lay(c,ly,-r._w/2-_GX,-1);ly+=_sh(c);});}
+}
+var NS='http://www.w3.org/2000/svg';
+function E(t,a){var e=document.createElementNS(NS,t);if(a)for(var k in a)e.setAttribute(k,a[k]);return e;}
+function _cl(n,a){a.push(n);_vc(n).forEach(function(c){_cl(c,a);});}
+function _rend(){
+  var iL=document.documentElement.getAttribute('data-theme')==='light';
+  var w=document.getElementById('_mm_world');while(w.firstChild)w.removeChild(w.firstChild);
+  if(!_cur)return;_layR(_cur);
+  var nodes=[];_cl(_cur,nodes);
+  document.getElementById('_mm_svg').style.background=iL?'#f4f5f8':'#0f1117';
+  var eg=E('g');
+  nodes.forEach(function(n){_vc(n).forEach(function(c){
+    var col=n._depth===0?_P[c._ci]:_P[n._ci];var x1,x2,y1=n._cy,y2=c._cy;
+    if(n._depth===0){x1=c._side===1?n._x+n._w:n._x;x2=c._side===1?c._x:c._x+c._w;}
+    else if(n._side===1){x1=n._x+n._w;x2=c._x;}else{x1=n._x;x2=c._x+c._w;}
+    var mx=(x1+x2)/2,sw=Math.max(1.2,3.8-c._depth*0.7);
+    eg.appendChild(E('path',{d:'M '+x1+' '+y1+' C '+mx+' '+y1+' '+mx+' '+y2+' '+x2+' '+y2,
+      stroke:col,'stroke-opacity':'0.75','stroke-width':sw,fill:'none','stroke-linecap':'round'}));
+  });});
+  w.appendChild(eg);
+  nodes.forEach(function(n){
+    var col=n._depth===0?(iL?'#1a1a2e':'#e2e4ec'):_P[n._ci];
+    var rv=parseInt(col.slice(1,3),16),gv=parseInt(col.slice(3,5),16),bv=parseInt(col.slice(5,7),16);
+    var rgb=rv+','+gv+','+bv;
+    var g=E('g',{style:'cursor:pointer'});
+    if(n._depth===0){
+      g.appendChild(E('ellipse',{cx:n._x+n._w/2,cy:n._cy,rx:n._w/2+6,ry:n._h/2+4,
+        fill:iL?'rgba(0,0,0,0.05)':'rgba(255,255,255,0.06)',stroke:iL?'#888':'#5a5f70','stroke-width':'2'}));
+    }else{
+      g.appendChild(E('rect',{x:n._x,y:n._y,width:n._w,height:n._h,rx:'5',ry:'5',
+        fill:'rgba('+rgb+','+(iL?(n._depth===1?'0.28':'0.16'):(n._depth===1?'0.42':'0.26'))+')',stroke:col,'stroke-width':n._depth===1?'2.2':'1.5'}));
+    }
+    var tx=E('text',{x:n._x+n._w/2,'text-anchor':'middle',fill:n._depth===0?col:(iL?'#111111':'#f0f0f0'),
+      'font-family':"'SF Mono','Fira Code','Courier New',monospace",
+      'font-size':n._depth===0?13:_FS,'font-weight':n._depth<=1?'600':'normal',
+      style:'pointer-events:none;user-select:none;'});
+    var tH=n._lines.length*_LH,sY=n._cy-tH/2+_LH*0.75;
+    n._lines.forEach(function(l,i){var ts=E('tspan',{x:n._x+n._w/2,y:sY+i*_LH});ts.textContent=l;tx.appendChild(ts);});
+    g.appendChild(tx);
+    if(n.children&&n.children.length&&_col.has(n._id)){
+      var d=_td(n),bx=n._side===-1?n._x-13:n._x+n._w+13,by=n._cy;
+      g.appendChild(E('circle',{cx:bx,cy:by,r:'10',fill:'rgba('+rgb+',0.18)',stroke:col,'stroke-width':'1.2'}));
+      var bt=E('text',{x:bx,y:by+0.5,'text-anchor':'middle','dominant-baseline':'middle',
+        fill:col,'font-size':'8.5','font-weight':'bold','font-family':'monospace',style:'pointer-events:none;user-select:none;'});
+      bt.textContent=String(d);g.appendChild(bt);
+    }
+    g.addEventListener('click',function(e){
+      e.stopPropagation();
+      if(n.children&&n.children.length){
+        var _px=n._x+n._w/2,_py=n._cy;
+        if(_col.has(n._id))_col.delete(n._id);else _col.add(n._id);
+        _rend();
+        _tr.x+=((_px-(n._x+n._w/2))*_tr.sc);
+        _tr.y+=(_py-n._cy)*_tr.sc;
+        _apT();
+      }
+    });
+    w.appendChild(g);
+  });
+  _apT();
+}
+function _apT(){document.getElementById('_mm_world').setAttribute('transform','translate('+_tr.x+','+_tr.y+') scale('+_tr.sc+')');}
+function _fit(){
+  if(!_cur)return;var nodes=[];_cl(_cur,nodes);
+  var mnX=1e9,mxX=-1e9,mnY=1e9,mxY=-1e9;
+  nodes.forEach(function(n){if(n._x<mnX)mnX=n._x;if(n._x+n._w>mxX)mxX=n._x+n._w;if(n._y<mnY)mnY=n._y;if(n._y+n._h>mxY)mxY=n._y+n._h;});
+  var W=mxX-mnX+80,H=mxY-mnY+60,sv=document.getElementById('_mm_svg'),cW=sv.clientWidth||900,cH=sv.clientHeight||600;
+  var s=Math.min(1.1,(cW-60)/W,(cH-60)/H);
+  _tr.sc=s;_tr.x=cW/2-(mnX+(mxX-mnX)/2)*s;_tr.y=cH/2-(mnY+(mxY-mnY)/2)*s;_apT();
+}
+window.__MM={
+  norm:_norm,
+  init:function(){
+    if(document.getElementById('_mm_wrap'))return;
+    var div=document.createElement('div');div.id='_mm_wrap';
+    div.style.cssText='display:none;position:fixed;z-index:500;';
+    div.innerHTML='<svg id="_mm_svg"><g id="_mm_world"></g></svg>';
+    document.body.appendChild(div);
+    var svg=document.getElementById('_mm_svg');
+    var isPan=false,pSt={x:0,y:0},pOr={x:0,y:0};
+    svg.style.cursor='grab';
+    svg.addEventListener('mousedown',function(e){
+      if(e.target===svg||e.target.id==='_mm_world'){
+        isPan=true;svg.style.cursor='grabbing';pSt={x:e.clientX,y:e.clientY};pOr={x:_tr.x,y:_tr.y};e.preventDefault();}});
+    window.addEventListener('mousemove',function(e){if(!isPan)return;_tr.x=pOr.x+(e.clientX-pSt.x);_tr.y=pOr.y+(e.clientY-pSt.y);_apT();});
+    window.addEventListener('mouseup',function(){isPan=false;svg.style.cursor='grab';});
+    svg.addEventListener('wheel',function(e){
+      e.preventDefault();var f=e.deltaY<0?1.12:0.89,r=svg.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+      _tr.x=mx-(mx-_tr.x)*f;_tr.y=my-(my-_tr.y)*f;_tr.sc=Math.max(0.05,Math.min(6,_tr.sc*f));_apT();},{passive:false});
+  },
+  show:function(rawData){
+    _nid=0;_col=new Set();_cur=_norm(rawData);_meta(_cur,0);_ic(_cur);
+    var wrap=document.getElementById('_mm_wrap');
+    var sb=document.getElementById('sidebar');
+    var tb=document.getElementById('_wtb')||document.getElementById('_hdr');
+    var sW=sb?sb.offsetWidth:0,tH=tb?tb.offsetHeight:42;
+    wrap.style.left=sW+'px';wrap.style.top=tH+'px';wrap.style.right='0';wrap.style.bottom='0';
+    wrap.style.display='block';_act=true;_rend();setTimeout(_fit,50);
+    var btn=document.getElementById('_mm_btn');if(btn)btn.classList.add('_mm_on');
+  },
+  hide:function(){
+    var wrap=document.getElementById('_mm_wrap');if(wrap)wrap.style.display='none';_act=false;
+    var btn=document.getElementById('_mm_btn');if(btn)btn.classList.remove('_mm_on');
+  },
+  toggle:function(rawData){if(_act)this.hide();else this.show(rawData);},
+  refresh:function(rawData){if(_act)this.show(rawData);},
+  isActive:function(){return _act;},
+  fitView:function(){_fit();}
+};
+document.addEventListener('DOMContentLoaded',function(){window.__MM.init();});
+})();
+</script>
+<script>
+// MM adapter — ambiental
+window.__MM_getData = function(){
+  if(typeof DATA==='undefined'||typeof cur==='undefined') return null;
+  return DATA[cur]||null;
+};
+(function(){
+  if(typeof selChap!=='undefined'){
+    var _o=selChap;
+    selChap=function(k){_o(k);window.__MM&&window.__MM.isActive()&&window.__MM.refresh(window.__MM_getData());};
+  }
+})();
+</script>
+<script>
+// Mobile sidebar + color picker (called from #_hdr)
+var _sbo=window.innerWidth>768;
+function _sbT(){_sbo=!_sbo;_sbA();localStorage.setItem('_sbo',_sbo?'1':'0');}
+function _sbC(){_sbo=false;_sbA();}
+function _sbA(){var sb=document.getElementById('sidebar'),ov=document.getElementById('_sbov'),mob=window.innerWidth<=768;if(sb)sb.classList.toggle('sb-off',!_sbo);if(ov)ov.classList.toggle('open',_sbo&&mob);}
+function _logout(){_doLogout();}
+function _pickColor(c){var m={y:'yellow',g:'green',b:'blue',p:'pink',o:'orange'};_hl(c?m[c]:null);}
+window.addEventListener('DOMContentLoaded',function(){var sv=localStorage.getItem('_sbo');_sbo=window.innerWidth>768?(sv!=='0'):false;_sbA();});
+window.addEventListener('resize',function(){if(window.innerWidth>768&&!_sbo){_sbo=true;_sbA();}if(window.innerWidth<=768&&_sbo){_sbo=false;_sbA();}});
+</script>
+</body>
+</html>
+
+<div id="_sbov" onclick="_sbC()"></div>
+<div id="_hdr">
+  <button class="hbtn" onclick="_sbT()" style="padding:4px 8px;font-size:16px;" title="Menu">&#9776;</button>
+  <a href="index.html" class="hbtn">&#8592; Portal</a>
+  <a href="index.html" onclick="try{sessionStorage.setItem('_gotoTab','tracker')}catch(e){}" class="hbtn">&#128202; Tracker</a>
+  <button onclick="_logout()" class="hbtn">Sair</button>
+  <span id="_htit">Dir. Ambiental</span>
+  <div id="_hlbar">
+    <div class="hlsw" style="background:rgba(250,204,21,0.85)" onclick="_pickColor('y')" id="_sw_y" title="Amarelo"></div>
+    <div class="hlsw" style="background:rgba(34,197,94,0.75)"  onclick="_pickColor('g')" id="_sw_g" title="Verde"></div>
+    <div class="hlsw" style="background:rgba(59,130,246,0.75)" onclick="_pickColor('b')" id="_sw_b" title="Azul"></div>
+    <div class="hlsw" style="background:rgba(236,72,153,0.75)" onclick="_pickColor('p')" id="_sw_p" title="Rosa"></div>
+    <div class="hlsw" style="background:rgba(249,115,22,0.75)" onclick="_pickColor('o')" id="_sw_o" title="Laranja"></div>
+    <div class="hlsw clr" onclick="_pickColor(null)" id="_sw_x" title="Limpar">&#x2715;</div>
+  </div>
+  <button class="hbtn" onclick="_tT()" id="_thb" style="margin-left:4px;">&#9728;&#65039;</button>
+</div>
+
+
