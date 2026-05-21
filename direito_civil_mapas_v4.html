@@ -628,7 +628,6 @@ function toggleMapTheme(){
   <a href="index.html" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;text-decoration:none;white-space:nowrap;">← Portal</a>
   <a href="index.html" onclick="try{sessionStorage.setItem('_gotoTab','tracker')}catch(e){}" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;text-decoration:none;white-space:nowrap;">📊 Tracker</a>
   <button class="_tb-btn" id="_mm_btn" onclick="window.__MM&&window.__MM.toggle(window.__MM_getData())" title="Mapa Mental" style="font-size:15px;padding:2px 8px;">🌐</button>
-  <button onclick="_doLogout()" style="font-size:12px;font-family:monospace;color:#ef4444;background:none;border:1px solid #ef4444;border-radius:6px;padding:3px 10px;cursor:pointer;white-space:nowrap;">Sair</button>
   </div>
   <div class="_sep"></div>
 
@@ -679,6 +678,10 @@ function toggleMapTheme(){
   <!-- Note -->
   <div class="_grp">
     <button class="_tb-btn" id="_ntbtn" onclick="_on()" title="Adicionar nota">✏️ Nota</button>
+  </div>
+  <div class="_sep"></div>
+  <div class="_grp">
+    <button onclick="_doLogout()" style="font-size:12px;font-family:monospace;color:#ef4444;background:none;border:1px solid #ef4444;border-radius:6px;padding:3px 10px;cursor:pointer;white-space:nowrap;">Sair</button>
   </div>
 
   <!-- Selected node info -->

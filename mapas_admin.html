@@ -548,7 +548,7 @@ body{padding-top:42px!important;}
 ._chk_done { opacity: 0.5; text-decoration: line-through; }
 
 /* ══ UI INJECTED ══ */
-body { padding-top: 46px !important; }
+body { padding-top: 42px !important; }
 
 #_hdr {
   position: fixed; top: 0; left: 0; right: 0; z-index: 9900;
@@ -608,7 +608,7 @@ body { padding-top: 46px !important; }
 ._hly.o { background: rgba(249,115,22,0.3) !important; border-left: 3px solid rgba(234,88,12,0.8);  padding-left: 5px; }
 
 /* SIDEBAR */
-#sidebar { top: 46px !important; height: calc(100vh - 46px) !important; }
+#sidebar { top: 42px !important; height: calc(100vh - 42px) !important; }
 @media(min-width:769px) { #sidebar.sb-off { width:0!important; min-width:0!important; overflow:hidden!important; border-right:none!important; } }
 @media(max-width:768px) {
   #sidebar { position:fixed!important; left:0!important; z-index:8900!important; }
@@ -930,7 +930,6 @@ async function _doLogout(){
     <a href="index.html" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;text-decoration:none;white-space:nowrap;">← Portal</a>
     <a href="index.html" onclick="try{sessionStorage.setItem('_gotoTab','tracker')}catch(e){}" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;text-decoration:none;white-space:nowrap;">📊 Tracker</a>
     <button class="_tb-btn" id="_mm_btn" onclick="window.__MM&&window.__MM.toggle(window.__MM_getData())" title="Mapa Mental" style="font-size:15px;padding:2px 8px;">🌐</button>
-    <button onclick="_doLogout()" style="font-size:12px;font-family:monospace;color:#ef4444;background:none;border:1px solid #ef4444;border-radius:6px;padding:3px 10px;cursor:pointer;white-space:nowrap;">Sair</button>
   </div>
   <div class="_sep"></div>
   <div class="_grp">
@@ -972,6 +971,10 @@ async function _doLogout(){
   <div class="_grp">
     <button class="_tb-btn" id="_ntbtn" onclick="_on()" title="Adicionar nota">✏️ Nota</button>
   </div>
+  <div class="_sep"></div>
+  <div class="_grp">
+    <button onclick="_doLogout()" style="font-size:12px;font-family:monospace;color:#ef4444;background:none;border:1px solid #ef4444;border-radius:6px;padding:3px 10px;cursor:pointer;white-space:nowrap;">Sair</button>
+  </div>
   <div id="_sel-info">← Clique num nó para marcar</div>
 </div>
 
@@ -990,10 +993,10 @@ async function _doLogout(){
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-body { padding-top: 46px !important; }
-#_hdr { display:none!important; position:fixed; top:0; left:0; right:0; z-index:9900; height:46px;
+body { padding-top: 42px !important; }
+#_hdr { position:fixed; top:0; left:0; right:0; z-index:9900; height:46px;
   background:var(--bg,#1a1d27); border-bottom:1px solid var(--border,#2e3350);
-  display:flex; align-items:center; gap:8px; padding:0 12px; }
+  align-items:center; gap:8px; padding:0 12px; display:none !important; }
 [data-theme="light"] #_hdr { background:#fff; border-color:#d8d3c8; }
 .hbtn { font-size:12px; font-family:monospace; background:none;
   border:1px solid var(--border,#2e3350); border-radius:6px; padding:4px 10px;
@@ -1001,7 +1004,7 @@ body { padding-top: 46px !important; }
 .hbtn:hover { background:rgba(255,255,255,0.06); }
 [data-theme="light"] .hbtn { color:#1a1a1a; border-color:#d8d3c8; }
 #_htit { font-size:13px; font-family:monospace; color:#7aa2f7; flex:1; text-align:center; }
-#sidebar { top: 46px !important; height: calc(100vh - 46px) !important; }
+#sidebar { top: 42px !important; height: calc(100vh - 42px) !important; }
 #_trk_bar { padding:10px 12px 8px; border-bottom:1px solid var(--border,#2e3350); flex-shrink:0; }
 #_trk_label { font-size:10px; font-family:monospace; letter-spacing:0.1em; text-transform:uppercase;
   color:#7c8db5; display:flex; justify-content:space-between; margin-bottom:6px; }
