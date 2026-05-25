@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview de Layouts</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0f1117;--surface:#1a1d27;--surface2:#21253a;--border:#2e3350;
+    --text:#cdd6f4;--muted:#5a6070;--accent:#c8a96e;
+    --admin:#5b8dee;--const:#7dc87d;--civil:#e07b7b;--ambiental:#6dcfb8;
+    --trabalho:#bb9af7;--ptrabalho:#f59e0b;--dtributario:#6366f1;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0a0c12; color:var(--text); font-family:'DM Sans',sans-serif; }
+
+  /* NAV */
+  .nav { background:#111420; border-bottom:1px solid #1e2235; padding:0 32px; display:flex; align-items:center; gap:8px; height:48px; position:sticky; top:0; z-index:100; }
+  .nav h2 { font-family:'DM Mono',monospace; font-size:13px; color:var(--muted); }
+  .nav-opts { display:flex; gap:4px; margin-left:24px; }
+  .nav-btn { font-size:12px; font-family:'DM Mono',monospace; padding:4px 14px; border-radius:6px; border:1px solid var(--border); background:none; color:var(--muted); cursor:pointer; transition:all .15s; }
+  .nav-btn.active, .nav-btn:hover { background:var(--accent); color:#111; border-color:var(--accent); }
+  .note { font-size:11px; color:#444; margin-left:auto; }
+
+  /* SECTIONS */
+  .section { display:none; height:calc(100vh - 48px); overflow:hidden; }
+  .section.active { display:flex; flex-direction:column; }
+
+  /* TOPBAR mock */
+  .topbar { background:var(--surface); border-bottom:1px solid var(--border); padding:0 32px; display:flex; align-items:center; height:48px; gap:24px; flex-shrink:0; }
+  .topbar-brand { font-family:'DM Serif Display',serif; font-size:17px; color:var(--text); }
+  .topbar-brand em { color:var(--accent); font-style:italic; }
+  .topbar-tabs { display:flex; gap:2px; }
+  .topbar-tab { font-size:13px; color:var(--muted); padding:8px 14px; border-radius:6px; cursor:pointer; }
+  .topbar-tab.active { color:var(--accent); font-weight:500; border-bottom:2px solid var(--accent); border-radius:0; }
+  .topbar-right { margin-left:auto; display:flex; gap:12px; align-items:center; font-size:12px; color:var(--muted); }
+  .topbar-right span { font-family:'DM Mono',monospace; }
+
+  /* ════════════════════════════════════════════
+     OPÇÃO A — 3 colunas compacto
+  ════════════════════════════════════════════ */
+  .a-body { flex:1; overflow:hidden; padding:24px 40px; display:flex; flex-direction:column; }
+  .a-header { margin-bottom:20px; display:flex; align-items:baseline; gap:16px; }
+  .a-header h1 { font-family:'DM Serif Display',serif; font-size:26px; color:var(--text); }
+  .a-header h1 em { color:var(--accent); font-style:italic; }
+  .a-header span { font-size:13px; color:var(--muted); }
+  .a-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; flex:1; }
+  .a-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:18px 20px; display:flex; flex-direction:column; gap:10px; cursor:pointer; position:relative; overflow:hidden; transition:all .2s; }
+  .a-card::before { content:''; position:absolute; top:0; left:0; width:3px; height:100%; background:var(--c); }
+  .a-card:hover { border-color:var(--c); transform:translateY(-2px); box-shadow:0 6px 24px rgba(0,0,0,0.4); }
+  .a-card-top { display:flex; align-items:center; gap:10px; }
+  .a-icon { font-size:22px; }
+  .a-name { font-family:'DM Serif Display',serif; font-size:17px; }
+  .a-sub { font-size:11px; font-family:'DM Mono',monospace; color:var(--c); letter-spacing:.06em; text-transform:uppercase; }
+  .a-prog { width:100%; height:3px; background:rgba(128,128,128,.15); border-radius:2px; overflow:hidden; }
+  .a-prog-fill { height:100%; border-radius:2px; background:var(--c); width:0%; }
+  .a-cta { font-size:12px; color:var(--c); display:flex; align-items:center; gap:6px; margin-top:auto; font-weight:500; }
+
+  /* ════════════════════════════════════════════
+     OPÇÃO B — Tiles icon-first 4+3
+  ════════════════════════════════════════════ */
+  .b-body { flex:1; overflow:hidden; padding:20px 32px; display:flex; flex-direction:column; gap:12px; }
+  .b-title { font-size:12px; font-family:'DM Mono',monospace; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+  .b-row { display:grid; gap:12px; }
+  .b-row-4 { grid-template-columns:repeat(4,1fr); }
+  .b-row-3 { grid-template-columns:repeat(3,1fr); max-width:75%; }
+  .b-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:24px 20px; display:flex; flex-direction:column; align-items:center; gap:8px; cursor:pointer; transition:all .2s; position:relative; overflow:hidden; }
+  .b-card::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; background:var(--c); opacity:.6; }
+  .b-card:hover { border-color:var(--c); transform:translateY(-3px); box-shadow:0 8px 32px rgba(0,0,0,0.4); }
+  .b-icon { font-size:28px; }
+  .b-name { font-family:'DM Serif Display',serif; font-size:15px; text-align:center; }
+  .b-cap { font-size:11px; font-family:'DM Mono',monospace; color:var(--muted); }
+  .b-prog { width:100%; height:3px; background:rgba(128,128,128,.15); border-radius:2px; overflow:hidden; margin-top:4px; }
+  .b-prog-fill { height:100%; border-radius:2px; background:var(--c); }
+
+  /* ════════════════════════════════════════════
+     OPÇÃO C — Lista lateral + preview
+  ════════════════════════════════════════════ */
+  .c-body { flex:1; display:flex; overflow:hidden; }
+  .c-sidebar { width:280px; flex-shrink:0; border-right:1px solid var(--border); overflow-y:auto; padding:12px 0; }
+  .c-header { padding:16px 20px 12px; }
+  .c-header h2 { font-family:'DM Serif Display',serif; font-size:20px; }
+  .c-header h2 em { color:var(--accent); font-style:italic; }
+  .c-header p { font-size:12px; color:var(--muted); margin-top:4px; }
+  .c-item { display:flex; align-items:center; gap:12px; padding:10px 20px; cursor:pointer; transition:background .15s; border-left:3px solid transparent; }
+  .c-item:hover { background:var(--surface2); }
+  .c-item.active { background:var(--surface2); border-left-color:var(--c); }
+  .c-item-icon { font-size:18px; }
+  .c-item-info { flex:1; min-width:0; }
+  .c-item-name { font-size:13px; font-weight:500; }
+  .c-item-prog { font-size:10px; font-family:'DM Mono',monospace; color:var(--muted); margin-top:2px; }
+  .c-item-bar { width:100%; height:2px; background:rgba(128,128,128,.15); border-radius:2px; overflow:hidden; margin-top:4px; }
+  .c-item-fill { height:100%; border-radius:2px; background:var(--c); }
+  .c-main { flex:1; overflow:hidden; padding:48px 56px; display:flex; flex-direction:column; justify-content:center; }
+  .c-detail-icon { font-size:56px; margin-bottom:20px; }
+  .c-detail-name { font-family:'DM Serif Display',serif; font-size:36px; margin-bottom:8px; }
+  .c-detail-name em { color:var(--cc); font-style:normal; }
+  .c-detail-sub { font-size:14px; font-family:'DM Mono',monospace; color:var(--cc); letter-spacing:.08em; text-transform:uppercase; margin-bottom:24px; }
+  .c-detail-tags { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:32px; }
+  .c-detail-tag { font-size:12px; font-family:'DM Mono',monospace; padding:5px 12px; border-radius:6px; background:color-mix(in srgb,var(--cc) 12%,transparent); color:color-mix(in srgb,var(--cc) 90%,var(--text)); border:1px solid color-mix(in srgb,var(--cc) 25%,transparent); }
+  .c-detail-prog-wrap { margin-bottom:32px; }
+  .c-detail-prog-label { font-size:11px; font-family:'DM Mono',monospace; color:var(--muted); letter-spacing:.1em; text-transform:uppercase; margin-bottom:8px; display:flex; justify-content:space-between; }
+  .c-detail-prog { width:100%; height:6px; background:rgba(128,128,128,.15); border-radius:3px; overflow:hidden; }
+  .c-detail-prog-fill { height:100%; border-radius:3px; background:var(--cc); }
+  .c-btn { display:inline-flex; align-items:center; gap:8px; padding:12px 28px; background:var(--cc); color:#111; font-family:'DM Mono',monospace; font-size:13px; font-weight:500; border-radius:8px; cursor:pointer; border:none; letter-spacing:.04em; transition:opacity .15s; }
+  .c-btn:hover { opacity:.85; }
+
+  /* ════════════════════════════════════════════
+     OPÇÃO D — Bento grid
+  ════════════════════════════════════════════ */
+  .d-body { flex:1; overflow:hidden; padding:20px 32px; display:grid; gap:12px;
+    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .d-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:24px; cursor:pointer; transition:all .2s; position:relative; overflow:hidden; display:flex; flex-direction:column; }
+  .d-card::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at top left, color-mix(in srgb,var(--c) 8%,transparent), transparent 60%); pointer-events:none; }
+  .d-card:hover { border-color:var(--c); transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,0,0,.4); }
+  .d-card.big { grid-row: span 2; }
+  .d-icon { font-size:28px; margin-bottom:auto; }
+  .d-card.big .d-icon { font-size:48px; }
+  .d-name { font-family:'DM Serif Display',serif; font-size:18px; }
+  .d-card.big .d-name { font-size:28px; }
+  .d-sub { font-size:11px; font-family:'DM Mono',monospace; color:var(--c); letter-spacing:.06em; text-transform:uppercase; margin-top:4px; }
+  .d-card.big .d-sub { font-size:13px; }
+  .d-prog { width:100%; height:3px; background:rgba(128,128,128,.15); border-radius:2px; overflow:hidden; margin-top:8px; }
+  .d-prog-fill { height:100%; border-radius:2px; background:var(--c); }
+  .d-card.big .d-cta { margin-top:24px; display:flex; align-items:center; gap:8px; font-size:13px; color:var(--c); font-weight:500; }
+</style>
+</head>
+<body>
+<div class="nav">
+  <h2>Previews de Layout</h2>
+  <div class="nav-opts">
+    <button class="nav-btn active" onclick="show('a',this)">A — 3 Colunas</button>
+    <button class="nav-btn" onclick="show('b',this)">B — Tiles 4+3</button>
+    <button class="nav-btn" onclick="show('c',this)">C — Lista + Preview</button>
+    <button class="nav-btn" onclick="show('d',this)">D — Bento Grid</button>
+  </div>
+  <span class="note">Clique nos botões para trocar de layout</span>
+</div>
+
+<!-- ══════════ OPÇÃO A ══════════ -->
+<div class="section active" id="sec-a">
+  <div class="topbar">
+    <span class="topbar-brand">Revisão <em>Jurídica</em></span>
+    <div class="topbar-tabs">
+      <div class="topbar-tab active">Mapas</div>
+      <div class="topbar-tab">Tracker</div>
+      <div class="topbar-tab">Lei Seca</div>
+    </div>
+    <div class="topbar-right"><span>🌙</span><span>Rafael Ribeiro</span><span style="color:#ef4444">Sair</span></div>
+  </div>
+  <div class="a-body">
+    <div class="a-header">
+      <h1>Cadernos de <em>Revisão Jurídica</em></h1>
+      <span>Selecione uma matéria</span>
+    </div>
+    <div class="a-grid">
+      <div class="a-card" style="--c:var(--admin)"><div class="a-card-top"><div class="a-icon">⚖️</div><div><div class="a-name">Dir. Administrativo</div><div class="a-sub">12 capítulos</div></div></div><div class="a-prog"><div class="a-prog-fill" style="width:0"></div></div><div class="a-cta">Abrir mapas →</div></div>
+      <div class="a-card" style="--c:var(--const)"><div class="a-card-top"><div class="a-icon">📜</div><div><div class="a-name">Dir. Constitucional</div><div class="a-sub">20 capítulos</div></div></div><div class="a-prog"><div class="a-prog-fill" style="width:0"></div></div><div class="a-cta">Abrir mapas →</div></div>
+      <div class="a-card" style="--c:var(--civil)"><div class="a-card-top"><div class="a-icon">🏛️</div><div><div class="a-name">Dir. Civil</div><div class="a-sub">27 capítulos</div></div></div><div class="a-prog"><div class="a-prog-fill" style="width:0"></div></div><div class="a-cta">Abrir mapas →</div></div>
+      <div class="a-card" style="--c:var(--ambiental)"><div class="a-card-top"><div class="a-icon">🌿</div><div><div class="a-name">Dir. Ambiental</div><div class="a-sub">16 capítulos</div></div></div><div class="a-prog"><div class="a-prog-fill" style="width:0"></div></div><div class="a-cta">Abrir mapas →</div></div>
+      <div class="a-card" style="--c:var(--ptrabalho)"><div class="a-card-top"><div class="a-icon">⚖️</div><div><div class="a-name">Proc. do Trabalho</div><div class="a-sub">12 capítulos</div></div></div><div class="a-prog"><div class="a-prog-fill" style="width:0"></div></div><div class="a-cta">Abrir mapas →</div></div>
+      <div class="a-card" style="--c:var(--dtributario)"><div class="a-card-top"><div class="a-icon">💰</div><div><div class="a-name">Dir. Tributário</div><div class="a-sub">9 capítulos</div></div></div><div class="a-prog"><div class="a-prog-fill" style="width:0"></div></div><div class="a-cta">Abrir mapas →</div></div>
+      <div class="a-card" style="--c:var(--trabalho)"><div class="a-card-top"><div class="a-icon">👷</div><div><div class="a-name">Dir. do Trabalho</div><div class="a-sub">15 capítulos</div></div></div><div class="a-prog"><div class="a-prog-fill" style="width:0"></div></div><div class="a-cta">Abrir mapas →</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ OPÇÃO B ══════════ -->
+<div class="section" id="sec-b">
+  <div class="topbar">
+    <span class="topbar-brand">Revisão <em>Jurídica</em></span>
+    <div class="topbar-tabs">
+      <div class="topbar-tab active">Mapas</div>
+      <div class="topbar-tab">Tracker</div>
+      <div class="topbar-tab">Lei Seca</div>
+    </div>
+    <div class="topbar-right"><span>🌙</span><span>Rafael Ribeiro</span><span style="color:#ef4444">Sair</span></div>
+  </div>
+  <div class="b-body">
+    <div class="b-title">Selecione uma matéria</div>
+    <div class="b-row b-row-4">
+      <div class="b-card" style="--c:var(--admin)"><div class="b-icon">⚖️</div><div class="b-name">Dir. Administrativo</div><div class="b-cap">12 capítulos</div><div class="b-prog"><div class="b-prog-fill" style="width:0"></div></div></div>
+      <div class="b-card" style="--c:var(--const)"><div class="b-icon">📜</div><div class="b-name">Dir. Constitucional</div><div class="b-cap">20 capítulos</div><div class="b-prog"><div class="b-prog-fill" style="width:0"></div></div></div>
+      <div class="b-card" style="--c:var(--civil)"><div class="b-icon">🏛️</div><div class="b-name">Dir. Civil</div><div class="b-cap">27 capítulos</div><div class="b-prog"><div class="b-prog-fill" style="width:0"></div></div></div>
+      <div class="b-card" style="--c:var(--ambiental)"><div class="b-icon">🌿</div><div class="b-name">Dir. Ambiental</div><div class="b-cap">16 capítulos</div><div class="b-prog"><div class="b-prog-fill" style="width:0"></div></div></div>
+    </div>
+    <div class="b-row b-row-3">
+      <div class="b-card" style="--c:var(--ptrabalho)"><div class="b-icon">⚖️</div><div class="b-name">Proc. do Trabalho</div><div class="b-cap">12 capítulos</div><div class="b-prog"><div class="b-prog-fill" style="width:0"></div></div></div>
+      <div class="b-card" style="--c:var(--dtributario)"><div class="b-icon">💰</div><div class="b-name">Dir. Tributário</div><div class="b-cap">9 capítulos</div><div class="b-prog"><div class="b-prog-fill" style="width:0"></div></div></div>
+      <div class="b-card" style="--c:var(--trabalho)"><div class="b-icon">👷</div><div class="b-name">Dir. do Trabalho</div><div class="b-cap">15 capítulos</div><div class="b-prog"><div class="b-prog-fill" style="width:0"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ OPÇÃO C ══════════ -->
+<div class="section" id="sec-c">
+  <div class="topbar">
+    <span class="topbar-brand">Revisão <em>Jurídica</em></span>
+    <div class="topbar-tabs">
+      <div class="topbar-tab active">Mapas</div>
+      <div class="topbar-tab">Tracker</div>
+      <div class="topbar-tab">Lei Seca</div>
+    </div>
+    <div class="topbar-right"><span>🌙</span><span>Rafael Ribeiro</span><span style="color:#ef4444">Sair</span></div>
+  </div>
+  <div class="c-body">
+    <div class="c-sidebar">
+      <div class="c-header"><h2>Cadernos de <br><em>Revisão</em></h2><p>Selecione uma matéria</p></div>
+      <div class="c-item active" style="--c:var(--admin)" onclick="cSelect(this,'⚖️','Direito Administrativo','12 capítulos','#5b8dee',['Regime Jurídico','Atos Administrativos','Poderes Admin.','Serviços Públicos','Responsabilidade Civil','Improbidade'])">
+        <div class="c-item-icon">⚖️</div>
+        <div class="c-item-info">
+          <div class="c-item-name">Dir. Administrativo</div>
+          <div class="c-item-prog">0 / 12 revisados</div>
+          <div class="c-item-bar"><div class="c-item-fill" style="width:0%;background:#5b8dee"></div></div>
+        </div>
+      </div>
+      <div class="c-item" style="--c:var(--const)" onclick="cSelect(this,'📜','Direito Constitucional','20 capítulos','#7dc87d',['Teoria Geral do Estado','Poder Constituinte','Direitos Fundamentais','Organização do Estado','Controle de Const.'])">
+        <div class="c-item-icon">📜</div>
+        <div class="c-item-info">
+          <div class="c-item-name">Dir. Constitucional</div>
+          <div class="c-item-prog">0 / 20 revisados</div>
+          <div class="c-item-bar"><div class="c-item-fill" style="width:0%;background:#7dc87d"></div></div>
+        </div>
+      </div>
+      <div class="c-item" style="--c:var(--civil)" onclick="cSelect(this,'🏛️','Direito Civil','27 capítulos','#e07b7b',['LINDB','Pessoa Natural','Pessoa Jurídica','Obrigações','Contratos','Família','Sucessões'])">
+        <div class="c-item-icon">🏛️</div>
+        <div class="c-item-info">
+          <div class="c-item-name">Dir. Civil</div>
+          <div class="c-item-prog">0 / 27 revisados</div>
+          <div class="c-item-bar"><div class="c-item-fill" style="width:0%;background:#e07b7b"></div></div>
+        </div>
+      </div>
+      <div class="c-item" style="--c:var(--ambiental)" onclick="cSelect(this,'🌿','Direito Ambiental','16 capítulos','#6dcfb8',['PNMA e SISNAMA','Licenciamento','Código Florestal','Recursos Hídricos','SNUC','Responsabilidade'])">
+        <div class="c-item-icon">🌿</div>
+        <div class="c-item-info">
+          <div class="c-item-name">Dir. Ambiental</div>
+          <div class="c-item-prog">0 / 16 revisados</div>
+          <div class="c-item-bar"><div class="c-item-fill" style="width:0%;background:#6dcfb8"></div></div>
+        </div>
+      </div>
+      <div class="c-item" style="--c:var(--ptrabalho)" onclick="cSelect(this,'⚖️','Processo do Trabalho','12 capítulos','#f59e0b',['Teoria Geral','Organização JT','Partes','Prazos','Procedimento','Recursos'])">
+        <div class="c-item-icon">⚖️</div>
+        <div class="c-item-info">
+          <div class="c-item-name">Proc. do Trabalho</div>
+          <div class="c-item-prog">0 / 12 revisados</div>
+          <div class="c-item-bar"><div class="c-item-fill" style="width:0%;background:#f59e0b"></div></div>
+        </div>
+      </div>
+      <div class="c-item" style="--c:var(--dtributario)" onclick="cSelect(this,'💰','Direito Tributário','9 capítulos','#6366f1',['Noções Introdutórias','Limitações Constitucionais','Crédito Tributário','Extinção do CT','Exclusão do CT'])">
+        <div class="c-item-icon">💰</div>
+        <div class="c-item-info">
+          <div class="c-item-name">Dir. Tributário</div>
+          <div class="c-item-prog">0 / 9 revisados</div>
+          <div class="c-item-bar"><div class="c-item-fill" style="width:0%;background:#6366f1"></div></div>
+        </div>
+      </div>
+      <div class="c-item" style="--c:var(--trabalho)" onclick="cSelect(this,'👷','Direito do Trabalho','15 capítulos','#bb9af7',['Fontes','Relação de Emprego','Contrato Individual','Salário','Jornada','FGTS','Greve'])">
+        <div class="c-item-icon">👷</div>
+        <div class="c-item-info">
+          <div class="c-item-name">Dir. do Trabalho</div>
+          <div class="c-item-prog">0 / 15 revisados</div>
+          <div class="c-item-bar"><div class="c-item-fill" style="width:0%;background:#bb9af7"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="c-main" id="c-detail">
+      <div class="c-detail-icon">⚖️</div>
+      <div class="c-detail-name"><em id="c-det-name" style="--cc:#5b8dee">Direito Administrativo</em></div>
+      <div class="c-detail-sub" id="c-det-sub" style="color:#5b8dee">12 capítulos</div>
+      <div class="c-detail-tags" id="c-det-tags">
+        <span class="c-detail-tag" style="--cc:#5b8dee">Regime Jurídico</span>
+        <span class="c-detail-tag" style="--cc:#5b8dee">Atos Administrativos</span>
+        <span class="c-detail-tag" style="--cc:#5b8dee">Poderes Admin.</span>
+        <span class="c-detail-tag" style="--cc:#5b8dee">Serviços Públicos</span>
+        <span class="c-detail-tag" style="--cc:#5b8dee">Responsabilidade Civil</span>
+        <span class="c-detail-tag" style="--cc:#5b8dee">Improbidade</span>
+      </div>
+      <div class="c-detail-prog-wrap">
+        <div class="c-detail-prog-label"><span>PROGRESSO</span><span id="c-det-pct">0 / 12 revisados</span></div>
+        <div class="c-detail-prog"><div class="c-detail-prog-fill" id="c-det-fill" style="width:0%;background:#5b8dee"></div></div>
+      </div>
+      <button class="c-btn" id="c-det-btn" style="background:#5b8dee">Abrir mapas →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ OPÇÃO D ══════════ -->
+<div class="section" id="sec-d">
+  <div class="topbar">
+    <span class="topbar-brand">Revisão <em>Jurídica</em></span>
+    <div class="topbar-tabs">
+      <div class="topbar-tab active">Mapas</div>
+      <div class="topbar-tab">Tracker</div>
+      <div class="topbar-tab">Lei Seca</div>
+    </div>
+    <div class="topbar-right"><span>🌙</span><span>Rafael Ribeiro</span><span style="color:#ef4444">Sair</span></div>
+  </div>
+  <div class="d-body">
+    <!-- Card grande: Admin -->
+    <div class="d-card big" style="--c:var(--admin)">
+      <div class="d-icon">⚖️</div>
+      <div style="margin-top:auto">
+        <div class="d-name">Dir. Administrativo</div>
+        <div class="d-sub">12 capítulos</div>
+        <div class="d-prog"><div class="d-prog-fill" style="width:0%"></div></div>
+        <div class="d-cta">Abrir mapas →</div>
+      </div>
+    </div>
+    <!-- Linha superior direita -->
+    <div class="d-card" style="--c:var(--const)"><div class="d-icon">📜</div><div style="margin-top:auto"><div class="d-name">Dir. Constitucional</div><div class="d-sub">20 capítulos</div><div class="d-prog"><div class="d-prog-fill" style="width:0%"></div></div></div></div>
+    <div class="d-card" style="--c:var(--civil)"><div class="d-icon">🏛️</div><div style="margin-top:auto"><div class="d-name">Dir. Civil</div><div class="d-sub">27 capítulos</div><div class="d-prog"><div class="d-prog-fill" style="width:0%"></div></div></div></div>
+    <!-- Linha inferior direita -->
+    <div class="d-card" style="--c:var(--ambiental)"><div class="d-icon">🌿</div><div style="margin-top:auto"><div class="d-name">Dir. Ambiental</div><div class="d-sub">16 capítulos</div><div class="d-prog"><div class="d-prog-fill" style="width:0%"></div></div></div></div>
+    <div class="d-card" style="--c:var(--ptrabalho)"><div class="d-icon">⚖️</div><div style="margin-top:auto"><div class="d-name">Proc. Trabalho</div><div class="d-sub">12 capítulos</div><div class="d-prog"><div class="d-prog-fill" style="width:0%"></div></div></div></div>
+    <!-- Row 2 extras (Tributário e Trabalho ficam em linha extra) -->
+  </div>
+  <!-- Linha extra para os 2 restantes -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding:0 32px 20px;flex-shrink:0;margin-top:-8px;height:120px;">
+    <!-- placeholder alinhamento col 1 (espaço do big) -->
+    <div style="opacity:0"></div>
+    <div class="d-card" style="--c:var(--dtributario)"><div style="display:flex;align-items:center;gap:10px;height:100%"><div style="font-size:22px">💰</div><div><div class="d-name" style="font-size:15px">Dir. Tributário</div><div class="d-sub">9 capítulos</div></div></div></div>
+    <div class="d-card" style="--c:var(--trabalho)"><div style="display:flex;align-items:center;gap:10px;height:100%"><div style="font-size:22px">👷</div><div><div class="d-name" style="font-size:15px">Dir. do Trabalho</div><div class="d-sub">15 capítulos</div></div></div></div>
+  </div>
+</div>
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+function cSelect(el, icon, name, cap, color, tags) {
+  document.querySelectorAll('.c-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelector('.c-detail-icon').textContent = icon;
+  document.getElementById('c-det-name').textContent = name;
+  document.getElementById('c-det-name').style.setProperty('--cc', color);
+  document.getElementById('c-det-sub').textContent = cap;
+  document.getElementById('c-det-sub').style.color = color;
+  document.getElementById('c-det-fill').style.background = color;
+  document.getElementById('c-det-btn').style.background = color;
+  const pct = cap.split(' ')[0];
+  document.getElementById('c-det-pct').textContent = '0 / ' + pct + ' revisados';
+  const tagsEl = document.getElementById('c-det-tags');
+  tagsEl.innerHTML = tags.map(t => `<span class="c-detail-tag" style="--cc:${color}">${t}</span>`).join('');
+}
+</script>
+</body>
+</html>
