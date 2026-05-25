@@ -104,19 +104,49 @@
   .card.card-complete{border-color:var(--stripe);}
 
   /* ── LAYOUT B — Tiles icon-first ── */
-  .b-body{flex:1;overflow:hidden;padding:20px 32px 24px;display:flex;flex-direction:column;gap:14px;}
-  .b-title{font-size:12px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;}
-  .b-row{display:grid;gap:12px;}
-  .b-row-4{grid-template-columns:repeat(4,1fr);}
-  .b-row-3{grid-template-columns:repeat(3,1fr);max-width:75%;}
-  .b-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px 20px 18px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
-  .b-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--c);opacity:.6;}
-  .b-card:hover,.b-card.card-complete{border-color:var(--c);transform:translateY(-3px);box-shadow:0 8px 32px var(--shadow);}
-  .b-icon{font-size:28px;}
-  .b-name{font-family:'DM Serif Display',serif;font-size:15px;text-align:center;}
-  .b-cap{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);}
-  .b-prog{width:100%;height:3px;background:rgba(128,128,128,.15);border-radius:2px;overflow:hidden;margin-top:4px;}
-  .b-prog-fill{height:100%;border-radius:2px;background:var(--c);transition:width 0.5s ease;}
+  .b-body{flex:1;overflow:hidden;padding:24px 40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+  .b-title{font-size:12px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;align-self:flex-start;}
+  .b-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;max-width:960px;}
+  .b-grid .b-card:nth-child(7){grid-column:2;}
+  .b-card{border:1px solid transparent;border-radius:14px;padding:28px 20px 22px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;transition:all .2s;}
+  .b-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px var(--shadow);filter:brightness(.97);}
+  .b-card.card-complete{box-shadow:0 0 0 2px var(--cborder) inset;}
+  .b-icon{font-size:30px;}
+  .b-name{font-family:'DM Serif Display',serif;font-size:16px;text-align:center;}
+  .b-cap{font-size:11px;font-family:'DM Mono',monospace;color:var(--cmuted,var(--muted));}
+  .b-prog{width:100%;height:3px;background:rgba(0,0,0,.1);border-radius:2px;overflow:hidden;margin-top:2px;}
+  .b-prog-fill{height:100%;border-radius:2px;transition:width 0.5s ease;}
+  /* light card colors */
+  .bc-admin      {background:#dbeafe;border-color:#bfdbfe;--cmuted:#1e4faa;--cborder:#2563eb;}
+  .bc-admin      .b-prog-fill{background:#2563eb;}
+  .bc-const      {background:#dcfce7;border-color:#bbf7d0;--cmuted:#166534;--cborder:#16a34a;}
+  .bc-const      .b-prog-fill{background:#16a34a;}
+  .bc-civil      {background:#fee2e2;border-color:#fecaca;--cmuted:#991b1b;--cborder:#dc2626;}
+  .bc-civil      .b-prog-fill{background:#dc2626;}
+  .bc-ambiental  {background:#ccfbf1;border-color:#99f6e4;--cmuted:#115e59;--cborder:#0d9488;}
+  .bc-ambiental  .b-prog-fill{background:#0d9488;}
+  .bc-ptrabalho  {background:#fef3c7;border-color:#fde68a;--cmuted:#92400e;--cborder:#d97706;}
+  .bc-ptrabalho  .b-prog-fill{background:#d97706;}
+  .bc-dtributario{background:#e0e7ff;border-color:#c7d2fe;--cmuted:#3730a3;--cborder:#4f46e5;}
+  .bc-dtributario .b-prog-fill{background:#4f46e5;}
+  .bc-trabalho   {background:#ede9fe;border-color:#ddd6fe;--cmuted:#5b21b6;--cborder:#9c6fe4;}
+  .bc-trabalho   .b-prog-fill{background:#9c6fe4;}
+  /* dark card colors */
+  [data-theme="dark"] .bc-admin      {background:rgba(91,141,238,.13);border-color:rgba(91,141,238,.28);--cmuted:#93b6f5;--cborder:#5b8dee;}
+  [data-theme="dark"] .bc-admin      .b-prog-fill{background:#5b8dee;}
+  [data-theme="dark"] .bc-const      {background:rgba(125,200,125,.13);border-color:rgba(125,200,125,.28);--cmuted:#a0d9a0;--cborder:#7dc87d;}
+  [data-theme="dark"] .bc-const      .b-prog-fill{background:#7dc87d;}
+  [data-theme="dark"] .bc-civil      {background:rgba(224,123,123,.13);border-color:rgba(224,123,123,.28);--cmuted:#edaaaa;--cborder:#e07b7b;}
+  [data-theme="dark"] .bc-civil      .b-prog-fill{background:#e07b7b;}
+  [data-theme="dark"] .bc-ambiental  {background:rgba(109,207,184,.13);border-color:rgba(109,207,184,.28);--cmuted:#99dace;--cborder:#6dcfb8;}
+  [data-theme="dark"] .bc-ambiental  .b-prog-fill{background:#6dcfb8;}
+  [data-theme="dark"] .bc-ptrabalho  {background:rgba(245,158,11,.13);border-color:rgba(245,158,11,.28);--cmuted:#f8c460;--cborder:#f59e0b;}
+  [data-theme="dark"] .bc-ptrabalho  .b-prog-fill{background:#f59e0b;}
+  [data-theme="dark"] .bc-dtributario{background:rgba(99,102,241,.13);border-color:rgba(99,102,241,.28);--cmuted:#a5a7f8;--cborder:#6366f1;}
+  [data-theme="dark"] .bc-dtributario .b-prog-fill{background:#6366f1;}
+  [data-theme="dark"] .bc-trabalho   {background:rgba(187,154,247,.13);border-color:rgba(187,154,247,.28);--cmuted:#d0b8fa;--cborder:#bb9af7;}
+  [data-theme="dark"] .bc-trabalho   .b-prog-fill{background:#bb9af7;}
+  [data-theme="dark"] .b-prog{background:rgba(255,255,255,.08);}
 
   /* MAPA VIEWER */
   #view-mapa{display:none;flex:1;flex-direction:column;}
@@ -207,9 +237,9 @@ t-chevron{transform:rotate(180deg);}
   .grid { grid-template-columns: 1fr !important; }
   #view-home { overflow-y: auto !important; }
   #view-tracker { padding: 24px 14px 60px !important; }
-  .b-body { padding: 16px 14px !important; gap: 10px !important; }
-  .b-row-4 { grid-template-columns: repeat(2,1fr) !important; }
-  .b-row-3 { grid-template-columns: repeat(3,1fr) !important; max-width: 100% !important; }
+  .b-body { padding: 16px 14px !important; gap: 10px !important; justify-content:flex-start !important; }
+  .b-grid { grid-template-columns: repeat(2,1fr) !important; }
+  .b-grid .b-card:nth-child(7) { grid-column: auto !important; }
   .tb-user { display: none !important; }
   .overall-bar { flex-direction: column; align-items: flex-start; gap: 12px; }
   .tb-logo { font-size: 14px; margin-right: 12px; }
@@ -355,34 +385,32 @@ t-chevron{transform:rotate(180deg);}
   <div id="view-home" style="display:flex;flex-direction:column;">
     <div class="b-body">
       <div class="b-title">Selecione uma matéria</div>
-      <div class="b-row b-row-4">
-        <div class="b-card card-admin" style="--c:var(--admin)" onclick="openMapa('mapas_admin.html','Direito Administrativo','#5b8dee')">
+      <div class="b-grid">
+        <div class="b-card bc-admin card-admin" onclick="openMapa('mapas_admin.html','Direito Administrativo','#5b8dee')">
           <div class="b-icon">⚖️</div><div class="b-name">Dir. Administrativo</div><div class="b-cap">12 capítulos</div>
           <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
         </div>
-        <div class="b-card card-const" style="--c:var(--const)" onclick="openMapa('mapas_const.html','Direito Constitucional','#7dc87d')">
+        <div class="b-card bc-const card-const" onclick="openMapa('mapas_const.html','Direito Constitucional','#7dc87d')">
           <div class="b-icon">📜</div><div class="b-name">Dir. Constitucional</div><div class="b-cap">20 capítulos</div>
           <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
         </div>
-        <div class="b-card card-civil" style="--c:var(--civil)" onclick="openMapa('direito_civil_mapas_v4.html','Direito Civil','#e07b7b')">
+        <div class="b-card bc-civil card-civil" onclick="openMapa('direito_civil_mapas_v4.html','Direito Civil','#e07b7b')">
           <div class="b-icon">🏛️</div><div class="b-name">Dir. Civil</div><div class="b-cap">27 capítulos</div>
           <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
         </div>
-        <div class="b-card card-ambiental" style="--c:var(--ambiental)" onclick="openMapa('mapas_ambiental.html','Direito Ambiental','#6dcfb8')">
+        <div class="b-card bc-ambiental card-ambiental" onclick="openMapa('mapas_ambiental.html','Direito Ambiental','#6dcfb8')">
           <div class="b-icon">🌿</div><div class="b-name">Dir. Ambiental</div><div class="b-cap">16 capítulos</div>
           <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
         </div>
-      </div>
-      <div class="b-row b-row-3">
-        <div class="b-card card-ptrabalho" style="--c:var(--ptrabalho)" onclick="openMapa('mapas_ptrabalho.html','Processo do Trabalho','#f59e0b')">
+        <div class="b-card bc-ptrabalho card-ptrabalho" onclick="openMapa('mapas_ptrabalho.html','Processo do Trabalho','#f59e0b')">
           <div class="b-icon">⚖️</div><div class="b-name">Proc. do Trabalho</div><div class="b-cap">12 capítulos</div>
           <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
         </div>
-        <div class="b-card card-dtributario" style="--c:var(--dtributario)" onclick="openMapa('mapas_dtributario.html','Direito Tributário','#6366f1')">
+        <div class="b-card bc-dtributario card-dtributario" onclick="openMapa('mapas_dtributario.html','Direito Tributário','#6366f1')">
           <div class="b-icon">💰</div><div class="b-name">Dir. Tributário</div><div class="b-cap">9 capítulos</div>
           <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
         </div>
-        <div class="b-card card-trabalho" style="--c:var(--trabalho)" onclick="openMapa('mapas_dtrabalho.html','Direito do Trabalho','#bb9af7')">
+        <div class="b-card bc-trabalho card-trabalho" onclick="openMapa('mapas_dtrabalho.html','Direito do Trabalho','#bb9af7')">
           <div class="b-icon">👷</div><div class="b-name">Dir. do Trabalho</div><div class="b-cap">15 capítulos</div>
           <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
         </div>
