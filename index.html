@@ -73,8 +73,7 @@
   #main{flex:1;display:flex;flex-direction:column;position:relative;z-index:1;overflow:hidden;}
 
   /* HOME */
-  #view-home{flex:1;overflow-y:auto;padding:48px 32px 80px;}
-  .home-inner{max-width:960px;margin:0 auto;}
+  #view-home{flex:1;overflow:hidden;padding:0;}
   h1{font-family:'DM Serif Display',serif;font-size:clamp(32px,4vw,46px);line-height:1.1;color:var(--text);margin-bottom:10px;}
   h1 em{font-style:italic;color:var(--accent);}
   .subtitle{font-size:15px;color:var(--muted);font-weight:300;margin-bottom:40px;}
@@ -103,6 +102,21 @@
   .card-prog-fill{height:100%;border-radius:2px;background:var(--stripe);transition:width 0.5s ease;width:0%;}
   .card-prog-label{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);margin-top:5px;letter-spacing:0.04em;}
   .card.card-complete{border-color:var(--stripe);}
+
+  /* ── LAYOUT B — Tiles icon-first ── */
+  .b-body{flex:1;overflow:hidden;padding:20px 32px 24px;display:flex;flex-direction:column;gap:14px;}
+  .b-title{font-size:12px;font-family:'DM Mono',monospace;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;}
+  .b-row{display:grid;gap:12px;}
+  .b-row-4{grid-template-columns:repeat(4,1fr);}
+  .b-row-3{grid-template-columns:repeat(3,1fr);max-width:75%;}
+  .b-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px 20px 18px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+  .b-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--c);opacity:.6;}
+  .b-card:hover,.b-card.card-complete{border-color:var(--c);transform:translateY(-3px);box-shadow:0 8px 32px var(--shadow);}
+  .b-icon{font-size:28px;}
+  .b-name{font-family:'DM Serif Display',serif;font-size:15px;text-align:center;}
+  .b-cap{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);}
+  .b-prog{width:100%;height:3px;background:rgba(128,128,128,.15);border-radius:2px;overflow:hidden;margin-top:4px;}
+  .b-prog-fill{height:100%;border-radius:2px;background:var(--c);transition:width 0.5s ease;}
 
   /* MAPA VIEWER */
   #view-mapa{display:none;flex:1;flex-direction:column;}
@@ -191,7 +205,11 @@ t-chevron{transform:rotate(180deg);}
 /* ── MOBILE ── */
 @media (max-width: 640px) {
   .grid { grid-template-columns: 1fr !important; }
-  #view-home, #view-tracker { padding: 24px 14px 60px !important; }
+  #view-home { overflow-y: auto !important; }
+  #view-tracker { padding: 24px 14px 60px !important; }
+  .b-body { padding: 16px 14px !important; gap: 10px !important; }
+  .b-row-4 { grid-template-columns: repeat(2,1fr) !important; }
+  .b-row-3 { grid-template-columns: repeat(3,1fr) !important; max-width: 100% !important; }
   .tb-user { display: none !important; }
   .overall-bar { flex-direction: column; align-items: flex-start; gap: 12px; }
   .tb-logo { font-size: 14px; margin-right: 12px; }
@@ -335,47 +353,38 @@ t-chevron{transform:rotate(180deg);}
 
   <!-- HOME -->
   <div id="view-home" style="display:flex;flex-direction:column;">
-    <div class="home-inner">
-      <h1>Cadernos de<br><em>Revisão Jurídica</em></h1>
-      <p class="subtitle">Selecione uma matéria para abrir os mapas interativos</p>
-      <div class="grid">
-        <div class="card card-admin" onclick="openMapa('mapas_admin.html','Direito Administrativo','#5b8dee')">
-          <div class="card-top"><div class="icon">⚖️</div><div><div class="card-title">Direito Administrativo</div><div class="card-sub">12 capítulos</div></div></div>
-          <div class="tags"><span class="tag">Regime Jurídico</span><span class="tag">Atos Administrativos</span><span class="tag">Poderes Admin.</span><span class="tag">Serviços Públicos</span><span class="tag">Responsabilidade Civil</span><span class="tag">Improbidade</span><span class="tag">+ 6 temas</span></div>
-          <div class="cta">Abrir mapas <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="b-body">
+      <div class="b-title">Selecione uma matéria</div>
+      <div class="b-row b-row-4">
+        <div class="b-card card-admin" style="--c:var(--admin)" onclick="openMapa('mapas_admin.html','Direito Administrativo','#5b8dee')">
+          <div class="b-icon">⚖️</div><div class="b-name">Dir. Administrativo</div><div class="b-cap">12 capítulos</div>
+          <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
         </div>
-        <div class="card card-const" onclick="openMapa('mapas_const.html','Direito Constitucional','#7dc87d')">
-          <div class="card-top"><div class="icon">📜</div><div><div class="card-title">Direito Constitucional</div><div class="card-sub">20 capítulos</div></div></div>
-          <div class="tags"><span class="tag">Teoria Geral do Estado</span><span class="tag">Poder Constituinte</span><span class="tag">Direitos Fundamentais</span><span class="tag">Organização do Estado</span><span class="tag">Controle de Const.</span><span class="tag">+ 15 temas</span></div>
-          <div class="cta">Abrir mapas <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="b-card card-const" style="--c:var(--const)" onclick="openMapa('mapas_const.html','Direito Constitucional','#7dc87d')">
+          <div class="b-icon">📜</div><div class="b-name">Dir. Constitucional</div><div class="b-cap">20 capítulos</div>
+          <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
         </div>
-        <div class="card card-civil" onclick="openMapa('direito_civil_mapas_v4.html','Direito Civil','#e07b7b')">
-          <div class="card-top"><div class="icon">🏛️</div><div><div class="card-title">Direito Civil</div><div class="card-sub">27 capítulos</div></div></div>
-          <div class="tags"><span class="tag">LINDB</span><span class="tag">Pessoa Natural</span><span class="tag">Pessoa Jurídica</span><span class="tag">Bens</span><span class="tag">Prescrição e Decadência</span><span class="tag">Negócio Jurídico</span><span class="tag">Obrigações</span></div>
-          <div class="cta">Abrir mapas <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="b-card card-civil" style="--c:var(--civil)" onclick="openMapa('direito_civil_mapas_v4.html','Direito Civil','#e07b7b')">
+          <div class="b-icon">🏛️</div><div class="b-name">Dir. Civil</div><div class="b-cap">27 capítulos</div>
+          <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
         </div>
-        <div class="card card-ambiental" onclick="openMapa('mapas_ambiental.html','Direito Ambiental','#6dcfb8')">
-          <div class="card-top"><div class="icon">🌿</div><div><div class="card-title">Direito Ambiental</div><div class="card-sub">16 capítulos</div></div></div>
-          <div class="tags"><span class="tag">PNMA e SISNAMA</span><span class="tag">Licenciamento</span><span class="tag">Código Florestal</span><span class="tag">Recursos Hídricos</span><span class="tag">SNUC</span><span class="tag">Responsabilidade</span><span class="tag">+ 10 temas</span>
+        <div class="b-card card-ambiental" style="--c:var(--ambiental)" onclick="openMapa('mapas_ambiental.html','Direito Ambiental','#6dcfb8')">
+          <div class="b-icon">🌿</div><div class="b-name">Dir. Ambiental</div><div class="b-cap">16 capítulos</div>
+          <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
+        </div>
       </div>
-          <div class="cta">Abrir mapas <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="b-row b-row-3">
+        <div class="b-card card-ptrabalho" style="--c:var(--ptrabalho)" onclick="openMapa('mapas_ptrabalho.html','Processo do Trabalho','#f59e0b')">
+          <div class="b-icon">⚖️</div><div class="b-name">Proc. do Trabalho</div><div class="b-cap">12 capítulos</div>
+          <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
         </div>
-      
-
-        <div class="card card-ptrabalho" onclick="openMapa('mapas_ptrabalho.html','Processo do Trabalho','#f59e0b')">
-          <div class="card-top"><div class="icon">⚖️</div><div><div class="card-title">Processo do Trabalho</div><div class="card-sub">12 capítulos</div></div></div>
-          <div class="tags"><span class="tag">Teoria Geral</span><span class="tag">Organização JT</span><span class="tag">Partes</span><span class="tag">Prazos</span><span class="tag">Procedimento</span></div>
-          <div class="cta">Abrir mapas <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="b-card card-dtributario" style="--c:var(--dtributario)" onclick="openMapa('mapas_dtributario.html','Direito Tributário','#6366f1')">
+          <div class="b-icon">💰</div><div class="b-name">Dir. Tributário</div><div class="b-cap">9 capítulos</div>
+          <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
         </div>
-        <div class="card card-dtributario" onclick="openMapa('mapas_dtributario.html','Direito Tributário','#6366f1')">
-          <div class="card-top"><div class="icon">💰</div><div><div class="card-title">Direito Tributário</div><div class="card-sub">9 capítulos</div></div></div>
-          <div class="tags"><span class="tag">Noções Introdutórias</span><span class="tag">Limitações Constitucionais</span><span class="tag">Crédito Tributário</span><span class="tag">Extinção do CT</span><span class="tag">Exclusão do CT</span></div>
-          <div class="cta">Abrir mapas <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        </div>
-        <div class="card card-trabalho" onclick="openMapa('mapas_dtrabalho.html','Direito do Trabalho','#bb9af7')">
-          <div class="card-top"><div class="icon">👷</div><div><div class="card-title">Direito do Trabalho</div><div class="card-sub">15 capítulos</div></div></div>
-          <div class="tags"><span class="tag">Fontes e Princípios</span><span class="tag">Relação de Emprego</span><span class="tag">Contrato Individual</span><span class="tag">Salário</span><span class="tag">Jornada</span><span class="tag">+ 10 temas</span></div>
-          <div class="cta">Abrir mapas <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="b-card card-trabalho" style="--c:var(--trabalho)" onclick="openMapa('mapas_dtrabalho.html','Direito do Trabalho','#bb9af7')">
+          <div class="b-icon">👷</div><div class="b-name">Dir. do Trabalho</div><div class="b-cap">15 capítulos</div>
+          <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
         </div>
       </div>
     </div>
@@ -655,16 +664,10 @@ function renderHomeCards(){
     const suffix = subj.id==='dtrabalho' ? 'trabalho' : subj.id;
     const card = document.querySelector('.card-'+suffix);
     if(!card) return;
-    let progWrap = card.querySelector('.card-prog-wrap');
-    if(!progWrap){
-      progWrap = document.createElement('div');
-      progWrap.className = 'card-prog-wrap';
-      progWrap.innerHTML = '<div class="card-prog"><div class="card-prog-fill"></div></div><div class="card-prog-label"></div>';
-      const cta = card.querySelector('.cta');
-      if(cta) card.insertBefore(progWrap, cta); else card.appendChild(progWrap);
-    }
-    progWrap.querySelector('.card-prog-fill').style.width = pct+'%';
-    progWrap.querySelector('.card-prog-label').textContent = done+' / '+total+' revisados';
+    const fill = card.querySelector('.b-prog-fill');
+    const cap = card.querySelector('.b-cap');
+    if(fill) fill.style.width = pct+'%';
+    if(cap) cap.textContent = done+' / '+total+' revisados';
     card.classList.toggle('card-complete', pct===100);
   });
 }
