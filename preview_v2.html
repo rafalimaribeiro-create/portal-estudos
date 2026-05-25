@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Preview — Layout com cores</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ── TEMAS ── */
+:root {
+  --bg:#f5f4f0; --surface:#ffffff; --surface2:#f0ede8; --border:#e0dbd0;
+  --text:#1a1a1a; --muted:#888070; --accent:#a07840; --topbar:#ffffff;
+  --admin:#2563eb; --const:#16a34a; --civil:#dc2626;
+  --ambiental:#0d9488; --trabalho:#9c6fe4; --ptrabalho:#d97706; --dtributario:#4f46e5;
+  --shadow:rgba(0,0,0,0.08);
+}
+[data-theme="dark"] {
+  --bg:#0d0f14; --surface:#13161e; --surface2:#1c2030; --border:#1e2330;
+  --text:#e8eaf0; --muted:#5a6070; --accent:#c8a96e; --topbar:#0d0f14;
+  --admin:#5b8dee; --const:#7dc87d; --civil:#e07b7b;
+  --ambiental:#6dcfb8; --trabalho:#bb9af7; --ptrabalho:#f59e0b; --dtributario:#6366f1;
+  --shadow:rgba(0,0,0,0.4);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html,body { height:100%; }
+body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; display:flex; flex-direction:column; transition:background .3s,color .3s; }
+
+/* TOPBAR */
+.topbar { background:var(--topbar); border-bottom:1px solid var(--border); padding:0 32px; display:flex; align-items:center; height:52px; gap:0; flex-shrink:0; }
+.topbar-brand { font-family:'DM Serif Display',serif; font-size:16px; margin-right:24px; }
+.topbar-brand em { color:var(--accent); font-style:italic; }
+.topbar-tab { padding:0 16px; height:52px; display:flex; align-items:center; font-size:12px; font-family:'DM Mono',monospace; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; letter-spacing:.06em; }
+.topbar-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+.topbar-right { margin-left:auto; display:flex; align-items:center; gap:10px; font-size:12px; font-family:'DM Mono',monospace; color:var(--muted); }
+.topbar-right span:last-child { color:#ef4444; }
+.tb-btn { background:none; border:1px solid var(--border); border-radius:6px; padding:4px 10px; cursor:pointer; color:var(--muted); font-family:'DM Mono',monospace; font-size:12px; }
+
+/* BODY */
+.b-body { flex:1; overflow:hidden; padding:24px 40px; display:flex; flex-direction:column; gap:14px; }
+.b-title { font-size:12px; font-family:'DM Mono',monospace; color:var(--muted); letter-spacing:.12em; text-transform:uppercase; }
+
+/* ROWS */
+.b-row-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+.b-row-3-wrap { display:flex; justify-content:center; }
+.b-row-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; width:75%; }
+
+/* CARDS */
+.b-card {
+  border:1px solid transparent;
+  border-radius:14px;
+  padding:28px 20px 22px;
+  display:flex; flex-direction:column; align-items:center; gap:10px;
+  cursor:pointer; transition:all .2s;
+  position:relative; overflow:hidden;
+}
+.b-card:hover { transform:translateY(-3px); box-shadow:0 8px 28px var(--shadow); filter:brightness(0.97); }
+.b-icon { font-size:30px; }
+.b-name { font-family:'DM Serif Display',serif; font-size:15px; text-align:center; color:var(--text); }
+.b-cap { font-size:11px; font-family:'DM Mono',monospace; color:var(--cardmuted); }
+.b-prog { width:100%; height:3px; background:rgba(128,128,128,.2); border-radius:2px; overflow:hidden; margin-top:2px; }
+.b-prog-fill { height:100%; border-radius:2px; }
+
+/* PER-SUBJECT COLORS — light */
+.bc-admin   { --cardmuted:#1e4faa; background:#dbeafe; border-color:#bfdbfe; }
+.bc-admin   .b-prog-fill { background:#2563eb; }
+.bc-const   { --cardmuted:#166534; background:#dcfce7; border-color:#bbf7d0; }
+.bc-const   .b-prog-fill { background:#16a34a; }
+.bc-civil   { --cardmuted:#991b1b; background:#fee2e2; border-color:#fecaca; }
+.bc-civil   .b-prog-fill { background:#dc2626; }
+.bc-ambiental { --cardmuted:#115e59; background:#ccfbf1; border-color:#99f6e4; }
+.bc-ambiental .b-prog-fill { background:#0d9488; }
+.bc-ptrabalho { --cardmuted:#92400e; background:#fef3c7; border-color:#fde68a; }
+.bc-ptrabalho .b-prog-fill { background:#d97706; }
+.bc-dtributario { --cardmuted:#3730a3; background:#e0e7ff; border-color:#c7d2fe; }
+.bc-dtributario .b-prog-fill { background:#4f46e5; }
+.bc-trabalho { --cardmuted:#5b21b6; background:#ede9fe; border-color:#ddd6fe; }
+.bc-trabalho .b-prog-fill { background:#9c6fe4; }
+
+/* dark overrides */
+[data-theme="dark"] .bc-admin   { background:rgba(91,141,238,.12); border-color:rgba(91,141,238,.25); --cardmuted:#93b6f5; }
+[data-theme="dark"] .bc-const   { background:rgba(125,200,125,.12); border-color:rgba(125,200,125,.25); --cardmuted:#a0d9a0; }
+[data-theme="dark"] .bc-civil   { background:rgba(224,123,123,.12); border-color:rgba(224,123,123,.25); --cardmuted:#ecaaa; }
+[data-theme="dark"] .bc-ambiental { background:rgba(109,207,184,.12); border-color:rgba(109,207,184,.25); --cardmuted:#99dace; }
+[data-theme="dark"] .bc-ptrabalho { background:rgba(245,158,11,.12); border-color:rgba(245,158,11,.25); --cardmuted:#f8c460; }
+[data-theme="dark"] .bc-dtributario { background:rgba(99,102,241,.12); border-color:rgba(99,102,241,.25); --cardmuted:#a5a7f8; }
+[data-theme="dark"] .bc-trabalho { background:rgba(187,154,247,.12); border-color:rgba(187,154,247,.25); --cardmuted:#d0b8fa; }
+[data-theme="dark"] .bc-admin .b-prog-fill { background:#5b8dee; }
+[data-theme="dark"] .bc-const .b-prog-fill { background:#7dc87d; }
+[data-theme="dark"] .bc-civil .b-prog-fill { background:#e07b7b; }
+[data-theme="dark"] .bc-ambiental .b-prog-fill { background:#6dcfb8; }
+[data-theme="dark"] .bc-ptrabalho .b-prog-fill { background:#f59e0b; }
+[data-theme="dark"] .bc-dtributario .b-prog-fill { background:#6366f1; }
+[data-theme="dark"] .bc-trabalho .b-prog-fill { background:#bb9af7; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <span class="topbar-brand">Revisão <em>Jurídica</em></span>
+  <div class="topbar-tab active">Mapas</div>
+  <div class="topbar-tab">Tracker</div>
+  <div class="topbar-tab">Lei Seca</div>
+  <div class="topbar-right">
+    <button class="tb-btn" id="theme-btn" onclick="toggleTheme()">🌙 Escuro</button>
+    <span>Rafael Ribeiro</span>
+    <span>Sair</span>
+  </div>
+</div>
+
+<div class="b-body">
+  <div class="b-title">Selecione uma matéria</div>
+
+  <div class="b-row-4">
+    <div class="b-card bc-admin">
+      <div class="b-icon">⚖️</div>
+      <div class="b-name">Dir. Administrativo</div>
+      <div class="b-cap">12 capítulos</div>
+      <div class="b-prog"><div class="b-prog-fill" style="width:35%"></div></div>
+    </div>
+    <div class="b-card bc-const">
+      <div class="b-icon">📜</div>
+      <div class="b-name">Dir. Constitucional</div>
+      <div class="b-cap">20 capítulos</div>
+      <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
+    </div>
+    <div class="b-card bc-civil">
+      <div class="b-icon">🏛️</div>
+      <div class="b-name">Dir. Civil</div>
+      <div class="b-cap">27 capítulos</div>
+      <div class="b-prog"><div class="b-prog-fill" style="width:60%"></div></div>
+    </div>
+    <div class="b-card bc-ambiental">
+      <div class="b-icon">🌿</div>
+      <div class="b-name">Dir. Ambiental</div>
+      <div class="b-cap">16 capítulos</div>
+      <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="b-row-3-wrap">
+    <div class="b-row-3">
+      <div class="b-card bc-ptrabalho">
+        <div class="b-icon">⚖️</div>
+        <div class="b-name">Proc. do Trabalho</div>
+        <div class="b-cap">12 capítulos</div>
+        <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
+      </div>
+      <div class="b-card bc-dtributario">
+        <div class="b-icon">💰</div>
+        <div class="b-name">Dir. Tributário</div>
+        <div class="b-cap">9 capítulos</div>
+        <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
+      </div>
+      <div class="b-card bc-trabalho">
+        <div class="b-icon">👷</div>
+        <div class="b-name">Dir. do Trabalho</div>
+        <div class="b-cap">15 capítulos</div>
+        <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleTheme(){
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+  document.getElementById('theme-btn').textContent = dark ? '🌙 Escuro' : '☀️ Claro';
+}
+</script>
+</body>
+</html>
