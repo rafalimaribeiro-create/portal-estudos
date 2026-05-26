@@ -372,7 +372,30 @@ body { padding-top: 46px !important; }
 [data-theme="light"] .node-row:hover,[data-theme="light"] .row:hover { background:rgba(0,0,0,0.04)!important; }
 [data-theme="light"] .ch-item { color:#4a4a4a!important; } [data-theme="light"] .ch-item.active { color:#a07840!important; }
 [data-theme="light"] .tab { color:#4a4a4a!important; }
-</style>
+
+  /* EXAM REFERENCE PILLS */
+  .exam-node>.row{cursor:default!important;pointer-events:none;}
+  .exam-tag{
+    display:inline-block;font-family:'DM Mono',monospace;font-size:9.5px;
+    color:var(--muted);border:1px solid var(--border);border-radius:3px;
+    padding:1px 6px 1px 4px;background:var(--surface2);cursor:default;
+    position:relative;line-height:1.5;letter-spacing:.04em;
+    vertical-align:middle;user-select:none;
+    transition:color .15s,border-color .15s;
+  }
+  .exam-tag::before{content:'◈ ';font-size:7px;opacity:.5;vertical-align:middle;}
+  .exam-tag:hover{color:var(--accent);border-color:var(--accent);}
+  .exam-tag::after{
+    content:attr(data-full);
+    position:absolute;left:0;top:calc(100% + 5px);
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:7px;padding:7px 12px;font-size:11px;color:var(--text);
+    white-space:nowrap;z-index:200;display:none;
+    box-shadow:0 6px 20px rgba(0,0,0,.15);pointer-events:none;
+    letter-spacing:.02em;
+  }
+  .exam-tag:hover::after{display:block;}
+  </style>
 </head>
 <body>
 <div id="app">
@@ -445,6 +468,16 @@ function renderCallout(node){
   const isTrivial=!node.title||/^(obs|callout|atenção)$/i.test((node.title||"").trim());
   const titleHtml=isTrivial?"":(`<div class="callout-title">${hilite(node.title,term)}</div>`);
   return `<div class="callout-box ${tipo}"><div class="callout-label">${label}</div>${titleHtml}<div class="callout-body">${esc(text)}</div></div>`;
+}
+
+
+var _EXAM_RE=/^\s*(CESPE\s*[\/]?\s*CEBRASPE|CEBRASPE|CESPE|FCC|FGV|VUNESP|ESAF|CESGRANRIO|MPT|AOCP|IBFC|IADES|FUNCAB|FUNDEP|QUADRIX|SELECON|OBJETIVA|NUCEPE|CS-UFG|INAZ|CONSULPLAN|NC-UFPR)\b/i;
+var _YEAR_RE=/\b(20\d{2}|199\d)\b/;
+function _isExam(t){return _EXAM_RE.test(t)&&_YEAR_RE.test(t);}
+function _examShort(t){
+  var b=t.match(_EXAM_RE);var y=t.match(_YEAR_RE);
+  var banca=(b?b[1].replace(/\s*\/\s*CEBRASPE/i,'').replace(/\s*CEBRASPE\s*\/\s*/i,'').trim():'');
+  return banca+(y?' '+y[0]:'');
 }
 
 function renderNode(n,depth,path){
