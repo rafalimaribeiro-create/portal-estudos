@@ -109,7 +109,8 @@
   .b-title em{font-style:italic;color:var(--accent);}
   .b-subtitle{font-size:13px;color:var(--muted);font-weight:300;width:100%;max-width:960px;margin-bottom:4px;}
   .b-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;max-width:960px;}
-  /* 9 cards = perfect 3x3, no centering rules needed */
+  /* 10 cards = 3+3+3+1, center the last */
+  .b-grid .b-card:nth-child(10){grid-column:2;}
   .b-card{border:1px solid transparent;border-radius:14px;padding:28px 20px 22px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;transition:all .2s;}
   .b-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px var(--shadow);filter:brightness(.97);}
   .b-card.card-complete{box-shadow:0 0 0 2px var(--cborder) inset;}
@@ -137,6 +138,8 @@
   .bc-dconsumidor .b-prog-fill{background:#ea580c;}
   .bc-dempresarial{background:#d1fae5;border-color:#a7f3d0;--cmuted:#064e3b;--cborder:#059669;}
   .bc-dempresarial .b-prog-fill{background:#059669;}
+  .bc-deleitoral  {background:#e0f2fe;border-color:#bae6fd;--cmuted:#0c4a6e;--cborder:#0284c7;}
+  .bc-deleitoral  .b-prog-fill{background:#0284c7;}
   /* dark card colors */
   [data-theme="dark"] .bc-admin      {background:rgba(91,141,238,.13);border-color:rgba(91,141,238,.28);--cmuted:#93b6f5;--cborder:#5b8dee;}
   [data-theme="dark"] .bc-admin      .b-prog-fill{background:#5b8dee;}
@@ -156,6 +159,8 @@
   [data-theme="dark"] .bc-dconsumidor .b-prog-fill{background:#ea580c;}
   [data-theme="dark"] .bc-dempresarial{background:rgba(5,150,105,.13);border-color:rgba(5,150,105,.28);--cmuted:#6ee7b7;--cborder:#059669;}
   [data-theme="dark"] .bc-dempresarial .b-prog-fill{background:#059669;}
+  [data-theme="dark"] .bc-deleitoral  {background:rgba(2,132,199,.13);border-color:rgba(2,132,199,.28);--cmuted:#7dd3fc;--cborder:#0284c7;}
+  [data-theme="dark"] .bc-deleitoral  .b-prog-fill{background:#0284c7;}
   [data-theme="dark"] .b-prog{background:rgba(255,255,255,.08);}
 
   /* MAPA VIEWER */
@@ -250,7 +255,7 @@ t-chevron{transform:rotate(180deg);}
   .b-body { padding: 16px 14px !important; gap: 10px !important; justify-content:flex-start !important; }
   .b-grid { grid-template-columns: repeat(2,1fr) !important; }
   .b-grid .b-card:nth-child(7) { grid-column: auto !important; }
-  /* 9 cards = 3x3 on mobile too, no overrides needed */
+  .b-grid .b-card:nth-child(10) { grid-column: auto !important; }
   .tb-user { display: none !important; }
   .overall-bar { flex-direction: column; align-items: flex-start; gap: 12px; }
   .tb-logo { font-size: 14px; margin-right: 12px; }
@@ -434,6 +439,10 @@ t-chevron{transform:rotate(180deg);}
           <div class="b-icon">🏢</div><div class="b-name">Dir. Empresarial</div><div class="b-cap">8 capítulos</div>
           <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
         </div>
+        <div class="b-card bc-deleitoral card-deleitoral" onclick="openMapa('mapas_deleitoral.html','Direito Eleitoral','#0284c7')">
+          <div class="b-icon">🗳️</div><div class="b-name">Dir. Eleitoral</div><div class="b-cap">5 capítulos</div>
+          <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -541,7 +550,8 @@ const SUBJECTS = [
   {id:'dtributario',name:'Direito Tributário',color:'#6366f1',chapters:['Noções Introdutórias','Limitações Constitucionais','Competência e Legislação','Obrigação Tributária','Responsabilidade Tributária','Crédito Tributário e Lançamento','Suspensão da Exigibilidade','Extinção do CT','Exclusão do CT']},
     {id:'dtrabalho',name:'Dir. do Trabalho',color:'#bb9af7',chapters:['Fontes do D. do Trabalho','Princípios do D. do Trabalho','Relação de Emprego','Terceirização e Flexibilização','Contrato Individual de Trabalho','Extinção do CT e Estabilidade','Salário e Remuneração','Jornada de Trabalho e Descansos','Férias e Prescrição','Segurança e Medicina do Trabalho','CCP e D. Coletivo do Trabalho','Empregado Doméstico','FGTS','Direito de Greve','Dano Moral e Profissões Regulamentadas']},
   {id:'dconsumidor',name:'Direito do Consumidor',color:'#ea580c',chapters:['Introdução e Aplicabilidade','Direitos Básicos e PNRC','Vícios e Fatos do Produto','Infrações Penais','Práticas Comerciais']},
-  {id:'dempresarial',name:'Direito Empresarial',color:'#059669',chapters:['Evolução Histórica do D. Comercial','Regras do D. de Empresa no CC/02','Direito de Propriedade Industrial','Direito Societário (Itens 1–6)','Operações Societárias','Dissolução, Liquidação e Extinção das Soc.','Títulos de Crédito','Contratos Bancários']}
+  {id:'dempresarial',name:'Direito Empresarial',color:'#059669',chapters:['Evolução Histórica do D. Comercial','Regras do D. de Empresa no CC/02','Direito de Propriedade Industrial','Direito Societário (Itens 1–6)','Operações Societárias','Dissolução, Liquidação e Extinção das Soc.','Títulos de Crédito','Contratos Bancários']},
+  {id:'deleitoral',name:'Direito Eleitoral',color:'#0284c7',chapters:['Noções Introdutórias','Sistemas Eleitorais','Partidos Políticos','Justiça Eleitoral','MP Eleitoral']}
 ];
 
 const FLAGS = {hard:'🔴',review:'🟡',done:'🟢'};
