@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html data-theme="dark" lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direito Urbanístico - Mapas Mentais</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;--border:#2a3348;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --accent:#65a30d;--accent2:#4d7c0f;
+  --cespe:#c2440a;--cespe-bg:#0f0f2e;--cespe-border:#312e81;
+  --stj:#3b82f6;--stj-bg:#0c1426;--stj-border:#1e3a5f;
+  --obs:#10b981;--obs-bg:#061410;--obs-border:#064e3b;
+  --h1:#a5b4fc;--h2:#818cf8;--h3:#65a30d;
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;line-height:1.6}
+#app{display:flex;flex-direction:row;height:100vh;overflow:hidden;}
+#sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;height:calc(100vh - 46px);}
+#sb-header{padding:10px 12px 8px;border-bottom:1px solid var(--border);flex-shrink:0;}
+#sb-title{font-size:13px;font-family:monospace;color:var(--accent);font-weight:500;margin-bottom:6px;}
+#search{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:11px;color:var(--text);font-family:monospace;outline:none;}
+#search:focus{border-color:var(--accent);}
+#trk-bar{padding:8px 12px 6px;border-bottom:1px solid var(--border);flex-shrink:0;}
+#trk-label{font-size:10px;font-family:monospace;letter-spacing:.08em;text-transform:uppercase;color:#7c8db5;display:flex;justify-content:space-between;margin-bottom:5px;}
+#trk-pct{color:var(--accent);font-weight:700;}
+#trk-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+#trk-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s;}
+#tabs{overflow-y:auto;flex:1;padding:4px 0;}
+.tab{display:flex;align-items:center;gap:6px;padding:7px 12px;cursor:pointer;transition:background .12s;font-size:12px;color:var(--text);font-family:monospace;border-left:3px solid transparent;}
+.tab:hover{background:var(--bg);}
+.tab.active{border-left-color:var(--accent);background:rgba(200,169,110,0.08);color:var(--accent);}
+.tab input[type=checkbox]{width:13px;height:13px;accent-color:var(--accent);flex-shrink:0;cursor:pointer;}
+#main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);}
+.match-bar{padding:6px 16px;font-size:12px;font-family:monospace;color:var(--accent);background:var(--bg2);border-bottom:1px solid var(--border);display:none;}
+.content{flex:1;overflow-y:auto;padding:20px 24px;}
+#empty-msg{display:flex;align-items:center;justify-content:center;height:100%;font-family:monospace;font-size:12px;letter-spacing:.15em;opacity:.3;color:var(--text);}
+.node{margin:0}
+.row{display:flex;align-items:flex-start;gap:6px;padding:3px 6px;border-radius:5px;cursor:pointer;transition:background .1s}
+.row:hover{background:var(--bg3)}
+.row.hit{background:#1a2e1a}
+.tog{width:14px;height:14px;flex-shrink:0;margin-top:1px;font-size:10px;color:var(--text3);display:flex;align-items:center;justify-content:center}
+.txt{flex:1;word-break:break-word}
+.txt.d0{font-size:14px;font-weight:600;color:var(--h1)}
+.txt.d1{font-size:13px;font-weight:500;color:var(--h2)}
+.txt.d2{font-size:13px;color:var(--h3)}
+.txt.dn{font-size:13px;color:var(--text)}
+.txt.callout{font-size:12px;color:var(--text2);border-left:2px solid var(--cespe);padding-left:6px;font-style:italic}
+.children{padding-left:18px;border-left:1px solid var(--border);margin-left:7px}
+mark{background:#312e81;color:#a5b4fc;border-radius:2px;padding:0 1px}
+.callout-box{border-radius:6px;padding:8px 12px;margin:6px 0;font-size:12px;line-height:1.6}
+.callout-box.cespe{background:var(--cespe-bg);border:1px solid var(--cespe-border)}
+.callout-box.stj{background:var(--stj-bg);border:1px solid var(--stj-border)}
+.callout-box.obs{background:var(--obs-bg);border:1px solid var(--obs-border)}
+.callout-label{font-size:11px;font-weight:700;letter-spacing:.05em;margin-bottom:4px}
+.cespe .callout-label{color:var(--cespe)}
+.stj .callout-label{color:var(--stj)}
+.obs .callout-label{color:var(--obs)}
+.callout-title{font-weight:600;margin-bottom:3px;font-size:12px}
+.cespe .callout-title{color:#a5b4fc}
+.stj .callout-title{color:#93c5fd}
+.obs .callout-title{color:#6ee7b7}
+.callout-body{color:#94a3b8}
+.no-res{color:var(--text3);padding:24px;text-align:center}
+
+/* ── LIGHT THEME ── */
+[data-theme="light"] {
+  --bg: #f8f7f2 !important;
+  --bg2: #eeeae0 !important;
+  --bg3: #e5e0d5 !important;
+  --surface: #ffffff !important;
+  --surface2: #f0ede8 !important;
+  --border: #d8d3c8 !important;
+  --border-hover: #b8b3a8 !important;
+  --text: #1a1a1a !important;
+  --text2: #4a4a4a !important;
+  --text3: #888070 !important;
+  --text-muted: #888070 !important;
+  --text-dim: #bbbbbb !important;
+  --accent: #a07840 !important;
+  --accent-dim: rgba(160,120,64,0.12) !important;
+  --accent2: #2563eb !important;
+  --accent2-dim: rgba(37,99,235,0.10) !important;
+  --cespe: #c2440a !important;
+  --cespe-bg: #fff7ed !important;
+  --cespe-border: #c2440a !important;
+  --stj: #1d4ed8 !important;
+  --stj-bg: #dbeafe !important;
+  --stj-border: #3b82f6 !important;
+  --obs: #047857 !important;
+  --obs-bg: #d1fae5 !important;
+  --obs-border: #10b981 !important;
+  --node-l1: #1d4ed8 !important;
+  --node-l2: #7c3aed !important;
+  --node-l3: #047857 !important;
+  --node-l4: #c2410c !important;
+  --node-l5: #be185d !important;
+  --h1: #c2440a !important;
+  --h2: #9a3510 !important;
+  --h3: #7c2d12 !important;
+}
+
+[data-theme="light"] body { background: #f8f7f2 !important; color: #1a1a1a !important; }
+[data-theme="light"] #sidebar,
+[data-theme="light"] #sidebar-header,
+[data-theme="light"] #toolbar,
+[data-theme="light"] header { background: #eeeae0 !important; border-color: #d8d3c8 !important; }
+[data-theme="light"] #search,
+[data-theme="light"] input[type=text],
+[data-theme="light"] input[type=search] { background: #ffffff !important; color: #1a1a1a !important; border-color: #d8d3c8 !important; }
+[data-theme="light"] .ch-item:hover { background: rgba(0,0,0,0.04) !important; }
+[data-theme="light"] .ch-item.active { background: rgba(160,120,64,0.1) !important; }
+[data-theme="light"] #content,
+[data-theme="light"] #map-content,
+[data-theme="light"] .content,
+[data-theme="light"] main { background: #f8f7f2 !important; }
+
+/* Toggle button */
+#theme-toggle-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  background: #c8a96e;
+  color: #1a1a1a;
+  border: none;
+  border-radius: 50px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-family: monospace;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: opacity 0.2s;
+  font-weight: 600;
+}
+#theme-toggle-btn:hover { opacity: 0.85; }
+
+/* LIGHT THEME */
+[data-theme="light"] {
+  --bg:#f8f7f2!important;--bg2:#eeeae0!important;--bg3:#e5e0d5!important;
+  --surface:#ffffff!important;--surface2:#f0ede8!important;--border:#d8d3c8!important;
+  --text:#1a1a1a!important;--text2:#4a4a4a!important;--text3:#888070!important;
+  --text-muted:#888070!important;--accent:#a07840!important;--accent2:#2563eb!important;
+  --cespe:#4338ca!important;--cespe-bg:#eef2ff!important;--cespe-border:#65a30d!important;
+  --stj:#1d4ed8!important;--stj-bg:#dbeafe!important;--stj-border:#3b82f6!important;
+  --obs:#047857!important;--obs-bg:#d1fae5!important;--obs-border:#10b981!important;
+  --node-l1:#1d4ed8!important;--node-l2:#7c3aed!important;--node-l3:#047857!important;
+  --node-l4:#c2410c!important;--node-l5:#be185d!important;
+}
+[data-theme="light"] body{background:#f8f7f2!important;color:#1a1a1a!important;}
+[data-theme="light"] #sidebar,[data-theme="light"] #sidebar-header,
+[data-theme="light"] #chapter-list,[data-theme="light"] header,
+[data-theme="light"] #toolbar,[data-theme="light"] #tabs{background:#eeeae0!important;border-color:#d8d3c8!important;}
+[data-theme="light"] #search,[data-theme="light"] #search-box,[data-theme="light"] input{background:#fff!important;color:#1a1a1a!important;border-color:#d8d3c8!important;}
+[data-theme="light"] .node-row:hover,[data-theme="light"] .row:hover{background:rgba(0,0,0,0.04)!important;}
+[data-theme="light"] .tab,[data-theme="light"] .ch-item{color:#4a4a4a!important;}
+
+/* HIGHLIGHTS */
+.hl-yellow{background:rgba(250,204,21,0.45)!important;border-radius:2px;}
+.hl-green{background:rgba(34,197,94,0.38)!important;border-radius:2px;}
+.hl-blue{background:rgba(59,130,246,0.38)!important;border-radius:2px;}
+.hl-red{background:rgba(239,68,68,0.38)!important;border-radius:2px;}
+._sel{outline:2px solid #c8a96e!important;outline-offset:1px;border-radius:3px;}
+
+/* WORD-STYLE TOOLBAR */
+#_wtb{
+  position:fixed;top:0;left:0;right:0;z-index:9999;
+  background:var(--surface,#1a1d2e);
+  border-bottom:1px solid var(--border,#2e3350);
+  display:flex;align-items:center;gap:2px;
+  padding:4px 10px;height:42px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+  flex-wrap:nowrap;overflow-x:auto;
+}
+[data-theme="light"] #_wtb{background:#f3f2f1;border-color:#d0ccc8;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+
+body{padding-top:42px!important;}
+
+#_wtb ._sep{width:1px;height:24px;background:var(--border,#2e3350);margin:0 4px;flex-shrink:0;}
+[data-theme="light"] #_wtb ._sep{background:#d0ccc8;}
+
+#_wtb ._grp{display:flex;align-items:center;gap:2px;flex-shrink:0;}
+
+#_wtb ._grp-label{
+  font-size:9px;font-family:monospace;letter-spacing:0.08em;
+  text-transform:uppercase;color:var(--text-muted,#5a6070);
+  padding:0 4px;white-space:nowrap;
+}
+
+/* Toolbar buttons */
+._tb-btn{
+  background:none;border:1px solid transparent;border-radius:4px;
+  padding:3px 7px;cursor:pointer;font-size:13px;
+  color:var(--text,#e8eaf0);transition:background 0.12s,border-color 0.12s;
+  display:flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0;
+  font-family:system-ui,sans-serif;
+}
+._tb-btn:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.15);}
+[data-theme="light"] ._tb-btn{color:#1a1a1a;}
+[data-theme="light"] ._tb-btn:hover{background:rgba(0,0,0,0.07);border-color:rgba(0,0,0,0.15);}
+._tb-btn._on{background:rgba(200,169,110,0.25);border-color:rgba(200,169,110,0.5);}
+
+/* Color swatches inline */
+._sw{
+  width:18px;height:18px;border-radius:3px;border:1px solid rgba(255,255,255,0.2);
+  cursor:pointer;flex-shrink:0;transition:transform 0.12s;display:inline-block;
+}
+._sw:hover{transform:scale(1.25);}
+._sw._on{outline:2px solid #c8a96e;outline-offset:1px;}
+[data-theme="light"] ._sw{border-color:rgba(0,0,0,0.2);}
+
+/* Font size */
+._fs-num{
+  width:36px;text-align:center;background:var(--bg,#0d0f14);
+  border:1px solid var(--border,#2e3350);border-radius:4px;
+  color:var(--text,#e8eaf0);font-size:12px;font-family:monospace;
+  padding:2px 4px;
+}
+[data-theme="light"] ._fs-num{background:#fff;color:#1a1a1a;border-color:#d0ccc8;}
+
+/* Selected node indicator */
+#_sel-info{
+  font-size:11px;font-family:monospace;color:var(--text-muted,#5a6070);
+  max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  margin-left:8px;flex-shrink:1;
+}
+
+/* Note modal */
+#_np{display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;}
+#_np._o{display:flex;}
+._npb{background:var(--surface,#13161e);border:1px solid var(--border,#2e3350);border-radius:14px;padding:24px;width:100%;max-width:460px;box-shadow:0 12px 40px rgba(0,0,0,0.5);}
+[data-theme="light"] ._npb{background:#fff;border-color:#d8d3c8;}
+._nptitle{font-size:13px;font-weight:600;color:var(--text,#e8eaf0);margin-bottom:12px;}
+._npta{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border,#2e3350);border-radius:8px;padding:12px;font-size:14px;color:var(--text,#e8eaf0);font-family:sans-serif;resize:vertical;min-height:120px;outline:none;line-height:1.6;}
+[data-theme="light"] ._npta{background:#eef2ff;color:#1a1a1a;border-color:#65a30d;}
+._npact{display:flex;justify-content:flex-end;gap:10px;margin-top:14px;}
+._npcxl{font-size:13px;background:none;border:1px solid var(--border,#2e3350);border-radius:7px;padding:7px 16px;cursor:pointer;color:var(--text-muted,#5a6070);font-family:sans-serif;}
+._npsave{font-size:13px;background:#c8a96e;color:#1a1a1a;border:none;border-radius:7px;padding:7px 16px;cursor:pointer;font-weight:600;font-family:sans-serif;}
+
+@media (max-width: 768px) {
+  #_wtb { display: none !important; }
+  #_sel-info { display: none; }
+  .tabs { font-size: 12px; }
+  #_hdr { display: flex !important; }
+}
+@media (min-width: 769px) {
+  #_hdr { display: none !important; }
+}
+
+/* ── TRACKER INTEGRATION ── */
+#_trk_bar {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border, #1e2330);
+  background: var(--surface, #13161e);
+  flex-shrink: 0;
+}
+[data-theme="light"] #_trk_bar { background: #f0ede8; border-color: #d8d3c8; }
+#_trk_label {
+  font-size: 10px; font-family: monospace; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-muted, #5a6070);
+  display: flex; justify-content: space-between; margin-bottom: 6px;
+}
+#_trk_pct { color: var(--accent, #c8a96e); font-weight: 700; }
+#_trk_track {
+  height: 5px; background: var(--border, #2e3350);
+  border-radius: 3px; overflow: hidden;
+}
+#_trk_fill {
+  height: 100%; background: var(--accent, #c8a96e);
+  border-radius: 3px; transition: width 0.4s ease;
+}
+
+/* Checkbox in sidebar items */
+._chk_wrap {
+  display: flex; align-items: center; gap: 0; width: 100%;
+}
+._chk_wrap input[type=checkbox] {
+  width: 14px; height: 14px;
+  accent-color: var(--accent, #c8a96e);
+  cursor: pointer; flex-shrink: 0;
+  margin-right: 6px; margin-left: 4px;
+}
+._chk_done { opacity: 0.5; text-decoration: line-through; }
+
+/* ══ UI INJECTED ══ */
+body { padding-top: 46px !important; }
+
+#_hdr {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9900;
+  height: 46px; background: var(--surface, #13161e);
+  border-bottom: 1px solid var(--border, #2e3350);
+  display: flex; align-items: center; gap: 8px; padding: 0 12px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.2);
+}
+[data-theme="light"] #_hdr { background: #fff; border-color: #d8d3c8; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+.hbtn {
+  font-size: 12px; font-family: monospace;
+  background: none; border: 1px solid var(--border, #2e3350);
+  border-radius: 6px; padding: 4px 10px; cursor: pointer;
+  color: var(--text, #e8eaf0); white-space: nowrap;
+  transition: background 0.15s; text-decoration: none; display: inline-flex; align-items: center;
+}
+.hbtn:hover { background: var(--surface2, #1c2030); }
+[data-theme="light"] .hbtn { color: #1a1a1a; }
+[data-theme="light"] .hbtn:hover { background: #f0ede8; }
+
+#_htit {
+  font-size: 13px; font-family: monospace;
+  color: var(--muted, #5a6070); flex: 1; text-align: center;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* HIGHLIGHT SWATCHES */
+#_hlbar {
+  display: flex; align-items: center; gap: 5px;
+  padding: 0 6px; border-left: 1px solid var(--border, #2e3350);
+  margin-left: 4px;
+}
+[data-theme="light"] #_hlbar { border-color: #d8d3c8; }
+
+.hlsw {
+  width: 20px; height: 20px; border-radius: 50%; cursor: pointer;
+  border: 2px solid transparent; transition: transform 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.hlsw:hover { transform: scale(1.2); }
+.hlsw.on { border-color: var(--text, #e8eaf0); transform: scale(1.15); }
+[data-theme="light"] .hlsw.on { border-color: #1a1a1a; }
+.hlsw.clr {
+  background: var(--border, #2e3350) !important;
+  font-size: 11px; display: flex; align-items: center; justify-content: center;
+  color: var(--text, #e8eaf0); border-radius: 50%;
+}
+[data-theme="light"] .hlsw.clr { background: #e5e0d5 !important; color: #1a1a1a; }
+
+/* HIGHLIGHT APPLIED STYLES */
+._hly { border-radius: 2px; padding: 0 1px; cursor: pointer; }
+._hly.y { background: rgba(250,204,21,0.45) !important; border-left: 3px solid rgba(202,138,4,0.8); padding-left: 5px; }
+._hly.g { background: rgba(34,197,94,0.3)  !important; border-left: 3px solid rgba(22,163,74,0.8);  padding-left: 5px; }
+._hly.b { background: rgba(59,130,246,0.3) !important; border-left: 3px solid rgba(37,99,235,0.8);  padding-left: 5px; }
+._hly.p { background: rgba(236,72,153,0.3) !important; border-left: 3px solid rgba(219,39,119,0.8); padding-left: 5px; }
+._hly.o { background: rgba(249,115,22,0.3) !important; border-left: 3px solid rgba(234,88,12,0.8);  padding-left: 5px; }
+
+/* SIDEBAR */
+#sidebar { top: 46px !important; height: calc(100vh - 46px) !important; }
+@media(min-width:769px) { #sidebar.sb-off { width:0!important; min-width:0!important; overflow:hidden!important; border-right:none!important; } }
+@media(max-width:768px) {
+  #sidebar { position:fixed!important; left:0!important; z-index:8900!important; }
+  #sidebar.sb-off { transform:translateX(-100%)!important; }
+  #_sbov { display:none; position:fixed; inset:0; z-index:8800; background:rgba(0,0,0,0.4); }
+  #_sbov.open { display:block; }
+}
+
+/* TRACKER in sidebar */
+#_trk_bar { padding:10px 12px; border-bottom:1px solid var(--border,#1e2330); background:var(--surface,#13161e); flex-shrink:0; }
+[data-theme="light"] #_trk_bar { background:#f0ede8; border-color:#d8d3c8; }
+#_trk_label { font-size:10px; font-family:monospace; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted,#5a6070); display:flex; justify-content:space-between; margin-bottom:6px; }
+#_trk_pct { color:#c8a96e; font-weight:700; }
+#_trk_track { height:4px; background:var(--border,#2e3350); border-radius:2px; overflow:hidden; }
+#_trk_fill { height:100%; background:#c8a96e; border-radius:2px; transition:width 0.4s; }
+._chk_wrap { display:flex; align-items:center; width:100%; }
+._chk_wrap input[type=checkbox] { width:14px; height:14px; accent-color:#c8a96e; cursor:pointer; flex-shrink:0; margin-right:6px; margin-left:4px; }
+._chk_done { opacity:0.5; text-decoration:line-through; }
+
+/* LIGHT THEME */
+[data-theme="light"] { --bg:#f8f7f2!important; --surface:#ffffff!important; --surface2:#f0ede8!important; --border:#d8d3c8!important; --text:#1a1a1a!important; --text-muted:#888070!important; --accent:#a07840!important; }
+[data-theme="light"] body { background:#f8f7f2!important; color:#1a1a1a!important; }
+[data-theme="light"] #sidebar,[data-theme="light"] #sidebar-header,[data-theme="light"] #chapter-list,[data-theme="light"] header { background:#e8e8f0!important; border-color:#c8c8dc!important; }
+[data-theme="light"] #search,[data-theme="light"] #search-box,[data-theme="light"] input[type=text] { background:#fff!important; color:#1a1a1a!important; border-color:#d8d3c8!important; }
+[data-theme="light"] .node-row:hover,[data-theme="light"] .row:hover { background:rgba(0,0,0,0.04)!important; }
+[data-theme="light"] .ch-item { color:#4a4a4a!important; } [data-theme="light"] .ch-item.active { color:#a07840!important; }
+[data-theme="light"] .tab { color:#4a4a4a!important; }
+</style>
+</head>
+<body>
+<div id="app">
+<nav id="sidebar">
+  <div id="sb-header">
+    <div id="sb-title">§ DIR. URBANÍSTICO</div>
+    <input id="search" placeholder="buscar em todos os capítulos..." type="text" autocomplete="off">
+  </div>
+  <div id="trk-bar">
+    <div id="trk-label"><span>Revisão</span><span><span id="trk-cnt">0/3</span>&nbsp;<span id="trk-pct">0%</span></span></div>
+    <div id="trk-track"><div id="trk-fill" style="width:0%"></div></div>
+  </div>
+  <div id="tabs"></div>
+</nav>
+<div id="main-area">
+  <div class="match-bar" id="matchBar"></div>
+  <div class="content" id="content">
+    <div id="empty-msg">SELECIONE UM CAPÍTULO</div>
+  </div>
+</div>
+</div>
+<script>
+var _TRK = window._TRK || {done:{}};
+
+const RAW = "{\"cap0\":{\"title\":\"0. Estatuto da Cidade \u2014 Lei 10.257/2001\",\"children\":[{\"title\":\"Disp. Gerais\",\"children\":[{\"title\":\"Intro\",\"children\":[{\"title\":\"O estatuto regulamenta o art. 182 da CF. Traz regras gerais de politica urbana\"},{\"title\":\"Cuida-se de Lei Federal exigida pela CF de aplica\u00e7\u00e3o pela U, E, DF e M\"},{\"title\":\"Normas gerais e instrumentos de ordena\u00e7\u00e3o do espa\u00e7o urbano\"},{\"title\":\"Estatuto traz normas de ordem publica. A lei reconhece q a cidade tem fun\u00e7\u00e3o social\"},{\"title\":\"O Estatuto da Cidade forneceu nova base jur\u00eddica para o tratamento da terra urbana no Brasil, no tocante \u00e0 imposi\u00e7\u00e3o de limita\u00e7\u00f5es de direito de propriedade.\"},{\"title\":\"Segundo Fernanda Lousada (Cole\u00e7\u00e3o Leis especiais para concurso - Juspodivum 2015, pg. 126), o Estatuto da Cidade contribuiu para a sistematiza\u00e7\u00e3o dos instrumentos urban\u00edsticos. No entanto, muitos deles j\u00e1 existiam, como os planos de urbaniza\u00e7\u00e3o, a usucapi\u00e3o e o plano diretor.\"},{\"title\":\"a Lei nao esquece em nenhum momento a tutela do meio ambiente\"}]},{\"title\":\"Objetivo da Pol. Urbana(5)\",\"children\":[{\"title\":\"Ordenar pleno desenvolvimento das fun\u00e7\u00f5es sociais da cidade e da prop. urbana\"},{\"title\":\"Reforma Urbana\"},{\"title\":\"Gest\u00e3o democratica\"},{\"title\":\"Evitar polui\u00e7\u00e3o\"},{\"title\":\"Bem estar dos habitantes\"}]},{\"title\":\"Diretrizes Gerais Ex: FGV - 2023 - PGM - Niter\u00f3i - Procurador do Munic\u00edpio FEPESE - 2023 - Prefeitura - SC - Procurador do Munic\u00edpio CESPE / CEBRASPE - 2022 - PGE-RO - Procurador do Estado MPE-SP - 2019 - MPE-SP - Promotor de Justi\u00e7a Substituto\",\"children\":[{\"title\":\"I \u2013 garantia do direito a cidades sustent\u00e1veis, entendido como o direito \u00e0 terra urbana, \u00e0 moradia, ao saneamento ambiental, \u00e0 infra-estrutura urbana, ao transporte e aos servi\u00e7os p\u00fablicos, ao trabalho e ao lazer, para as presentes e futuras gera\u00e7\u00f5es; Avan\u00e7a SP - 2022 - Prefeitura de Amparo - SP - Engenheiro Civil\"},{\"title\":\"Direito a cidade sustentavel, entendido como direito a terra urbana, moradia e saneamento...\"},{\"title\":\"Ordena\u00e7\u00e3o e controle do uso do solo, de forma a evitar especula\u00e7\u00e3o imobiliaria\"},{\"title\":\"Polui\u00e7\u00f5a e degra\u00e7\u00e3o ambiental\"},{\"title\":\"Simplifi\u00e7\u00e3o da Lei de Parcelamento, p permitir redu\u00e7\u00e3o de custos e aumento da oferta de lotes\"},{\"title\":\"Regulariza\u00e7\u00e3o Fundiaria e Urbaniza\u00e7\u00e3o\"},{\"title\":\"III \u2013 coopera\u00e7\u00e3o entre os governos, a iniciativa privada e os demais setores da sociedade no processo de urbaniza\u00e7\u00e3o, em atendimento ao interesse social;\"},{\"title\":\"XVI \u2013 isonomia de condi\u00e7\u00f5es para os agentes p\u00fablicos e privados na promo\u00e7\u00e3o de empreendimentos e atividades relativos ao processo de urbaniza\u00e7\u00e3o, atendido o interesse social. VUNESP - 2022 - Prefeitura de Sorocaba - SP - Arquiteto I\"},{\"title\":\"XX - promo\u00e7\u00e3o de conforto, abrigo, descanso, bem-estar e acessibilidade na frui\u00e7\u00e3o dos espa\u00e7os livres de uso p\u00fablico, de seu mobili\u00e1rio e de suas interfaces com os espa\u00e7os de uso privado, vedado o emprego de materiais, estruturas, equipamentos e t\u00e9cnicas construtivas hostis que tenham como objetivo ou resultado o afastamento de pessoas em situa\u00e7\u00e3o de rua, idosos, jovens e outros segmentos da popula\u00e7\u00e3o.     (Reda\u00e7\u00e3o dada pela Lei n\u00ba 14.489, de 2022)\"},{\"title\":\"obs\",\"children\":[{\"title\":\"FCC, PGM S\u00e3o Lu\u00eds, 2016: Segundo a Constitui\u00e7\u00e3o Federal, o objetivo da pol\u00edtica urbana \u00e9 garantir o bem-estar dos habitantes das cidades. (C)\"},{\"title\":\"FCC, TCMGO, 2015 - adaptada: Em mat\u00e9ria urban\u00edstica, compete \u00e0 Uni\u00e3o instituir diretrizes para o desenvolvimento urbano, inclusive habita\u00e7\u00e3o, saneamento b\u00e1sico e transportes urbanos. Gab: C\"}]}]},{\"title\":\"Competencia p/ Ordenar pleno desenvolviemtno e garantir bem-estar\",\"children\":[{\"title\":\"Do Municipio\"}]},{\"title\":\"Estatuto da Metropole Estabelecido pela Lei 13.089/2015\",\"children\":[{\"title\":\"As diretrizes acima devem ser observadas pela governan\u00e7a de regioes metropolitanas\"}]},{\"title\":\"Competencias Administrativa e Legislativa Federal - Art. 3\u02da\",\"children\":[{\"title\":\"Repete Art. 21, XX e 23 IX, parag. \u00fanico e 24 I, da CF\"}]},{\"title\":\"Competencias da Uni\u00e3o - Art. 3\u02da NAO CONFUNDIR COM DIRETRIZES Uniao e cal\u00e7adas - III NORMAS GERAIS COOPERA\u00c7\u00c3O COM ENTES PROGRAMA DE CONSTRU\u00c7AO DE MORADIAS DIRETRIZES DE DESENVOLVIMENTO PLANOS NACIONAIS E REGIONAIS IBADE - 2022 - Acrel\u00e2ndia - AC - Procurador IBADE - 2022 - Barra de S\u00e3o Francisco - ES - Procurador VUNESP - 2014 - PGM - SP - Procurador do Munic\u00edpio CESPE / CEBRASPE - 2022 - MPC-SC - Procurador do MPTC  FUNDEP (Gest\u00e3o de Concursos) - 2021 - MPE-MG - Promotor CESPE / CEBRASPE - 2023 - PGM - SP - Procurador do Munic\u00edpio\",\"children\":[{\"title\":\"I \u2013 legislar sobre normas gerais de direito urban\u00edstico;\"},{\"title\":\"II \u2013 legislar sobre normas para a coopera\u00e7\u00e3o entre a Uni\u00e3o, os Estados, o Distrito Federal e os Munic\u00edpios em rela\u00e7\u00e3o \u00e0 pol\u00edtica urbana, tendo em vista o equil\u00edbrio do desenvolvimento e do bem-estar em \u00e2mbito nacional;\"},{\"title\":\"III - promover, por iniciativa pr\u00f3pria e em conjunto com os Estados, o Distrito Federal e os Munic\u00edpios, programas de constru\u00e7\u00e3o de moradias e melhoria das condi\u00e7\u00f5es habitacionais, de saneamento b\u00e1sico, das cal\u00e7adas, dos passeios p\u00fablicos, do mobili\u00e1rio urbano e dos demais espa\u00e7os de uso p\u00fablico;                   (Reda\u00e7\u00e3o dada pela Lei n\u00ba 13.146, de 2015)     (Vig\u00eancia)\"},{\"title\":\"IV - instituir diretrizes para desenvolvimento urbano, inclusive habita\u00e7\u00e3o, saneamento b\u00e1sico, transporte e mobilidade urbana, que incluam regras de acessibilidade aos locais de uso p\u00fablico;                   (Reda\u00e7\u00e3o dada pela Lei n\u00ba 13.146, de 2015)   (Vig\u00eancia)\"},{\"title\":\"V \u2013 elaborar e executar planos nacionais e regionais de ordena\u00e7\u00e3o do territ\u00f3rio e de desenvolvimento econ\u00f4mico e social.\"}]},{\"title\":\"obs\",\"children\":[{\"title\":\"Os Munic\u00edpios t\u00eam compet\u00eancia para legislar sobre assuntos de interesse local compreendendo o ordenamento territorial, o planejamento urbano e a fiscaliza\u00e7\u00e3o de \u00e1reas de uso e ocupa\u00e7\u00e3o do solo (art. 30, I e VII, da CF/88). \u00c9 formalmente inconstitucional norma estadual pela qual se disp\u00f5e sobre direito urban\u00edstico em contrariedade ao que se determina nas normas gerais estabelecidas pela Uni\u00e3o e em ofensa \u00e0 compet\u00eancia dos Munic\u00edpios para legislar sobre assuntos de interesse local, sobre os quais inclu\u00eddos pol\u00edtica de desenvolvimento urbano, planejamento, controle e uso do solo. De igual modo, \u00e9 inconstitucional norma de Constitui\u00e7\u00e3o estadual que, a pretexto de organizar e delimitar compet\u00eancia de seus respectivos Munic\u00edpios, ofende o princ\u00edpio da autonomia municipal, previsto no art. 18, no art. 29 e no art. 30 da CF/88. STF. Plen\u00e1rio. ADI 6602/SP, Rel. Min. C\u00e1rmen L\u00facia, julgado em 11/6/2021 (Info 1021).\"},{\"title\":\"\u00c9 cab\u00edvel a aquisi\u00e7\u00e3o de im\u00f3veis particulares situados no Setor Tradicional de Planaltina/DF, por usucapi\u00e3o, ainda que pendente o processo de regulariza\u00e7\u00e3o urban\u00edstica. STJ. 2\u00aa Se\u00e7\u00e3o. REsp 1818564-DF, Rel. Min. Moura Ribeiro, julgado em 09/06/2021 (Recurso Repetitivo \u2013 Tema 1025) (Info 700).\"},{\"title\":\"A aliena\u00e7\u00e3o de terrenos a consumidores de baixa renda em loteamento irregular, tendo sido veiculada publicidade enganosa sobre a exist\u00eancia de autoriza\u00e7\u00e3o do \u00f3rg\u00e3o p\u00fablico e de registro no cart\u00f3rio de im\u00f3veis, configura les\u00e3o ao direito da coletividade e d\u00e1 ensejo \u00e0 indeniza\u00e7\u00e3o por dano moral coletivo. STJ. 4\u00aa Turma. REsp 1539056/MG, Rel. Min. Luis Felipe Salom\u00e3o, julgado em 06/04/2021 (Info 691).\"},{\"title\":\"S\u00e3o constitucionais as leis municipais anteriores \u00e0 Emenda Constitucional n\u00b0 29/2000, que institu\u00edram al\u00edquotas diferenciadas de IPTU para im\u00f3veis edificados e n\u00e3o edificados, residenciais e n\u00e3o residenciais. STF. Plen\u00e1rio. RE 666156, Rel. Roberto Barroso, julgado em 11/05/2020 (Repercuss\u00e3o Geral \u2013 Tema 523) (Info 982 \u2013 clipping). Antes da EC 29/2000, a CF/88 permitia para o IPTU apenas a progressividade em raz\u00e3o da fun\u00e7\u00e3o social da propriedade (art. 182, \u00a7 4\u00ba, II). A Constitui\u00e7\u00e3o n\u00e3o previa, expressamente, a progressividade em raz\u00e3o do valor do im\u00f3vel (art. 156, \u00a7 1\u00ba, I). Ocorre que mesmo antes da EC 29/2000, muitos Munic\u00edpios editaram leis prevendo al\u00edquotas progressivas em raz\u00e3o do valor do im\u00f3vel. O STF considera que essas leis s\u00e3o inv\u00e1lidas: S\u00famula 668-STF: \u00c9 inconstitucional a lei municipal que tenha estabelecido, antes da emenda constitucional 29/2000, al\u00edquotas progressivas para o IPTU, salvo se destinada a assegurar o cumprimento da fun\u00e7\u00e3o social da propriedade urbana. Com a declara\u00e7\u00e3o de inconstitucionalidade da lei municipal, os contribuintes ir\u00e3o pagar o IPTU com base em qual al\u00edquota? A m\u00ednima prevista. O STF firmou a seguinte tese: \\\"Declarada inconstitucional a progressividade de al\u00edquota tribut\u00e1ria, \u00e9 devido o tributo calculado pela al\u00edquota m\u00ednima correspondente, de acordo com a destina\u00e7\u00e3o do im\u00f3vel.\\\" STF. Plen\u00e1rio. RE 602347/MG, Rel. Min. Edson Fachin, julgado em 4/11/2015 (repercuss\u00e3o geral) (Info 806)\"},{\"title\":\"O Minist\u00e9rio P\u00fablico Federal \u00e9 parte ileg\u00edtima para ajuizar a\u00e7\u00e3o civil p\u00fablica que visa \u00e0 anula\u00e7\u00e3o da tramita\u00e7\u00e3o de Projeto de Lei do Plano Diretor de munic\u00edpio, ao argumento da falta de participa\u00e7\u00e3o popular nos respectivos trabalhos legislativos. No caso concreto, o MPF ajuizou ACP contra o Munic\u00edpio de Florian\u00f3polis e a Uni\u00e3o argumentando que o Poder Executivo Municipal teria encaminhado \u00e0 C\u00e2mara de Vereadores o projeto de Lei do Plano Diretor da cidade sem a realiza\u00e7\u00e3o das necess\u00e1rias audi\u00eancias p\u00fablicas, o que violaria o Estatuto da Cidade.  O STJ entendeu que a legitimidade para essa demanda seria do Minist\u00e9rio P\u00fablico estadual (e n\u00e3o do MPF). STJ. 1\u00aa Turma.REsp 1687821-SC, Rel. Min. S\u00e9rgio Kukina, julgado em 07/11/2017 (Info 616).\"},{\"title\":\"O Estatuto da Cidade, ao tratar sobre a a\u00e7\u00e3o de usucapi\u00e3o especial urbana, prev\u00ea que \\\"o autor ter\u00e1 os benef\u00edcios da justi\u00e7a e da assist\u00eancia judici\u00e1ria gratuita, inclusive perante o cart\u00f3rio de registro de im\u00f3veis.\\\" Isso significa que o autor da a\u00e7\u00e3o de usucapi\u00e3o especial urbana gozar\u00e1 sempre da gratuidade da justi\u00e7a? H\u00e1 uma presun\u00e7\u00e3o absoluta de que este autor n\u00e3o tem recursos suficientes para pagar as custas? N\u00c3O. O art. 12, \u00a7 2\u00ba da Lei n\u00ba 10.257/2001 (Estatuto da Cidade) estabelece uma presun\u00e7\u00e3o relativa de que o autor da a\u00e7\u00e3o de usucapi\u00e3o especial urbana \u00e9 hipossuficiente. Isso significa que essa presun\u00e7\u00e3o pode ser ilidida (refutada) a partir da comprova\u00e7\u00e3o inequ\u00edvoca de que o autor n\u00e3o \u00e9 considerado \\\"necessitado\\\". STJ. 3\u00aa Turma. REsp 1517822-SP, Rel. Min. Ricardo Villas B\u00f4as Cueva, julgado em 21/2/2017 (Info 599).\"}]}]},{\"title\":\"Instrumentos em Geral EIA e EIV s\u00e3o instrumentos? (Rol EXEMPLIFICATIVO) CESPE - 2023 - MPE-SC - Promotor  FUNDEP (Gest\u00e3o de Concursos) - 2021 - MPE-MG - Promotor CESPE / CEBRASPE - 2023 - PGM - SP - Procurador do Munic\u00edpio\",\"children\":[{\"title\":\"Plano Nacionais, Regionais e Estaduais de ordena\u00e7\u00e3o de terrotorios\"},{\"title\":\"Planej. de regioes mtropolitanas, aglomera\u00e7\u00f5es e microrregioes\"},{\"title\":\"Planej. Municipal, em especial(8)\",\"children\":[{\"title\":\"a) plano diretor; deve necessariamente observar normas ambientais expedidas\"},{\"title\":\"b) disciplina do parcelamento, do uso e da ocupa\u00e7\u00e3o do solo;\"},{\"title\":\"c) zoneamento ambiental;\"},{\"title\":\"d) PPA, LDO e LOA\"},{\"title\":\"f) gest\u00e3o or\u00e7ament\u00e1ria participativa;\"},{\"title\":\"g) planos, programas e projetos setoriais;\"},{\"title\":\"h) planos de desenvolvimento econ\u00f4mico e social;\"}]},{\"title\":\"Institutos Tributarios e Financeiros\",\"children\":[{\"title\":\"a) IPTU;\"},{\"title\":\"b) contribui\u00e7\u00e3o de melhoria;\"},{\"title\":\"c) incentivos e benef\u00edcios fiscais e financeiros;\"}]},{\"title\":\"Institutos Juridicos e Politicos\",\"children\":[{\"title\":\"a) desapropria\u00e7\u00e3o;\"},{\"title\":\"b) servid\u00e3o administrativa;\"},{\"title\":\"c) limita\u00e7\u00f5es administrativas;\"},{\"title\":\"d) tombamento de im\u00f3veis ou de mobili\u00e1rio urbano;\"},{\"title\":\"e) institui\u00e7\u00e3o de unidades de conserva\u00e7\u00e3o;\"},{\"title\":\"f) institui\u00e7\u00e3o de zonas especiais de interesse social;\"},{\"title\":\"g) concess\u00e3o de direito real de uso;\"},{\"title\":\"h) concess\u00e3o de uso especial para fins de moradia;\"},{\"title\":\"i) parcelamento, edifica\u00e7\u00e3o ou utiliza\u00e7\u00e3o compuls\u00f3rios;\"},{\"title\":\"j) usucapi\u00e3o especial de im\u00f3vel urbano;\"},{\"title\":\"l) direito de superf\u00edcie;\"},{\"title\":\"m) direito de preemp\u00e7\u00e3o;\"},{\"title\":\"n) outorga onerosa do direito de construir e de altera\u00e7\u00e3o de uso;\"},{\"title\":\"o) transfer\u00eancia do direito de construir;\"},{\"title\":\"p) opera\u00e7\u00f5es urbanas consorciadas;\"},{\"title\":\"q) regulariza\u00e7\u00e3o fundi\u00e1ria;\"},{\"title\":\"r) assist\u00eancia t\u00e9cnica e jur\u00eddica gratuita para as comunidades e grupos sociais menos favorecidos;\"},{\"title\":\"s) referendo popular e plebiscito;\"},{\"title\":\"t) demarca\u00e7\u00e3o urban\u00edstica para fins de regulariza\u00e7\u00e3o fundi\u00e1ria;\"},{\"title\":\"u) legitima\u00e7\u00e3o de posse.\"}]},{\"title\":\"EIA e EIV\"}]},{\"title\":\"Instrumentos da Pol. Urbana\",\"children\":[{\"title\":\"Intro\",\"children\":[{\"title\":\"O art. 182 \u00a74 prev\u00ea alguns instrumentos E traz no rol, a SUCESSIVIDADE\"},{\"title\":\"Ent\u00e3o a ordem \u00e9 assim: FGV - 2023 - PGM - Niter\u00f3i - Procurador\",\"children\":[{\"title\":\"Parcelamento e Edifica\u00e7\u00e3o\"},{\"title\":\"IPTU\"},{\"title\":\"Desapropria(san\u00e7\u00e3o)\"}]}]},{\"title\":\"Parcelamento, Edifica\u00e7\u00e3o e Utiliza\u00e7\u00e3o Compuls\u00f3rio MPE-GO - 2019 - MPE-GO\",\"children\":[{\"title\":\"Previs\u00e3o CF CF preve todos instrumentos?\",\"children\":[{\"title\":\"Disposto no Art. 182 da CF. Atingem o D. de Propriedade\"},{\"title\":\"Em raz\u00e3o disso, a perpetuidade dos direitos reais deixa de existir na propriedade urbana\"},{\"title\":\"A CF nao trata do USO COMPULSORIO, apenas da edifica\u00e7\u00e3o e parcelamento compulsorios\"},{\"title\":\"A doutrian diz que o USO seria inconst., mas traz a exemplificatividae do art.\"},{\"title\":\"Os solos urbanos nao aproveitados podem ser desapropriados, inclusive\"},{\"title\":\"Exigir o adequado nao \u00e9 FACULDADE do M, e sim DEVER\"},{\"title\":\"A competencia p/ eventual notifica\u00e7\u00e3o \u00e9 do ente municipal e nao do estadual\"}]},{\"title\":\"Nat. Juridica\",\"children\":[{\"title\":\"Impoe ao proprietario uma obrigac\u00e3o de fazer POSITIVA\"},{\"title\":\"O plano diretor deve prever areas onde \u00e9 possivel impor a san\u00e7\u00e3o,\"},{\"title\":\"E lei M ESPECIFICA deve prever o procedimento, condi\u00e7\u00f5es e prazos\"},{\"title\":\"\u00c9 necessario: PLANO DIRETOR + Lei especifica Municipal\"}]},{\"title\":\"Sub-uso\",\"children\":[{\"title\":\"Conceito\",\"children\":[{\"title\":\"Nao impede somente o vazio urbano, mas sua subutiliza\u00e7\u00e3o\"},{\"title\":\"Usos inferiores ao min. s\u00e3o vedados\"},{\"title\":\"Visa tbm combater fraudes nesse sentido. Ex: Constru\u00e7\u00f5es\"}]},{\"title\":\"Uso Ilegal\",\"children\":[{\"title\":\"Era previsto no art., mas foi vetado. Ilegalidade \u00e9 diferente do subuso\"},{\"title\":\"Nao \u00e9 com parcelamento compulsorio e edifica\u00e7\u00e3o que ser\u00e1 combatido.  Administra\u00e7\u00e3o dispoe de outros meios\"}]},{\"title\":\"Rol TAXATIVO\",\"children\":[{\"title\":\"Lei nao pode ampliar o conceito de imovel subutilizado\"},{\"title\":\"A CF estabelece no art. 182, \u00a74 os instrumentos devem ser por lei federal\"}]}]},{\"title\":\"Aproveitamento pelo Propriet\u00e1rio M pode dar uso diretamente?\",\"children\":[{\"title\":\"A Lei nao permite que o M d\u00ea diretamente uso ao imovel\"},{\"title\":\"M deve notificar o proprietario. A notifica\u00e7\u00e3o deve ser averbada no RGI\"},{\"title\":\"Forma da Notificac\u00e3o\",\"children\":[{\"title\":\"Funcionario do orgao competente\"},{\"title\":\"Edital\"},{\"title\":\"obs  MPE-RJ - 2022 - MPE-RJ - Promotor\",\"children\":[{\"title\":\"\u00a7 2o O propriet\u00e1rio ser\u00e1 notificado pelo Poder Executivo municipal para o cumprimento da obriga\u00e7\u00e3o, devendo a notifica\u00e7\u00e3o ser averbada no cart\u00f3rio de registro de im\u00f3veis. \u00a7 3o A notifica\u00e7\u00e3o far-se-\u00e1: I \u2013 por funcion\u00e1rio do \u00f3rg\u00e3o competente do Poder P\u00fablico municipal, ao propriet\u00e1rio do im\u00f3vel ou, no caso de este ser pessoa jur\u00eddica, a quem tenha poderes de ger\u00eancia geral ou administra\u00e7\u00e3o; II \u2013 por edital quando frustrada, por tr\u00eas vezes, a tentativa de notifica\u00e7\u00e3o na forma prevista pelo inciso I.\"}]}]},{\"title\":\"Prazos nao  podem ser  inferiores\",\"children\":[{\"title\":\"P. protocolar projeto\",\"children\":[{\"title\":\"1 ano\"}]},{\"title\":\"Iniciar obras, depois do projeto\",\"children\":[{\"title\":\"2 anos\"}]}]}]},{\"title\":\"Empreedimento de Grande Porte\",\"children\":[{\"title\":\"Em carater excepcional, a Lei M especifica pode prever conclusao em etapas\"}]},{\"title\":\"Em caso de Transmiss\u00e3o do Imovel Obriga\u00e7\u00e3o \u00e9 propter rem? MPE-GO - 2019 - MPE-GO - Promotor\",\"children\":[{\"title\":\"Seja inter vivos ou causa mortir, transfere as obrig. aos sucessores\"},{\"title\":\"Essa sucess\u00e3o s\u00f3 possivel gra\u00e7as a publicidade(notifica\u00e7\u00e3o)\"},{\"title\":\"E mesmo com transmiss\u00e3o, nao h\u00e1 interrup\u00e7ao de qlq prazo\"}]}]},{\"title\":\"IPTU progressivo\",\"children\":[{\"title\":\"Instrumentos Sucessivos\",\"children\":[{\"title\":\"S\u00f3 \u00e9 possivel em caso de inobservancia dos prazos acima. Essa sucess\u00e3o tem assento CF\"},{\"title\":\"Alem disso, o tributo deve respeitar anterioridade\"},{\"title\":\"Caso o proprietario apresente o proj., a tributa\u00e7\u00e3o progressiva \u00e9 suspensa no ex. seguinte\"},{\"title\":\"\u00c9 NECESS\u00c1RIO LEI ESPECIFICA, ALEM DO PLANO DIRETOR(LOGICAMENTE)\"}]},{\"title\":\"Atividade Discricionaria ou Vinculada?\",\"children\":[{\"title\":\"VINCULADA\"}]},{\"title\":\"Progressividade Extrafiscal Se aplica a capacidade contribuitiva? Pode ter beneficios tribut\u00e1rios?\",\"children\":[{\"title\":\"Nao h\u00e1 interesse em aumentar a arrecada\u00e7\u00e3o. Progressividade \u00e9 extrafiscal\"},{\"title\":\"Por ter essa finalidade nao se aplica a capacidade contribuitiva\"},{\"title\":\"Discute-se se \u00e9 possivel confisco ou n\u00e3o\"}]},{\"title\":\"Benef. Tributarios?\",\"children\":[{\"title\":\"N\u00e3o \u00e9 possivel. Visto que tem natureza de san\u00e7\u00e3o\"}]},{\"title\":\"Prazo\",\"children\":[{\"title\":\"Ocorre progressividade em 5 anos, apos tal prazo \u00e9 possivel DESAPROPRIAR  VUNESP - 2022 - C\u00e2mara de Orl\u00e2ndia - SP - Procurador Jur\u00eddico\"},{\"title\":\"OBS - Desapropria\u00e7\u00e3o ocorre em pagto com titulos da divida publica\"},{\"title\":\"A aliquota max. \u00e9 mantida at\u00e9 o instrumento seguinte(desaprop.)\"}]},{\"title\":\"Valor da Aliquota\",\"children\":[{\"title\":\"Definida em Lei especifica\"},{\"title\":\"Nao pode exceder 2x o valor do ano anterior\"},{\"title\":\"Tem aliquita max. de 15%\"}]},{\"title\":\"obs\",\"children\":[{\"title\":\"Art. 7\u00ba, \u00a72\u00ba da Lei 10.257/01 (Estatuto da Cidade) Do IPTU progressivo no tempo \ufeffArt. 7\u00ba Em caso de descumprimento das condi\u00e7\u00f5es e dos prazos previstos na forma do caput do art. 5\u00ba desta Lei, ou n\u00e3o sendo cumpridas as etapas previstas no \u00a7 5\u00ba do art. 5\u00ba desta Lei, o Munic\u00edpio proceder\u00e1 \u00e0 aplica\u00e7\u00e3o do imposto sobre a propriedade predial e territorial urbana (IPTU) progressivo no tempo, mediante a majora\u00e7\u00e3o da al\u00edquota pelo prazo de cinco anos consecutivos. (...)\u00a7 2\u00ba Caso a obriga\u00e7\u00e3o de parcelar, edificar ou utilizar n\u00e3o esteja atendida em cinco anos, o Munic\u00edpio manter\u00e1 a cobran\u00e7a pela al\u00edquota m\u00e1xima, at\u00e9 que se cumpra a referida obriga\u00e7\u00e3o, garantida a prerrogativa prevista no art. 8\u00ba. CESPE / CEBRASPE - 2023 - PGM - SP - Procurador do Munic\u00edpio\"}]}]},{\"title\":\"Desapropria\u00e7\u00e3o com pagto em titulos  VUNESP - 2022 - C\u00e2mara de Orl\u00e2ndia - SP - Procurador Jur\u00eddico CPCON - 2023 - Prefeitura de Catol\u00e9 do Rocha - PB - Fiscal de Tributos VUNESP - 2014 - PGM - SP - Procurador do Munic\u00edpio MPE-RJ - 2022 - MPE-RJ - Promotor de Justi\u00e7a Substituto - Concurso XXXVI\",\"children\":[{\"title\":\"Conceito Desapropria\u00e7\u00e3o-san\u00e7\u00e3o\",\"children\":[{\"title\":\"Difere da prevista no art. 5\u02da da CF e da prevista no Art. 182 \u00a73 da CF\"},{\"title\":\"Tem como causa o propriet\u00e1rio FALTOSO\"},{\"title\":\"Somente areas incluidas no plano diretor podem ser submetidas\"},{\"title\":\"Diferen\u00e7as\",\"children\":[{\"title\":\"Descumprimento de obrigac\u00f5es urbanisticas(nao \u00e9 interesse publico ou social)\"},{\"title\":\"Necessita DECRETO expropriatorio?\",\"children\":[{\"title\":\"N\u00e3o!\"}]},{\"title\":\"Apenas entes M podem promove-la(plano diretor deve prever areas onde seja possivel). Apenas os Munic\u00edpios que possuem plano diretor podem se valer dessa modalidade de desapropria\u00e7\u00e3o.  MPE-RJ - 2022 - MPE-RJ - Promotor de Justi\u00e7a Substituto - Concurso XXXVI\"},{\"title\":\"Indeniza\u00e7\u00e3o ocorre em titulos da divida publica\"}]},{\"title\":\"N\u00e3o \u00e9 liberat\u00f3rio do imposto incidente\"},{\"title\":\"Deve haver notifica\u00e7\u00e3o do propriet\u00e1rio e sua averba\u00e7\u00e3o no registro do im\u00f3vel\"},{\"title\":\"a notifica\u00e7\u00e3o de inadimpl\u00eancia pelo Poder Executivo municipal dever\u00e1 ser averbada no RGI\"}]},{\"title\":\"Proceidmento Art. 11 a 30 do DL 3365/41\",\"children\":[{\"title\":\"OBS - Proc. Suspende ou Interrompe?\",\"children\":[{\"title\":\"N\u00e3o, msm que o propriet\u00e1rio d\u00ea fim adequado ao bem\"}]}]},{\"title\":\"Indeniza\u00e7\u00e3o em Titulos da Divida Publica Titulos podem ser usados p/ pagto de tributos? Quem autoriza a emiss\u00e3o desses titulos? VUNESP - 2014 - PGM - SP - Procurador do Munic\u00edpio\",\"children\":[{\"title\":\"Esses titulos  N \u00c3 O  podem ser usados p/ pagto de tributos\"},{\"title\":\"Emiss\u00e3o depende de autoriza\u00e7\u00e3o do SF\"},{\"title\":\"OBS IMPORTANTE\",\"children\":[{\"title\":\"N\u00e3o \u00e9 deposito previo do valor\"}]}]},{\"title\":\"Aproveitamento do IMOVEL Qual prazo de aproveitamento?\",\"children\":[{\"title\":\"A desapropria\u00e7\u00e3o transfere ao M a propriedade e cabe a ele dar a destina\u00e7\u00e3o adequada\"},{\"title\":\"O prazo \u00e9 de 5 anos a contar do final do proc. expropriatorio\"},{\"title\":\"Descumprimento \u00e9 IMPROBIDADE ADMIN.\"},{\"title\":\"caso o M nao tenha interesse pode alienar, por licita\u00e7\u00e3o\"}]},{\"title\":\"Valor da Indeniza\u00e7\u00e3o Computa-se expectativas de lucros cessantes e juros? CPCON - 2023 - Prefeitura - PB - Fiscal de Tributos VUNESP - 2014 - PGM - SP - Procurador do Munic\u00edpio\",\"children\":[{\"title\":\"Nao computa expectativas de ganhos, lucros cessantes e juros compensatorios\"},{\"title\":\"Dar-se-a pelo valor REAL e nao pelo valor justo\"}]},{\"title\":\"obs\",\"children\":[{\"title\":\"Art. 182. da CF III - desapropria\u00e7\u00e3o com pagamento mediante t\u00edtulos da d\u00edvida p\u00fablica de emiss\u00e3o previamente aprovada pelo Senado Federal, com prazo de resgate de at\u00e9 dez anos, em parcelas anuais, iguais e sucessivas, assegurados o valor real da indeniza\u00e7\u00e3o e os juros legais. CPCON - 2023 - Prefeitura de Catol\u00e9 do Rocha - PB - Fiscal de Tributos - \\\"Senado Federal\\\"\"}]}]},{\"title\":\"Demais Instrumentos\",\"children\":[{\"title\":\"Usucapi\u00e3o Especial de Imovel Urbano\",\"children\":[{\"title\":\"Destina\u00e7\u00e3o Social pode ser exercida por pf ou pj?\",\"children\":[{\"title\":\"Por visar aquisi\u00e7\u00e3o de moradias, nao pode ser exercida por PJ, s\u00f3 por PF\"},{\"title\":\"Por ter cunho social, cada pessoa s\u00f3 pode ser beneficiada uma vez\"},{\"title\":\"Cabe ao autor do processo demonstrar q nao tem outros imoveis, nem que seja rural\"},{\"title\":\"A Lei exige destina\u00e7\u00e3o como moradia, mas nao impoe uso exclusivo.\"},{\"title\":\"O fim comercial de parte do imovel nao impede(STF)\"},{\"title\":\"obs\",\"children\":[{\"title\":\"A usucapi\u00e3o especial de im\u00f3vel urbano prevista no Estatuto da Cidade n\u00e3o se aplica ao caso de Marta residir na casa de sua vizinha falecida por 20 anos consecutivos. A usucapi\u00e3o especial exige que o ocupante utilize o im\u00f3vel como sua moradia por 5 anos ininterruptos, entre outros requisitos como \u00e9 o caso de Marta j\u00e1 possuir uma Ch\u00e1cara. CESPE / CEBRASPE - 2023 - PGM - SP - Procurador do Munic\u00edpio\"},{\"title\":\"Subt\u00f3pico 2\"}]}]},{\"title\":\"Posse Ad Usucapitionem\",\"children\":[{\"title\":\"A Lei exige animo de dono. Por isso nao atinge locatarios\"}]},{\"title\":\"Sucesso Possessiones\",\"children\":[{\"title\":\"\u00c9 a transf. da posse causa mortis\"},{\"title\":\"\u00c9 necessario que o herdeiro resida no local na epoca do obito\"},{\"title\":\"Em caso de varios herdeiros e somente um esta no imovel? Doutrina admite continuidade por esse em beneficio dos outso\"},{\"title\":\"Callout\",\"children\":[{\"title\":\"\u00c9 admitida a soma das posses na usucapi\u00e3o especial urbana? \u2022 \u00e9 permitida a sucessio possessionis (soma das posses causa mortis); \u2022 n\u00e3o \u00e9 admitida a possibilidade de accessio possessionis (soma das posses por ato inter vivos). Fundamento legal: art. 9\u00ba, \u00a7 3\u00ba, do Estatuto da Cidade. Al\u00e9m disso, se fosse aceita a accessio possessionis na usucapi\u00e3o especial urbana, estaria havendo um afastamento da finalidade constitucional dessa peculiar modalidade de usucapi\u00e3o. STJ. 4\u00aa Turma. REsp 1.799.625-SP, Rel. Min. Marco Buzzi, julgado em 6/6/2023 (Info 12 \u2013 Edi\u00e7\u00e3o Extraordin\u00e1ria).\"}]}]},{\"title\":\"Objeto\",\"children\":[{\"title\":\"Terreno e Constru\u00e7\u00e3o de ate 250m2\"},{\"title\":\"STJ  - NUCLEOS URBANOS INFORMAIS\",\"children\":[{\"title\":\"Imoveis destinados a pessaos de baixa renda financiados pelo SFH\"},{\"title\":\"Nao se sujeitam a essa modalidade no periodo de 5 anos da posse\"}]}]},{\"title\":\"Requisitos\",\"children\":[{\"title\":\"CC\",\"children\":[{\"title\":\"PF ou PJ\"},{\"title\":\"Nao tem finalidade definida\"},{\"title\":\"Nao ha limite de vezes\"},{\"title\":\"Sucess\u00e3o de posses\"},{\"title\":\"Titulo, boa-f\u00e9, animos de dono e prazo legal\"}]},{\"title\":\"Estatuto da cidade CESPE / CEBRASPE - 2023 - TJ-ES - Analista FGV - 2023 - PGM - Niter\u00f3i - Analista Processual\",\"children\":[{\"title\":\"Suj. Ativo\",\"children\":[{\"title\":\"PF\"}]},{\"title\":\"Finalidade\",\"children\":[{\"title\":\"Moradia\"}]},{\"title\":\"Possibilidades\",\"children\":[{\"title\":\"Unica vez\"}]},{\"title\":\"Sucess\u00e3o de posses\",\"children\":[{\"title\":\"Apenas se j\u00e1 morar\"}]},{\"title\":\"Animos dono por 5 anos\"},{\"title\":\"Dispensa boa-fe e justo titulo\"}]}]},{\"title\":\"Forma Coletiva Nao existe previs\u00e7ao legal de forma coletiva rural INSTITUTO AOCP - 2022 - DPE-PR - Defensor P\u00fablico\",\"children\":[{\"title\":\"Discute-se a constitucionalidade e o prazo de inicio de quem estava no prazo antes da lei\"},{\"title\":\"Req. Legais\",\"children\":[{\"title\":\"Ocupa\u00e7\u00e3o deve ser de area superior 250m2\"},{\"title\":\"Nao deve ser possivel identificar posses individuais\"},{\"title\":\"Popula\u00e7\u00e3o de baixa renda\"},{\"title\":\"Possuidores nao podem ser proprietarios de outro imovel\"},{\"title\":\"Area usada para moradia\"}]},{\"title\":\"Acessio Possessiones\",\"children\":[{\"title\":\"Lei admite soma de posses de pessoas vivas, desde que continuas\"}]},{\"title\":\"Condominio\",\"children\":[{\"title\":\"O juiz, ao reconhecer, criar\u00e1 um condominio\"},{\"title\":\"A extin\u00e7\u00e3o s\u00f3 ser\u00e1 possivel apos urbaniza\u00e7\u00e3o e por 2/3 dos condominos\"},{\"title\":\"Por ausencia de lei, nao aplica direito de preferencia\"},{\"title\":\"Delibera\u00e7\u00f5es condominais sao tomadas por maioria simples\"}]}]},{\"title\":\"Materia Processual Consulplan - 2022 - PGE-SC - Assistente Jur\u00eddico  Funda\u00e7\u00e3o CEFETBAHIA - 2018 - MPE-BA - Promotor\",\"children\":[{\"title\":\"1. Processo Judicial VUNESP - 2023 - TCM-SP - Auditor Ci\u00eancias Jur\u00eddicas FCC - 2018 - DPE-MA - Defensor P\u00fablico\",\"children\":[{\"title\":\"Na pendencia dessa a\u00e7\u00e3o, todas as demais, sobre posse e propriedade ficam sustadas\"},{\"title\":\"Possuidor tem beneficios da justi\u00e7a gratuita e \u00e9 dispensado dos gastos cartorarios\"},{\"title\":\"Essa dispensa de gastos \u00e9 isolada do possuidor\"}]},{\"title\":\"Legitimidade(3) Associa\u00e7\u00e3o deve ter PJ? VUNESP - 2023 - TCM-SP - Auditor Ci\u00eancias Jur\u00eddicas  Instituto Consulplan - 2019 - MPE-SC - Promotor\",\"children\":[{\"title\":\"Possuidor(isolado ou litis)\"},{\"title\":\"Compossuidores\"},{\"title\":\"Associa\u00e7\u00e3o de moradores, constituida legalmente, com persona juridica como substituta processual\",\"children\":[{\"title\":\"Autoriza\u00e7\u00e3o?\",\"children\":[{\"title\":\"Sim!\"}]}]}]},{\"title\":\"MP CESPE - 2023 - MPE-SC - Promotor  Instituto Consulplan - 2019 - MPE-SC - Promotor\",\"children\":[{\"title\":\"Obrgatorio intervir(pena de nuldiade)\"}]},{\"title\":\"Usucapi\u00e3o em DEFESA\",\"children\":[{\"title\":\"A a\u00e7\u00e3o \u00e9 duplice. Logo pode ser usada como defesa\"},{\"title\":\"A sentenca vale como titulo p registro\"},{\"title\":\"A usucapi\u00e3o especial de im\u00f3vel urbano poder\u00e1 ser invocada como mat\u00e9ria de defesa.\"}]},{\"title\":\"Rto\",\"children\":[{\"title\":\"Sumario, segundo a Lei\"}]},{\"title\":\"obs\",\"children\":[{\"title\":\"Art. 11. Na pend\u00eancia da a\u00e7\u00e3o de usucapi\u00e3o especial urbana, ficar\u00e3o sobrestadas quaisquer outras a\u00e7\u00f5es, petit\u00f3rias ou possess\u00f3rias, que venham a ser propostas relativamente ao im\u00f3vel usucapiendo. (...) Art. 12, \u00a71\u00ba Na a\u00e7\u00e3o de usucapi\u00e3o especial urbana \u00e9 obrigat\u00f3ria a interven\u00e7\u00e3o do Minist\u00e9rio P\u00fablico.\"}]}]}]},{\"title\":\"Direito de Superficie\",\"children\":[{\"title\":\"Intro  Funda\u00e7\u00e3o CEFETBAHIA - 2018 - MPE-BA - Promotor\",\"children\":[{\"title\":\"Tratava-se de instituto inovador no direito\"},{\"title\":\"\u00c9 um direito que suspende o d. de acess\u00e3o(acessorio segue o principal)\"},{\"title\":\"O contrato pode ser gratuito ou oneroso\"},{\"title\":\"Mediante escritura publica registrada no cartorio\"}]},{\"title\":\"Abrangencia CESPE / CEBRASPE - 2023 - TJ-ES - Analista\",\"children\":[{\"title\":\"Solo, subsolo e espa\u00e7o arero, nos termos do contrato e observando legisla\u00e7\u00e3o M vigente\"}]},{\"title\":\"Diferen\u00e7as com o CC\",\"children\":[{\"title\":\"Estatuto da cidade trata apenas do solo urbano. CC trata de forma geral\"},{\"title\":\"Envolve interesse da comunidade. No CC interesse da spartes\"},{\"title\":\"Estatuto tras normas de interesse publico, inafastaveis. Diferente do CC\"},{\"title\":\"Aliena\u00e7\u00e3o do estatuto pode ser pro prazo determinado ou indeterminado. CC somente determinado\"},{\"title\":\"Aqui admite-se do SUBSOLO, no CC n\u00e3o\"}]},{\"title\":\"Semelhan\u00e7as\",\"children\":[{\"title\":\"D. de preferencia em caso de aliena\u00e7\u00e3o\"},{\"title\":\"Admitem transf. intervivos ou postmortem\"},{\"title\":\"Transf. de tributos e encargos ao superficiario\"}]},{\"title\":\"Extin\u00e7\u00e3o\",\"children\":[{\"title\":\"Termo\"},{\"title\":\"Descumprimento de obrig. contratuais\"},{\"title\":\"Altera\u00e7\u00e3o da destina\u00e7\u00e3o do bem\"}]},{\"title\":\"O que ocorre na extin\u00e7\u00e3o?\",\"children\":[{\"title\":\"Propiedade plena \u00e9 do proprietario\"},{\"title\":\"Acess\u00f5es e benfeitorias tbm, salvo se previsto em contrato\"},{\"title\":\"Deve ser averbada no RGI\"}]}]},{\"title\":\"Direito de Preemp\u00e7\u00e3o CESPE / CEBRASPE - 2023 - TJ-ES - Analista  Funda\u00e7\u00e3o CEFETBAHIA - 2018 - MPE-BA - Promotor\",\"children\":[{\"title\":\"Conceito  VUNESP - 2022 - Orl\u00e2ndia - SP - Procurador Jur\u00eddico\",\"children\":[{\"title\":\"Restri\u00e7\u00e3o ao direito de dispor do bem. \u00c9 estabelecida em lei a favor do poder publico M\"},{\"title\":\"\u00c9 uma especie de obrigac\u00e3o de fazer do proprietario que deve notificar o M\"},{\"title\":\"Em caso de aliena\u00e7\u00e3o entre particulares o NJ \u00e9 NULO DE PLENO DIREITO\"},{\"title\":\"prefer\u00eancia para aquisi\u00e7\u00e3o de im\u00f3vel urbano objeto de aliena\u00e7\u00e3o onerosa entre particulares.\"},{\"title\":\"\u00c9 EM FAVOR DO PODER PUBLICO MUNICIPAL\"}]},{\"title\":\"Req. Legais\",\"children\":[{\"title\":\"Previs\u00e3o no PLANO DIRETOR e regulamenta\u00e7\u00e3o por Lei M\"},{\"title\":\"Fica assegurado o direito durante o prazo fixado na Lei M, independente do n\u02da de aliena\u00e7\u00f5es\"},{\"title\":\"Prazo: 5 anos, renov\u00e1vel a partir de 1 (um) ano ap\u00f3s o decurso do prazo inicial de vig\u00eancia\"}]},{\"title\":\"Hip. de Incidencia -  Aliena\u00e7\u00f5es e  Desapropria\u00e7\u00f5es\",\"children\":[{\"title\":\"N A O incide em aliena\u00e7\u00e3o de dominio util ou superficie, aliena\u00e7\u00f5es gratuitas, doa\u00e7\u00f5es e heran\u00e7\"},{\"title\":\"N A O incide em desapropria\u00e7\u00f5es, evic\u00e7\u00e3o e usucapi\u00e3o. \u00c9 necessario elemento volitivo\"},{\"title\":\"N A O incide tbm entre aliena\u00e7oes por pessoas de D. Publico\"},{\"title\":\"S O M E N T E  incide sobre aliena\u00e7\u00e3o ONEROSA e entre particulares\"}]},{\"title\":\"Nat. Juridica CEFETBAHIA - 2018 - MPE-BA - Promotor\",\"children\":[{\"title\":\"Limita\u00e7\u00e3o administrativa\"}]},{\"title\":\"Finalidade do Direito - Art. 26(8)\",\"children\":[{\"title\":\"I \u2013 regulariza\u00e7\u00e3o fundi\u00e1ria;\"},{\"title\":\"II \u2013 execu\u00e7\u00e3o de programas e projetos habitacionais de interesse social;\"},{\"title\":\"III \u2013 constitui\u00e7\u00e3o de reserva fundi\u00e1ria;\"},{\"title\":\"IV \u2013 ordenamento e direcionamento da expans\u00e3o urbana;\"},{\"title\":\"V \u2013 implanta\u00e7\u00e3o de equipamentos urbanos e comunit\u00e1rios;\"},{\"title\":\"VI \u2013 cria\u00e7\u00e3o de espa\u00e7os p\u00fablicos de lazer e \u00e1reas verdes;\"},{\"title\":\"VII \u2013 cria\u00e7\u00e3o de unidades de conserva\u00e7\u00e3o ou prote\u00e7\u00e3o de outras \u00e1reas de interesse ambiental;\"},{\"title\":\"VIII \u2013 prote\u00e7\u00e3o de \u00e1reas de interesse hist\u00f3rico, cultural ou paisag\u00edstico;\"},{\"title\":\"n\u00e3o envolve\",\"children\":[{\"title\":\"Interesse social ou de utilidade p\u00fablica, conforme definido no plano diretor. (FUNDEP (Gest\u00e3o de Concursos) - 2023 - FUTEL - MG - Procurador)\"}]}]},{\"title\":\"Diferen\u00e7as p/ o CC\",\"children\":[{\"title\":\"Aqui, somente o ENTE M\"},{\"title\":\"Aqui, decorre de Lei(l\u00e1 de contrato)\"},{\"title\":\"Aqui, somente em IMOVEIS(l\u00e1 moveis e imoveis)\"},{\"title\":\"Necessario ter finalidade urbanistica\"}]},{\"title\":\"Procedimento\",\"children\":[{\"title\":\"Improbidade Admin.\",\"children\":[{\"title\":\"Se o M adquirir por valor superior ao do mercado\"}]},{\"title\":\"Desistencia\",\"children\":[{\"title\":\"Ente M pode desistir at\u00e9 o pagto\"}]},{\"title\":\"Notifica\u00e7\u00e3o\",\"children\":[{\"title\":\"Prorpietario deve notificar o M em 30 dias da inten\u00e7\u00e3o de vender\"},{\"title\":\"M deve se manifestar por escrito(\u00c9 o M e nao o poder publico)\"},{\"title\":\"Transcorrido o prazo em silencio, pode vender p terceiros\"}]},{\"title\":\"Nulidade\",\"children\":[{\"title\":\"Sendo diverso da forma prevista, \u00e9 NULA!\"},{\"title\":\"Possibilita ao M aquisi\u00e7\u00e3o pelo valor Venal ou pela transa\u00e7\u00e3o, se menor que o venal\"}]}]}]},{\"title\":\"Outorga Onerosa do Direito Real de Construir OU SOLO CRIADO ODIR CESPE / CEBRASPE - 2023 - PGM - SP - Procurador do Munic\u00edpio\",\"children\":[{\"title\":\"Intro\",\"children\":[{\"title\":\"Doutrina chama de SOLO CRIADO. A outorga gera o solo criado\"},{\"title\":\"\u00c9 a faculdade de construir alem do coeficiente de aproveitamento b\u00e1sico\"},{\"title\":\"Ocorre mediante  C O N T R A   P A R T I D A  b\u00e1sica ESTABELECIDA EM CONTRATO\"},{\"title\":\"A Lei n\u00e3o fala em prazos. Entende-se que funciona nos moldes de uma PPP\"},{\"title\":\"\u00c9 o unico instrumento p/ alterar o COEFICIENTE de aproveitamento?\",\"children\":[{\"title\":\"N\u00e3o! No d. de construir pode chegar no coeficiente MAX.\"}]},{\"title\":\"Tem o mesmo RESULTADO que o D. de CONSTRUIR no que tange a edifica\u00e7\u00e3o q os incorpora\"},{\"title\":\"Pode ser alterado durante a vigencia di plano diretor?\",\"children\":[{\"title\":\"Sim!\"}]}]},{\"title\":\"CONTRAPARTIDA\",\"children\":[{\"title\":\"Pode ser em dinheiro, imoveis ou construindo infra-estrutura urbana\"},{\"title\":\"Dispensa de Pagto\",\"children\":[{\"title\":\"Pode ser concedida por for\u00e7a de situa\u00e7\u00f5es objetivas ou subjetivas\"},{\"title\":\"Importa que \u00e9 possivel\"}]},{\"title\":\"Nat. Juridica do valor pago\",\"children\":[{\"title\":\"Nao \u00e9 tributo. \u00c9 onus do interessado\"}]},{\"title\":\"Recursos auferidos vao pra onde?\",\"children\":[{\"title\":\"P/ incisos do art. 26\"}]}]},{\"title\":\"H\u00e1 possib. de defini\u00e7\u00e3o DE COEFICIENTE UNICA p/ toda ZONA URBANA?\",\"children\":[{\"title\":\"Sim! Ou diferenciado p/ areas especificas dentro da ZONA URBANA\"},{\"title\":\"A Lei nao fala em areas rurais\"}]},{\"title\":\"Req.\",\"children\":[{\"title\":\"Previs\u00e3o das areas onde pode ocorrer + prevendo o procedimento\"}]},{\"title\":\"Coeficiente de Aproveitamento\",\"children\":[{\"title\":\"O coeficiente de aproveitamento \u00e9 a rela\u00e7\u00e3o entre a \u00e1rea edific\u00e1vel e a \u00e1rea do terreno.\"}]},{\"title\":\"Outorga Onerosa de Altera\u00e7\u00e3o do uso do Solo\",\"children\":[{\"title\":\"Area prevista no plano diretor em que, mediante contrapartida, pode-se alterar o uso\"}]},{\"title\":\"Legisla\u00e7\u00e3o Especifica\",\"children\":[{\"title\":\"Lei M deve trazer forma de calculo da contrapartida e outros req.\"}]},{\"title\":\"obs\",\"children\":[{\"title\":\"(V) A outorga onerosa do direito de construir (solo criado), pela doutrina mais abalizada, ser\u00e1 sempre um acr\u00e9scimo ao direito de construir al\u00e9m do coeficiente b\u00e1sico de aproveitamento estabelecido pela lei e at\u00e9 o limite que as normas ed\u00edlicas admitirem. FGV - 2014 - PGM - Niter\u00f3i - Procurador do Munic\u00edpio, 3\u00aa Categoria (P3)\"}]}]},{\"title\":\"Op. Urbanas Consorciadas FCC - 2022 - DPE-CE - Defensor(a) P\u00fablico(a) FCC - DPE-CE FCC - 2022 - MPE-PE - Promotor de Justi\u00e7a CESPE / CEBRASPE - 2023 - PGE-RR - Procurador do Estado Substituto CESPE / CEBRASPE - 2023 - PGM - SP - Procurador do Munic\u00edpio\",\"children\":[{\"title\":\"Req.\",\"children\":[{\"title\":\"Plano Diretor prev\u00ea\"},{\"title\":\"Lei M p delimitar areas\"}]},{\"title\":\"Conceito\",\"children\":[{\"title\":\"conjunto de interven\u00e7\u00f5es e medidas coordenadas pelo Poder P\u00fablico municipal\"},{\"title\":\"com a participa\u00e7\u00e3o dos propriet\u00e1rios, moradores, usu\u00e1rios permanentes e investidores privados\"},{\"title\":\"com o objetivo de alcan\u00e7ar em uma \u00e1rea transforma\u00e7\u00f5es urban\u00edsticas estruturais\"},{\"title\":\"melhorias sociais e a valoriza\u00e7\u00e3o ambiental.\"}]},{\"title\":\"Finalidades\",\"children\":[{\"title\":\"Alcan\u00e7ar valoriza\u00e7\u00e3o, ambiental, melhorias sociais e promover transf. urbanisticas\"}]},{\"title\":\"Polo Multilateral\",\"children\":[{\"title\":\"Envolve proprietarios, moradores, investitudores privados e usuarios em geral\"}]},{\"title\":\"Opera\u00e7ao Interligada\",\"children\":[{\"title\":\"Op. consorciada \u00e9 diferente de interligada\"},{\"title\":\"Essa visa resolver problemas de favelas e ocupa\u00e7\u00f5es de popula\u00e7\u00e3o de baixa renda\"},{\"title\":\"Envolve apenas o pdoer publico e proprietario\"},{\"title\":\"Ocorre altera\u00e7\u00e3o do parcelamento do solo, indices de constru\u00e7\u00e3o e\"},{\"title\":\"Em contrapartida o beneficiario constroi casas populares ou implanta SP\"}]},{\"title\":\"Medidas Integrantes -  Art. 32 \u00a72 da Lei(3)\",\"children\":[{\"title\":\"I \u2013 a modifica\u00e7\u00e3o de \u00edndices e caracter\u00edsticas de parcelamento, uso e ocupa\u00e7\u00e3o do solo e subsolo, bem como altera\u00e7\u00f5es das normas edil\u00edcias, considerado o impacto ambiental delas decorrente;\"},{\"title\":\"II \u2013 a regulariza\u00e7\u00e3o de constru\u00e7\u00f5es, reformas ou amplia\u00e7\u00f5es executadas em desacordo com a legisla\u00e7\u00e3o vigente.\"},{\"title\":\"III - a concess\u00e3o de incentivos a opera\u00e7\u00f5es urbanas que utilizam tecnologias visando a redu\u00e7\u00e3o de impactos ambientais, e que comprovem a utiliza\u00e7\u00e3o, nas constru\u00e7\u00f5es e uso de edifica\u00e7\u00f5es urbanas, de tecnologias que reduzam os impactos ambientais e economizem recursos naturais, especificadas as modalidades de design e de obras a serem contempladas.     (Inclu\u00eddo pela Lei n\u00ba 12.836, de 2013)\"}]},{\"title\":\"Plano de Op. Urbana Consorciada(lei especifica deve prever(8):\",\"children\":[{\"title\":\"OBS\",\"children\":[{\"title\":\"Recursos Obtidos podem ter outra destinacao?\",\"children\":[{\"title\":\"NAO\"}]},{\"title\":\"Aprovada a Lei qlq coisa sem observancia do plano \u00e9 nula\"},{\"title\":\"Consta da Lei que aprovar a OP.\"}]}]},{\"title\":\"CEPAC`S\",\"children\":[{\"title\":\"A Lei que aprovar a op. urbana pode prever emiss\u00e3o pelo M de CEPAC\"},{\"title\":\"\u00c9 um tipo de titulo de credito. N\u00e3o \u00e9 requisito, mas faculdade do M\"},{\"title\":\"Ser\u00e3o alienados em leil\u00e3o ou utilizados diretamente no pagto de obras\"},{\"title\":\"S\u00e3o livremente negociados, mas conversiveis em dinheiro unicamente na area da op.\"},{\"title\":\"Apresentado o pedido de licen\u00e7a construir, o CPAC \u00e9 utilziado no pagto da area de constru\u00e7\u00e3o Q...\"},{\"title\":\"Supere os padroes esatabelecidos na Lei de uso e ocup. do solo, ate limite fixado na lei especifica\"},{\"title\":\"Recursos obtidos podem ser usados somente na AREA da opera\u00e7\u00e3o consorciada\"}]},{\"title\":\"Regi\u00f5es Metropolitanas  MPE-RJ - 2022 - MPE-RJ - Promotor\",\"children\":[{\"title\":\"Podem ser realizdas essas OP de forma Interfederativas nessas regioes\"},{\"title\":\"Devem ser aprovadas por Lei Estadual Especifica\"},{\"title\":\"A elas aplica-se o art. 32 ao 34\"}]}]},{\"title\":\"Transf. do Direito de Construir CESPE / CEBRASPE - 2023 - PGM - SP - Procurador\",\"children\":[{\"title\":\"Conceito\",\"children\":[{\"title\":\"Lei M autoriza o proprietario, de imovel urbano, privado ou publico\",\"children\":[{\"title\":\"Publico ou privado  N\u00e3o exclusivo p imoveis privados\"}]},{\"title\":\"A exercer em outro local ou alienar, MEDIANTE ESCRITURA P\u00daBLICA\"},{\"title\":\"O dirieto de construir previsto no plano diretor\"},{\"title\":\"Qnd o referido imovel for necessario p/ alguns fins\"},{\"title\":\"Faculta tbm ao proprietario que doar ao poder publico seu imovel\"},{\"title\":\"Lei M deve estabelecer as condi\u00e7\u00f5es\"},{\"title\":\"A transferencia pode ser objetiva ou subjetiva\"},{\"title\":\"O propriet\u00e1rio faz um requerimento. Somente ele. Nao alcan\u00e7a VIZINHOS\"}]},{\"title\":\"diferen\u00e7a com a Outorga\",\"children\":[{\"title\":\"A outorga exige municipalidade de um lado\"},{\"title\":\"Aqui pode se dar entre 2 proprietarios\"}]},{\"title\":\"Finalidades que legitimam(3)\",\"children\":[{\"title\":\"Equip. urbanos e comunitarios\"},{\"title\":\"Preserva\u00e7\u00e3o de patrim. historico, cultural, paisagistico, social(ex: tombamento)\"},{\"title\":\"Prog. de regulariza\u00e7\u00e3o fundiaria\"}]},{\"title\":\"Plano Diretor\",\"children\":[{\"title\":\"Define areas em q o direito de construir pode ser destacado da pripriedade\"}]},{\"title\":\"Forma\",\"children\":[{\"title\":\"Escritura Publica. Se por ente publico, LEI\"}]}]},{\"title\":\"Estudo do Impacto de Vizinhan\u00e7a \u00c9 Documento publico FCC - 2018 - PGE-TO - Procurador do Estado  FGV - 2023 - PGM - Niter\u00f3i - Procurador do Munic\u00edpio FUNDEP (Gest\u00e3o de Concursos) - 2022 - MPE-MG - Promotor CESPE / CEBRASPE - 2023 - PGM - SP - Procurador do Munic\u00edpio\",\"children\":[{\"title\":\"Condi\u00e7\u00e3o\",\"children\":[{\"title\":\"O estatuto da cidade inaugurou o tema\"},{\"title\":\"Deve ser definida Lei Municipal empreendimentos e atividades que dependem do estudo\"},{\"title\":\"Pode ser requisito para constru\u00e7\u00e3o, amplia\u00e7\u00e3o e altera\u00e7\u00f5es\"},{\"title\":\"Se o local est\u00e1 fora da zona da cidade, mas causa impacto nela \u00e9 necessario EIV\"},{\"title\":\"Ef. Negativos obstaculizam?\",\"children\":[{\"title\":\"N\u00e3o. Necessita ver se teremos algum compensa\u00e7\u00e3o\"}]},{\"title\":\"S\u00f3 \u00c9 OBRGATORIO p/ areas definidas na Lei M\"},{\"title\":\"E imoveis rurais estao abrangidos? N\u00c3O. a Lei preve area URBANA\"}]},{\"title\":\"Ambito de Estudo\",\"children\":[{\"title\":\"Trazer impactos positivos e negativos\"},{\"title\":\"Conteudo min.(7)(rol eemplificativo) OBJETIVA - 2022 - Prefeitura - Engenheiro MPE-SP - 2019 - MPE-SP - Promotor CESPE / CEBRASPE - 2023 - TBG - Analista J\u00fanior \u2013 \u00canfase: Jur\u00eddico\",\"children\":[{\"title\":\"OBS\",\"children\":[{\"title\":\"N\u00e3o prev\u00ea o EIA e RIMA como requisito do EIV\"}]},{\"title\":\"I \u2013 adensamento populacional; II \u2013 equipamentos urbanos e comunit\u00e1rios; III \u2013 uso e ocupa\u00e7\u00e3o do solo; IV \u2013 valoriza\u00e7\u00e3o imobili\u00e1ria; V \u2013 gera\u00e7\u00e3o de tr\u00e1fego e demanda por transporte p\u00fablico; VI \u2013 ventila\u00e7\u00e3o e ilumina\u00e7\u00e3o; VII \u2013 paisagem urbana e patrim\u00f4nio natural e cultural\"}]}]},{\"title\":\"Substitui EIA e RIMA?\",\"children\":[{\"title\":\"N\u00e3o!\"}]},{\"title\":\"Publicidade\",\"children\":[{\"title\":\"\u00c9 dada publicidade aos docs do EIV queficam a disposi\u00e7\u00e3o de interessados\"}]},{\"title\":\"obs\",\"children\":[{\"title\":\"Nem todos os empreendimentos em \u00e1rea urbana dependem da elabora\u00e7\u00e3o de estudo pr\u00e9vio de impacto na vizinhan\u00e7a para a obten\u00e7\u00e3o de licen\u00e7a de constru\u00e7\u00e3o. A necessidade desse estudo pode variar de acordo com a legisla\u00e7\u00e3o municipal.\"}]}]}]}]},{\"title\":\"Plano Diretor\",\"children\":[{\"title\":\"Intro\",\"children\":[{\"title\":\"O plano diretor \u00e9 uma disposi\u00e7\u00e3o constitucional, por\u00e9m somente com a promulga\u00e7\u00e3o do Estatuto da Cidade ele foi regulamentado, com a defini\u00e7\u00e3o de conceitos e formas de concretiza\u00e7\u00e3o de seus objetivos. O plano diretor \u00e9 fundamental para modifica\u00e7\u00f5es da paisagem urbana, podendo restringir ou induzir o uso e a ocupa\u00e7\u00e3o do solo nas cidades.\"}]},{\"title\":\"Conteudo Em sentido Amplo\",\"children\":[{\"title\":\"Visa organizar espa\u00e7os habitaveis e diz qual \u00e9 a fun\u00e7\u00e3o social de cada espa\u00e7o\"},{\"title\":\"\u00c9 instrumento norteador de a\u00e7\u00f5es urbanisticas, e n\u00e3o proj. de obras...\"},{\"title\":\"Nao apresenta plantas e nem memoriais descritivos\"},{\"title\":\"\u00c9 instrumento b\u00e1sico da pol. de desenvolvimento e expans\u00e3o urbana\"},{\"title\":\"\u00c9 REQUSITO p/ que o M receba AREA FEDERAL p/ regulariza\u00e7\u00e3o fundiaria\"},{\"title\":\"Nao estabelecendo o plano diretor? Ato-condi\u00e7\u00e3o\",\"children\":[{\"title\":\"Nao pode o M usar dos instrumentos da LEI Entende-se que \u00e9 um ATO-CONDI\u00c7AO(diversos instrumentos s\u00f3 podem ser tratados se houver ele)\"}]},{\"title\":\"Conteudo Min. do Plano Diretor - Formaliadde - Art. 42\",\"children\":[{\"title\":\"Delimita\u00e7\u00e3o de areas onde se aplicam os instrumentos da Lei\"},{\"title\":\"Disposi\u00e7\u00f5es do Art. 25, 28, 29, 32 e 35\"},{\"title\":\"sistema de acompanhamento e controle\"}]},{\"title\":\"M incluido no CADASTRO como areas de risco - A Lei prev\u00ea alguns req.(6)\"}]},{\"title\":\"Fun\u00e7\u00e3o Social da Propriedade Urbana\",\"children\":[{\"title\":\"Cumprida qnd atender exigencias do plano diretor, se existir\"}]},{\"title\":\"Forma  VUNESP - 2022 - Orl\u00e2ndia - SP - Procurador\",\"children\":[{\"title\":\"\u00c9 aprovado por Lei Municipal\"},{\"title\":\"N \u00c3 O h\u00e1 forma especifica, basta LO, salvo se houver previs\u00e3o especifica\"},{\"title\":\"Prazo de REVIS\u00c3O do PD?\",\"children\":[{\"title\":\"10 anos\"}]},{\"title\":\"Como \u00e9 o Processo de Elabora\u00e7\u00e3o  e Fisc. de sua implementa\u00e7\u00e3o?\",\"children\":[{\"title\":\"PE e PL devem garantir: AUD. PUBLICAs, PUBLICIDADE dos DOCS. e ACESSO aos docs.\"},{\"title\":\"Inobservancia dessas regras?\",\"children\":[{\"title\":\"IMPROBIDADE ADMIN. (previs\u00e3o expressa)\"}]}]}]},{\"title\":\"Coordena\u00e7\u00e3o\",\"children\":[{\"title\":\"\u00c9 parte integrante do planej. M\"},{\"title\":\"A Leis or\u00e7amentarias devem incorprorar diretrizes do plano\"}]},{\"title\":\"Abrangencia\",\"children\":[{\"title\":\"Deve englobar o M como um TODO, inclusive areas rurais\"}]},{\"title\":\"Hip. de Obrigatoriedade(6) CESPE - 2023 - MPE-SC - Promotor  Funda\u00e7\u00e3o CEFETBAHIA - 2018 - MPE-BA - Promotor\",\"children\":[{\"title\":\"+ de 20.000 habitantes\"},{\"title\":\"Regioes Metropolitanas e Aglomera\u00e7\u00f5es\"},{\"title\":\"Poder publico usar instrumentos do Art. 182 \u00a74 da CF\"},{\"title\":\"V \u2013 inseridas na \u00e1rea de influ\u00eancia de empreendimentos ou atividades com significativo impacto ambiental de \u00e2mbito regional ou nacional.\"},{\"title\":\"Incluidas em CADASTRO de M em raz\u00e3o de grandes deslizamentos...\",\"children\":[{\"title\":\"OBS\",\"children\":[{\"title\":\"Nesse caso, os recursos tecnicos e financeiros de elab. do plano diretor...\"},{\"title\":\"devem estar inseridas ns medidas de compensa\u00e7\u00e3o\"}]}]},{\"title\":\"IV \u2013 integrantes de \u00e1reas de especial interesse tur\u00edstico;\"},{\"title\":\"Plano de Tranporte Urbano integrado?\",\"children\":[{\"title\":\"Exigido somente p/ cidade com + de 50.000 habitantes(MUDOU PRA 20.000)\"},{\"title\":\"OBRIGAT\u00d3RIO: \u00a7 2\u00ba No caso de cidades com mais de 500 mil habitantes, dever\u00e1 ser elaborado um plano de transporte urbano integrado, compat\u00edvel com o plano diretor ou nele inserido. CESPE / CEBRASPE - 2022 - PGE-RO - Procurador do Estado\"}]},{\"title\":\"OBS - Estatuto da Metropole\",\"children\":[{\"title\":\"Prev\u00ea plano de desenvolvimento urbano integrado p/ regioes metrop.\"},{\"title\":\"Nao exime o M do Plano Diretor\"}]},{\"title\":\"obs CEBRASPE - 2022 - PGM Recife - PE - Procurador\",\"children\":[{\"title\":\"Art. 42-A. Al\u00e9m do conte\u00fado previsto no art. 42, o plano diretor dos Munic\u00edpios inclu\u00eddos no cadastro nacional de munic\u00edpios com \u00e1reas suscet\u00edveis \u00e0 ocorr\u00eancia de deslizamentos de grande impacto, inunda\u00e7\u00f5es bruscas ou processos geol\u00f3gicos ou hidrol\u00f3gicos correlatos dever\u00e1 conter:   I - par\u00e2metros de parcelamento, uso e ocupa\u00e7\u00e3o do solo, de modo a promover a diversidade de usos e a contribuir para a gera\u00e7\u00e3o de emprego e renda;                       II - mapeamento contendo as \u00e1reas suscet\u00edveis \u00e0 ocorr\u00eancia de deslizamentos de grande impacto, inunda\u00e7\u00f5es bruscas ou processos geol\u00f3gicos ou hidrol\u00f3gicos correlatos;          III - planejamento de a\u00e7\u00f5es de interven\u00e7\u00e3o preventiva e realoca\u00e7\u00e3o de popula\u00e7\u00e3o de \u00e1reas de risco de desastre;         IV - medidas de drenagem urbana necess\u00e1rias \u00e0 preven\u00e7\u00e3o e \u00e0 mitiga\u00e7\u00e3o de impactos de desastres; e         V - diretrizes para a regulariza\u00e7\u00e3o fundi\u00e1ria de assentamentos urbanos irregulares, se houver, observadas a , e demais normas federais e estaduais pertinentes, e previs\u00e3o de \u00e1reas para habita\u00e7\u00e3o de interesse social por meio da demarca\u00e7\u00e3o de zonas especiais de interesse social e de outros instrumentos de pol\u00edtica urbana, onde o uso habitacional for permitido.         VI - identifica\u00e7\u00e3o e diretrizes para a preserva\u00e7\u00e3o e ocupa\u00e7\u00e3o das \u00e1reas verdes municipais, quando for o caso, com vistas \u00e0 redu\u00e7\u00e3o da impermeabiliza\u00e7\u00e3o das cidades. LEI No 10.257, DE 10 DE JULHO DE 2001.\"}]}]},{\"title\":\"M que desejam ampliar seu perimetro urbano - Art. 42-B\",\"children\":[{\"title\":\"Devem elaborar proj. especificocom alguns req. minimos\"}]},{\"title\":\"obs\",\"children\":[{\"title\":\"Os Munic\u00edpios com mais de 20 mil habitantes e o Distrito Federal podem legislar sobre programas e projetos espec\u00edficos de ordenamento do espa\u00e7o urbano por meio de leis que sejam compat\u00edveis com as diretrizes fixadas no plano diretor. Isso significa que nem sempre que o Munic\u00edpio for legislar sobre mat\u00e9ria urban\u00edstica, ele precisar\u00e1 faz\u00ea-lo por meio do Plano Diretor. O Plano Diretor \u00e9 o instrumento legal que dita a atua\u00e7\u00e3o do Munic\u00edpio ou do Distrito Federal quanto ao ordenamento urbano, tra\u00e7ando suas linhas gerais, por\u00e9m a sua execu\u00e7\u00e3o pode se dar mediante a expedi\u00e7\u00e3o de outras lei e decretos, desde que guardem conformidade com o Plano Diretor. STF. Plen\u00e1rio. RE 607940/DF, Rel. Min. Teori Zavascki, julgado em 29/10/2015 (Info 805).\"}]}]},{\"title\":\"Gest\u00e3o Democr\u00e1tica da Cidade\",\"children\":[{\"title\":\"Conceito\",\"children\":[{\"title\":\"Consulta a sociedade de situa\u00e7\u00f5es cotidiana de tarefas e servicos\"}]},{\"title\":\"Instrumentos(4) CEBRASPE - 2022 - PGM Recife - PE - Procurador\",\"children\":[{\"title\":\"Orgaos Colegiados nos 3 niveis(F, E e M)\"},{\"title\":\"Debates, audiencias e consultas\"},{\"title\":\"Conferencias\"},{\"title\":\"Iniciativa popular de proj. de Leis Urbanas\"}]},{\"title\":\"Org\u00e3o Colegiados - Cria\u00e7\u00e3o\",\"children\":[{\"title\":\"Lei de iniciativa do Chefe do PE\"},{\"title\":\"Conselhos tem assento CF\"}]},{\"title\":\"Plebscito e Referendo\",\"children\":[{\"title\":\"Eram previstos, mas foram VETADOS\"}]},{\"title\":\"Gest\u00e3o or\u00e7amentaria\",\"children\":[{\"title\":\"envolve consultas, audiencias e .... sobre PPA, LDO e LOA\"}]}]},{\"title\":\"Disposi\u00e7\u00f5es Gerais\",\"children\":[{\"title\":\"Faculdade\",\"children\":[{\"title\":\"A Lei traz uma faculdade ao particular que tenha imovel submetido ao Art. 5\u02da\"},{\"title\":\"E nao tenha condi\u00e7\u00f5es ifnanceiras de dar uso adequado\"},{\"title\":\"O particular pode requerer estabelecimento de CONSORCIO IMOBILIARIO\"},{\"title\":\"A analise do requerimento \u00e9 discricionaria\"},{\"title\":\"Conceito de Consorcio\",\"children\":[{\"title\":\"O particular tranfere ao poder publico seu imovel e apos realiza\u00e7ao das obras\"},{\"title\":\"recebe como pagto, unidades imobiliarias. \u00c9 uma esp\u00e9cie de permuta\"},{\"title\":\"O valor das unidades deve ser igual ao da propriedade antes das obras\"},{\"title\":\"Nao se aplica o VALOR VENAL, pq nao tem aspecto punitivo\"}]}]},{\"title\":\"Tributos\",\"children\":[{\"title\":\"Em rela\u00e7\u00e3o a imoveis urbanos devem ser diferenciados em razao do interesse social\"}]},{\"title\":\"Prog. e Proj. Habitacionais de Interesse Publico\",\"children\":[{\"title\":\"OS contratos de concess\u00e3o de imoveis tem carater de escritura publica\"},{\"title\":\"E s\u00e3o titulo de aceita\u00e7\u00e3o obrigatoria em garantia de contratos de financiamentos\"},{\"title\":\"Explicando\",\"children\":[{\"title\":\"Visa facilitar acesso a moradia, abrandando a regra do CC(Art. 108)\"},{\"title\":\"Torna validos contratos celebrados de modo privado\"}]}]},{\"title\":\"Improbidade Admin.(6)\",\"children\":[{\"title\":\"Nao adequar o aproveitamento, em 5 anos, de imoveis incorporados ao poder publico\"},{\"title\":\"Utilizar areas obtidas com preemp\u00e7\u00e3o em desacordo\"},{\"title\":\"aplicar recursos auferidos ocm outorga onerosa e de altera\u00e7\u00e3o de uso em desacordo\"},{\"title\":\"Aplicar recursos em op. consorciadas em desacordo\"},{\"title\":\"Nao cumprir req. do art. 40\"},{\"title\":\"Adquirir imovel em preemp\u00e7\u00e3o com valor superior ao de mercado\"},{\"title\":\"OBS\",\"children\":[{\"title\":\"Suj. Ativo\",\"children\":[{\"title\":\"A lei prev\u00ea o prefeito, mas admite-se outros agentes\"}]}]}]},{\"title\":\"Tutela Coletiva\",\"children\":[{\"title\":\"A ordem urbanistica \u00e9 tutela a ser requerida de forma coletiva. Na forma da Lei da ACP\"},{\"title\":\"Permite-se pedidos cautelares\"}]}]}]},\"cap1\":{\"title\":\"1. Parcelamento do Solo Urbano \u2014 Lei 6.766/1979\",\"children\":[{\"title\":\"Intro. Disp. Gerais\",\"children\":[{\"title\":\"Intro\",\"children\":[{\"title\":\"Competencia Legislativa\",\"children\":[{\"title\":\"Competencia p/ Legislar sobre D. Urbanistico\",\"children\":[{\"title\":\"Concorrente(U - Normas Gerais; Resto(E, M e DF): Normas especificas)\"}]},{\"title\":\"Assuntos de Interesse Local\",\"children\":[{\"title\":\"Municipios(Zoneamento, limita\u00e7\u00f5es admin. do solo urbano)\"},{\"title\":\"Nao existindo tal lei, aplica-se a Lei Federal\"}]},{\"title\":\"Controle de CF\",\"children\":[{\"title\":\"N\u00e3o cabe ADIN da Lei de Parcelamento do SOLO editada pelo Municipio\"},{\"title\":\"Trata-se de Lei municipal, ou seja, cabe ADPF apenas\"}]}]},{\"title\":\"Competencia Administrativa\",\"children\":[{\"title\":\"Instituir diretrizes p/ desenvolvimento urbano\",\"children\":[{\"title\":\"Competencia da U\"}]},{\"title\":\"Melhorias na Habita\u00e7\u00e3o e Saneamento B\u00e1sico\",\"children\":[{\"title\":\"Competencia Comum\"},{\"title\":\"Decorrencia\",\"children\":[{\"title\":\"\u00c9 possivel ver programas federais, estaduais e municipais de regulariza\u00e7\u00e3o fundiaria\"}]}]}]},{\"title\":\"Solo Urbano X Solo Rural\",\"children\":[{\"title\":\"A defini\u00e7\u00e3o se \u00e9 solo urbano ou rural define a norma aplicavel e o ente legislador\"},{\"title\":\"CTN delega a Lei Municipal a defini\u00e7\u00e3o do solo urbano exigindo 2 servicos publicos\"},{\"title\":\"CTN diz tbm q Lei Municipal pode considerar URBANA areas URBANIZAVEIS msm em outra zona\"},{\"title\":\"A jurisprudencia adota o criterio da destina\u00e7\u00e3o economica\"},{\"title\":\"Art. 46 da da Lei MCMV estabelece conceitos de area urbana e rural tbm\"},{\"title\":\"Entendimento STJ\",\"children\":[{\"title\":\"Se h\u00e1 Lei Municipal determinado tal area como URBANA \u00e9 desnecess\u00e1ria exigencia do SP do CTN\"}]},{\"title\":\"STJ e DL n\u02da 57/66\",\"children\":[{\"title\":\"Entende que o DL continua aplicavel e foi recebido como LC\"},{\"title\":\"Sendo assim, o criterio usado(destina\u00e7\u00e3o econ.) \u00e9 v\u00e1lido\"}]}]},{\"title\":\"Parcelamento do Solo p/ Fins Urbanos\",\"children\":[{\"title\":\"Finalidade urbana do imovel \u00e9 oque determina aplica\u00e7\u00e3o desta Lei\"},{\"title\":\"P alcan\u00e7ar a funcionalidade do espa\u00e7o urbano o poder publico determina sua ocupa\u00e7\u00e3o\"},{\"title\":\"Doutrina traz 4 fun\u00e7\u00f5es do imovel urbano: Moradia, Circula\u00e7\u00e3o, Lazer e Trabalho\"},{\"title\":\"Legisla\u00e7\u00e3o Agraria\",\"children\":[{\"title\":\"Define rural terras proprias p/ atividades rurais pouco importando a finaldiade\"},{\"title\":\"Torna possivel que um loteamento seja urbano(Uso) e rural(natureza)\"},{\"title\":\"O parcelamento deve observar normas desta lei e ser submetido ao Incra nesse caso\"}]},{\"title\":\"A lei cuida do parcelamento para FINS URBANOS somente\"}]},{\"title\":\"Natureza da Lei\",\"children\":[{\"title\":\"Considera-se Lei FEDERAL que estabelece normas gerais\"},{\"title\":\"Revogou parcialmente os DL 58/37 e 271/66\"},{\"title\":\"Reconhece estado como sujeito interessado na adequada ocupa\u00e7\u00e3o do solo urbano\"},{\"title\":\"Regulamenta instrumentos de politica urbana a serem aplicados pela U, E, DF e M\"}]},{\"title\":\"obs\",\"children\":[{\"title\":\"A Administra\u00e7\u00e3o \u00e9 solid\u00e1ria, objetiva e ilimitadamente respons\u00e1vel, nos termos da Lei 6.938/1981, por danos urban\u00edstico-ambientais decorrentes da omiss\u00e3o do seu dever de controlar e fiscalizar, na medida em que contribua, direta ou indiretamente, tanto para a degrada\u00e7\u00e3o ambiental em si mesma, como para o seu agravamento, consolida\u00e7\u00e3o ou perpetua\u00e7\u00e3o, tudo sem preju\u00edzo da ado\u00e7\u00e3o, contra o agente p\u00fablico relapso ou desidioso, de medidas disciplinares, penais, civis e no campo da improbidade administrativa. No caso de omiss\u00e3o de dever de controle e fiscaliza\u00e7\u00e3o, a responsabilidade ambiental solid\u00e1ria da Administra\u00e7\u00e3o \u00e9 de execu\u00e7\u00e3o subsidi\u00e1ria (ou com ordem de prefer\u00eancia). (...) (STJ - REsp: 1326903 DF 2012/0116422-6, Relator: Ministro OG FERNANDES, Data de Publica\u00e7\u00e3o: DJ 28/11/2017)\"}]}]},{\"title\":\"Disposi\u00e7\u00f5es Preliminares\",\"children\":[{\"title\":\"Forma de fazer  o PARCELAMENTO Avan\u00e7a SP - 2021 - Prefeitura  - SP - Agente Fiscal OBJETIVA - 2021 - Prefeitura de Horizontina - RS Promotor MP/MS 2018 PGM Fortaleza 2017 CEBRASPE PGM Goi\u00e2nia UFG PGM S\u00e3o Lu\u00eds 2016 FCC CESPE / CEBRASPE - 2023 - DPE-RO - Defensor CESPE / CEBRASPE - 2022 - PGE-PA - Procurador MPE-MS - 2018 - MPE-MS - Promotor de Justi\u00e7a Substituto FGV - 2023 - AL-MA - T\u00e9cnico de Gest\u00e3o Administrativa CESPE / CEBRASPE - 2023 - PGE-RR - Procurador do Estado Substituto\",\"children\":[{\"title\":\"Loteamento Voluntariedade Registro p\u00fablico Edifica\u00e7\u00e3o\",\"children\":[{\"title\":\"Subdivis\u00e3o de glebas(terras) em LOTES p/ edificar\"},{\"title\":\"COM abertura de vias, logradouros OU\"},{\"title\":\"Prolongamento, modifica\u00e7\u00e3o ou amplia\u00e7\u00e3o das vias existentes\"},{\"title\":\"Somente surge VOLUNTARIAMENTE e \u00e9 objeto de REG. PUBLICO\"},{\"title\":\"N\u00e3o pode ser recusado por DISCRICIONARIEDADE(o loteador apresenta p/ poder moldurar)\"},{\"title\":\"PARA QUE HAJA LOTEAMENTO \u00c9 NECESSARIO Q OS LOTES SEJAM P/ EDIFICA\u00c7\u00c3O\"},{\"title\":\"Loteamento de Acesso Controlado\",\"children\":[{\"title\":\"controle de acesso ser\u00e1 regulamentado por ato do poder p\u00fablico Municipal\"},{\"title\":\"sendo vedado o impedimento de acesso a pedestres ou a condutores de ve\u00edculos\"},{\"title\":\"n\u00e3o residentes, devidamente identificados ou cadastrados\"}]},{\"title\":\"Callout\",\"children\":[{\"title\":\"Art. 2\u00ba, \u00a7 1 Considera-se loteamento a subdivis\u00e3o de gleba em lotes destinados a edifica\u00e7\u00e3o, com abertura de novas vias de circula\u00e7\u00e3o, de logradouros p\u00fablicos ou prolongamento, modifica\u00e7\u00e3o ou amplia\u00e7\u00e3o das vias existentes. DESMEMBRAMENTO Art. 2\u00ba, \u00a7 2 Considera-se desmembramento a subdivis\u00e3o de gleba em lotes destinados a edifica\u00e7\u00e3o, com aproveitamento do sistema vi\u00e1rio existente, desde que n\u00e3o implique na abertura de novas vias e logradouros p\u00fablicos, nem no prolongamento, modifica\u00e7\u00e3o ou amplia\u00e7\u00e3o dos j\u00e1 existentes.\"}]}]},{\"title\":\"Desmembramento\",\"children\":[{\"title\":\"Subdivis\u00e3o de glebas em lotes p edificar\"},{\"title\":\"Desde que  N A O  importe em novas vias  N E M  prolongamento e amplia\u00e7\u00e3o das existntes\"},{\"title\":\"N\u00e3o altera a configura\u00e7\u00e3o da cidade e \u00e9 objeto de A V E R B A \u00c7 A O P U B L I C A\"},{\"title\":\"Pode ocorrer VONTADE OU por DECISAO JUDICIAL(Ex: Arremata\u00e7\u00e3o ou partilha)\"},{\"title\":\"Admite-se indeferimento por discricionariedade(apresenta requerimento)\"},{\"title\":\"Conceitos\",\"children\":[{\"title\":\"Remembrar\",\"children\":[{\"title\":\"Aposto de desdobrar. Junta-se unidades. Nao cria espa\u00e7o publico\"}]},{\"title\":\"Desdobro\",\"children\":[{\"title\":\"\u00c9 a reparti\u00e7ao do lote, sem necessidade de urbaniza\u00e7\u00e3o ou venda por oferta publica\"},{\"title\":\"Incide apenas sobre o lote e nao cria novo aglomerado urbano\"},{\"title\":\"Divis\u00e3o de um LOTE resultante de loteamento aprovado e registrado\"}]}]},{\"title\":\"Desmembramento Compuls\u00f3rio Averba\u00e7\u00e3o (i)discricionariedade\",\"children\":[{\"title\":\"CESPE / CEBRASPE - 2023 - PGE-RR - Procurador do Estado Substituto Julgue o item subsequente, \u00e0 luz do disposto na Lei de Parcelamento do Solo Urbano.  De acordo com a norma, considera-se como desmembramento a subdivis\u00e3o de gleba em lotes destinados a edifica\u00e7\u00e3o nos quais n\u00e3o haja o aproveitamento do sistema vi\u00e1rio pr\u00e9-existente.(e)\"}]}]},{\"title\":\"Quem pode parcelar?\",\"children\":[{\"title\":\"Proprietario ou Co-propriet\u00e1rio da area\"}]}]},{\"title\":\"O que \u00e9 lote?  CESPE / CEBRASPE - 2023 - PGM - SP - Procurador do Munic\u00edpio\",\"children\":[{\"title\":\"Terreno com infra-estrutura b\u00e1sica(o que se considera infra-estrutura?) \\tEscoamento de aguas \\tIlumina\u00e7\u00e3o \\tEsgoto \\tAbastacimento de agua \\tEnergia publica e domiciliar \\tVias de Circula\u00e7\u00e3o\"},{\"title\":\"As dimens\u00f5es devem obedecer parametros definidos no PD ou lei municipal\"}]},{\"title\":\"ZHIS\",\"children\":[{\"title\":\"S\u00e3o conhecidas tbm ocmo areas de especial interesse social\"},{\"title\":\"Estabelecidas em regioes 1 o adensamento populacional \u00e9 intenso, com divis\u00e3o desordenada\"},{\"title\":\"Ex: Favelas e Invas\u00f5es\"},{\"title\":\"Como isso ocorre a Lei exige menos requisitos de regulariza\u00e7\u00e3o e implanta\u00e7\u00e3o do loteamento\"},{\"title\":\"Req. Exigidos:(5) VER SOLU\u00c7AO(EE)\",\"children\":[{\"title\":\"Vias de circula\u00e7\u00e3o\"},{\"title\":\"Escoamento de aguas pluviais\"},{\"title\":\"Rede de abastacimento de agua pot\u00e1vel\"},{\"title\":\"Solu\u00e7\u00e3o p/ Esgoto\"},{\"title\":\"Solu\u00e7\u00f5es p/ EE DOMICILIAR\"},{\"title\":\"Solu\u00e7\u00f5es. N\u00e3o precisa estar pronto\"},{\"title\":\"Iluminac\u00e3o P\u00fablica?\",\"children\":[{\"title\":\"A Lei n\u00e3o fala! Logo, n\u00e3o precisa\"}]}]}]},{\"title\":\"Permiss\u00e3o p/ Lotear CESPE / CEBRASPE - 2022 - PG-DF - Procurador do DF CESPE / CEBRASPE - 2023 - PGM - SP - Procurador do Munic\u00edpio Avan\u00e7a SP - 2021 - Prefeitura - SP - Agente CESPE - 2021 - PGE-CE - Procurador FGV - 2023 - PGM - Niter\u00f3i - Procurador do Munic\u00edpio CESPE / CEBRASPE - 2022 - MPE-AC - Promotor\",\"children\":[{\"title\":\"Somente \u00e9 permitido lotear em ZU e p/ fins urbanos definidas pelo PD ou lei municipal\",\"children\":[{\"title\":\"OBS\",\"children\":[{\"title\":\"Lotear area rural \u00e9 CRIME\"}]}]},{\"title\":\"N\u00e3o \u00e9 permitido parcelar o solo qnd:\",\"children\":[{\"title\":\"Terrenos Alagadi\u00e7os, sujeitos a inunda\u00e7\u00f5es A N T E S das providencias de corre\u00e7\u00e3o\"},{\"title\":\"Terrenos que tenham sido aterrados com material nocivo, S E M  corre\u00e7\u00e3o\"},{\"title\":\"Terrenos com declividade igual ou superior a 30%,  S A L V O  medidas especificas\"},{\"title\":\"Terrenos em condi\u00e7\u00f5es GEOLOGICAS que nao aconselham edifica\u00e7\u00e3o\"},{\"title\":\"Areas de preserv. ecologica ou polui\u00e7\u00e3o acima dos niveis, at\u00e9 a CORRE\u00c7\u00c3O\"}]},{\"title\":\"Parcelamento de Solo Urbano p/ Chacaras de Recreio...\",\"children\":[{\"title\":\"Mediante venda de fra\u00e7\u00f5es ideais da respectiva gleba de terras \u00e9 ilegal por afrontar a lei\"}]}]},{\"title\":\"Empreendedor(2021) FGV - 2023 - PGM - Niter\u00f3i - Procurador do Munic\u00edpio CESPE / CEBRASPE - 2022 - PGE-PA - Procurador do Estado\",\"children\":[{\"title\":\"Intro\",\"children\":[{\"title\":\"\u00c9 o responsavel pela implanta\u00e7\u00e3o do parcelamento\"}]},{\"title\":\"Quem \u00e9?\",\"children\":[{\"title\":\"a) o propriet\u00e1rio do im\u00f3vel a ser parcelado;\"},{\"title\":\"b) o compromiss\u00e1rio comprador, cession\u00e1rio ou promitente cession\u00e1rio, ou o foreiro, desde que o propriet\u00e1rio expresse sua anu\u00eancia em rela\u00e7\u00e3o ao empreendimento e sub-rogue-se nas obriga\u00e7\u00f5es do compromiss\u00e1rio comprador, cession\u00e1rio ou promitente cession\u00e1rio, ou do foreiro, em caso de extin\u00e7\u00e3o do contrato; DESDE QUE TENHA ANUENCIA e SUBROGA\u00c7\u00c3O\"},{\"title\":\"c) o ente da administra\u00e7\u00e3o p\u00fablica direta ou indireta habilitado a promover a desapropria\u00e7\u00e3o com a finalidade de implanta\u00e7\u00e3o de parcelamento habitacional ou de realiza\u00e7\u00e3o de regulariza\u00e7\u00e3o fundi\u00e1ria de interesse social, desde que tenha ocorrido a regular imiss\u00e3o na posse; ADMIN PUBLICA DIRETA E INDIRETADESDE QUE TENHA OCORRIDO IMISSAO NA POSSE\"},{\"title\":\"d) a PF ou PJ contratada pelo propriet\u00e1rio do im\u00f3vel a ser parcelado ou pelo poder p\u00fablico para executar o parcelamento ou a regulariza\u00e7\u00e3o fundi\u00e1ria, em forma de parceria, sob regime de obriga\u00e7\u00e3o solid\u00e1ria, devendo o contrato ser averbado na matr\u00edcula do im\u00f3vel no competente registro de im\u00f3veis; SOB REGIME DE OBRIGA\u00c7\u00c3O SOLID\u00c1RIA pode contratar pf ou pj\"},{\"title\":\"e) a cooperativa habitacional ou associa\u00e7\u00e3o de moradores, quando autorizada pelo titular do dom\u00ednio, ou associa\u00e7\u00e3o de propriet\u00e1rios ou compradores que assuma a responsabilidade pela implanta\u00e7\u00e3o do parcelamento.\"}]}]}]}]},{\"title\":\"Requisitos Urbanisticos p/ Lotear\",\"children\":[{\"title\":\"Req. VUNESP - 2021 - Prefeitura- Procurador CETAP - 2019 - Prefeitura - PA - Advogado CESPE - 2022 - PGM Recife - PE - Procurador CESPE - 2018 - PGM - Jo\u00e3o Pessoa - PB - Procurador\",\"children\":[{\"title\":\"Destina\u00e7\u00e3o\",\"children\":[{\"title\":\"I - as \u00e1reas destinadas a sistemas de circula\u00e7\u00e3o, a implanta\u00e7\u00e3o de equipamento urbano e comunit\u00e1rio, bem como a espa\u00e7os livres de uso p\u00fablico, ser\u00e3o proporcionais \u00e0 densidade de ocupa\u00e7\u00e3o prevista pelo plano diretor ou aprovada por lei municipal para a zona em que se situem. CESPE / CEBRASPE - 2022 - PGM Recife - PE - Procurador Judicial Municipal\"}]},{\"title\":\"Area MINIMA\",\"children\":[{\"title\":\"125m2, com frente min. de 5m2, salvo:(2)\",\"children\":[{\"title\":\"Exigencia da Lei\"},{\"title\":\"ZHIS\"}]}]},{\"title\":\"Reserva de Faixa nao Edificavel Faixas de dominio p\u00fablico das ao longo das rodovias Em regra 15m, por Lei min. 5m\",\"children\":[{\"title\":\"ao longo das faixas de dom\u00ednio p\u00fablico das rodovias\"},{\"title\":\"a reserva de faixa n\u00e3o edific\u00e1vel de, no m\u00ednimo, 15 (quinze) metros\"},{\"title\":\"de cada lado poder\u00e1 ser reduzida por lei municipal ou distrital que\"},{\"title\":\"aprovar o instrumento do planejamento territorial,\"},{\"title\":\"at\u00e9 o limite m\u00ednimo de 5 (cinco) metros de cada lado.\"}]},{\"title\":\"Reserva de Faixa nao Edificavel - !! Aguas correntes e dormentes FERROVIAS No min. 15m sem possibilidade lei\",\"children\":[{\"title\":\"ao longo das \u00e1guas correntes e dormentes e da faixa de dom\u00ednio das ferrovias ser\u00e1\"},{\"title\":\"obrigat\u00f3ria a reserva de faixa n\u00e3o edific\u00e1vel de, no m\u00ednimo, 15 metros de cada lado\"},{\"title\":\"NAO TEM EXCE\u00c7\u00c3O A ESSES REQUISITOS\"},{\"title\":\"OBS\",\"children\":[{\"title\":\"Nas ferrovias existe uma faixa de dom\u00ednio, ou seja, uma faixa de terra que pertence \u00e0 Uni\u00e3o. Essa faixa de dom\u00ednio \u00e9 de 15 metros. Depois que termina essa faixa de dom\u00ednio, ainda existe uma faixa n\u00e3o edific\u00e1vel \u00e0s margens de ferrovia, prevista no art. 4\u00ba, III-A, da Lei n\u00ba 6.766/79. Essa faixa n\u00e3o edific\u00e1vel tamb\u00e9m \u00e9 de 15 metros e se inicial ao final da faixa de dom\u00ednio. Assim, deve-se considerar que existe uma faixa de 30 metros nas quais s\u00e3o ser\u00e1 poss\u00edvel que o particular construa, estando sujeita \u00e0 reintegra\u00e7\u00e3o de posse. Isso porque s\u00e3o 15 metros de faixa de dom\u00ednio (Decreto n\u00ba 7.929/2013) mais 15 metros de faixa n\u00e3o edific\u00e1vel (Lei n\u00ba 6.766/79). STJ. 2\u00aa Turma. REsp 1997590-PE, Rel. Min. Mauro Campbell Marques, julgado em 04/10/2022 (Info 752).\"}]}]},{\"title\":\"Articula\u00e7\u00e3o das Vias(arruamento)  Arruamento\",\"children\":[{\"title\":\"\u00c9 a unica abertura de vias de circula\u00e7\u00e3o na GLEBA\"}]}]},{\"title\":\"Legisla\u00e7\u00e3o M deve definir p/ cada zona\",\"children\":[{\"title\":\"Usos permitidos\"},{\"title\":\"Indices urbanos de parcelamento e ocupa\u00e7\u00e3o do solo (deve incluir area min. a max. de  solo e aprov.)\"},{\"title\":\"OBS - Uma mesma cidade pode ter diferentes tamanhos de lotes\"}]},{\"title\":\"Consideram-se COMUNITARIOS\",\"children\":[{\"title\":\"Equip. pubicos de educa\u00e7\u00e3o, cultura, lazer e similares\"}]},{\"title\":\"AREA PUBLICA\",\"children\":[{\"title\":\"Cabe ao loteador doar percentual da area a ser parcelada ao ente publico p/ afetar SP\"},{\"title\":\"A Lei MCMV autoriza diminui\u00e7\u00e3o a area a ser recebida de assentamento populares consolidados\"},{\"title\":\"A Lei nao exige percentuais min. e max(existia previs\u00e3o, mas foi revogada). Exige proporcional\"},{\"title\":\"Art. 9\u02da da MPV 759, \u00a71\",\"children\":[{\"title\":\"M podem dispensar exigencias relativas a percentual min.\"}]},{\"title\":\"Alem disso poder publico pode exigir area non aedificandi em cada loteamento, p/ equip. urbanos\",\"children\":[{\"title\":\"O que \u00e9 equipamento urbano? Art. 5\u02da\",\"children\":[{\"title\":\"Agua\"},{\"title\":\"Esgoto\"},{\"title\":\"EE\"},{\"title\":\"Coleta de aguas plubiais\"},{\"title\":\"TELEFONE\"},{\"title\":\"GAS CANALIZADO\"}]}]}]},{\"title\":\"Zoneamento\",\"children\":[{\"title\":\"Nao refere-se a divis\u00e3o do solo, mas de regioes\"},{\"title\":\"Define a destinac\u00e3o social das areas\"},{\"title\":\"Ex: Zonas residenciais, comerciais\"},{\"title\":\"Considera-se um instrumento de interv. na odem econ.\"},{\"title\":\"Determina usos conformes, desconformes e tolerados\",\"children\":[{\"title\":\"Usos Conformes\",\"children\":[{\"title\":\"De acordo com a regiao que est\u00e1 o imovel\"},{\"title\":\"Gera direito subjetivo\"}]},{\"title\":\"Usos Desconformes\",\"children\":[{\"title\":\"Incompativel p/ o local\"},{\"title\":\"Estado pode encerra-lo sem indeniza\u00e7\u00e3o\"}]},{\"title\":\"Usos Tolerados\",\"children\":[{\"title\":\"Nasceram conformes, mas com mudan\u00e7a de parametro tornaram-se desconformes\"},{\"title\":\"Pode gerar indeniza\u00e7\u00e3o ou a continua\u00e7\u00e3o do uso \u00e9 permitida\"}]}]}]}]},{\"title\":\"Resumo Procedimento\",\"children\":[{\"title\":\"Regras de Loteamento + conceitos + REQUISITOS\"},{\"title\":\"Projeto(submissao as diretrizes) + particular solicita diretrizes\"},{\"title\":\"Aprova\u00e7\u00e3o\"},{\"title\":\"Registro - Loteamento \u00e9 regular Lotes podem ser negociados\"},{\"title\":\"Depois - contratos de aliena\u00e7\u00e3o/cess\u00e3o\"}]},{\"title\":\"Projetos\",\"children\":[{\"title\":\"Intro\",\"children\":[{\"title\":\"Traz a importancia de 2 sujeitos: Particular e Poder Publico M\"},{\"title\":\"Somente a partir do registro h\u00e1 um loteamento regular, antes do RGI h\u00e1 aprova\u00e7\u00e3o\"},{\"title\":\"Antes do proj. h\u00e1 a submiss\u00e3o para as diretrizes\"}]},{\"title\":\"Projeto de Loteamento\",\"children\":[{\"title\":\"Fase de Fixa\u00e7\u00e3o de Diretrizes \u00c9 obrigat\u00f3ria Particular solicita defini\u00e7\u00e3o  VUNESP - 2022 - SP - Procurador CESPE / CEBRASPE - 2023 - PGM - SP - Procurador\",\"children\":[{\"title\":\"Particular DEVE  solicitar ao poder publico M que defina(LEI MUNICIPAL)\"},{\"title\":\"Diretrizes de uso, tra\u00e7ado de lotes, sistema viario, espa\u00e7os livres e areas reservadas p/ equip. urb.\"},{\"title\":\"Art. 7\u00ba Par\u00e1grafo \u00fanico. As diretrizes expedidas vigorar\u00e3o prazo m\u00e1x. de 4 anos.\"},{\"title\":\"Para isso deve apresentar REQUERIMENTO e a PLANTA do im\u00f3vel\",\"children\":[{\"title\":\"Como \u00e9 a Planta?\",\"children\":[{\"title\":\"O que deve conter na Planta?(6)\",\"children\":[{\"title\":\"Uso predominante(n\u00e3o pode ser alterado)\"}]},{\"title\":\"Poder publico deve indicar se for o caso, nas plantas(5)\",\"children\":[{\"title\":\"Diretrizes indicadas tem prazo?\",\"children\":[{\"title\":\"Sim, 4 anos!\"}]}]}]}]},{\"title\":\"Caso o M nao se manifeste no prazo legal?\",\"children\":[{\"title\":\"O particular pode seguir seu projeto\"},{\"title\":\"Todavia nao h\u00e1 direitos adquiridos em D. Urb.\"},{\"title\":\"O interesse principal \u00e9 da coletividade\"}]},{\"title\":\"A Lei prev\u00ea alguma exce\u00e7\u00e3o a essa fase?(2) VUNESP - 2022 - Prefeitura - SP - Procurador\",\"children\":[{\"title\":\"No caso de M com at\u00e9 50.000 HABITANTES\"},{\"title\":\"No caso Aqueles com PD com diretrizes de urbaniza\u00e7\u00e3o\"}]}]},{\"title\":\"Projeto\",\"children\":[{\"title\":\"Intro\",\"children\":[{\"title\":\"Proj. \u00e9 acompahando de documentos que demonstrem regularidade\"}]},{\"title\":\"Req.\",\"children\":[{\"title\":\"Desenhos\",\"children\":[{\"title\":\"Req. dos Desenhos(6)\"},{\"title\":\"Alguns Conceitos\",\"children\":[{\"title\":\"Alinhamento - Conceito\",\"children\":[{\"title\":\"Divisao da propredade publica e privada\"},{\"title\":\"Ate onde vai a cal\u00e7ada e inicio do lote\"},{\"title\":\"A altera\u00e7\u00e3o pode ocasionar indeniza\u00e7\u00e3o\"},{\"title\":\"Se houver sobras no terreno?\",\"children\":[{\"title\":\"Via de regra, qnd sobra nao h\u00e1 metragem minima de lotes\"},{\"title\":\"O interesse da aquisi\u00e7\u00e3o quase sempre \u00e9 do lindeiro\"},{\"title\":\"A aquisi\u00e7\u00e3o chama-se INVESTIDURA e diante de ausencia de concorrencia \u00e9 hip. de licit. dispensada\"}]}]},{\"title\":\"Afastamento\",\"children\":[{\"title\":\"\u00c9 a area dentro do lote que pode ser construida\"}]},{\"title\":\"Recuo\",\"children\":[{\"title\":\"Faixa frontal nao edificavel(unilateral pra admin.)\"},{\"title\":\"Determina\u00e7\u00e3o do recuo nao esta sujeita a prescri\u00e7\u00e3o. Pode ser alterada\"},{\"title\":\"\u00c9 limita\u00e7\u00e3o admin. que nao gera indeniza\u00e7\u00e3o, em REGRA\"},{\"title\":\"O recuo embora limitado \u00e9 de propriedade privada e pode incidir usucapiao\"}]},{\"title\":\"Drenagem\",\"children\":[{\"title\":\"Proj. deve indicar linhas de escoamento de aguas pluviais\"}]}]}]},{\"title\":\"Memorial Descritivo\",\"children\":[{\"title\":\"Conceito\",\"children\":[{\"title\":\"Documento apresentado pelo proprietario do imovel que contem todas restri\u00e7\u00f5es\"},{\"title\":\"H\u00e1 restri\u00e7\u00f5es publicas, civis e pode ter convencionais(devem ter registro)\"}]},{\"title\":\"Req. do Memorial Descritivo((4)\"}]},{\"title\":\"Cronogama de exec. de obras de no max. 4 anos\"}]},{\"title\":\"Apresentan\u00e7\u00e3o a prefeitura com\",\"children\":[{\"title\":\"Certid\u00e3o atualizada da matricula da gleba\",\"children\":[{\"title\":\"Se a Certid\u00e3o da Matricula n\u00e3o tiver correspondencia com registros?\",\"children\":[{\"title\":\"Alem de consequencias penais, s\u00e3o insubsistentes tanto as diretrizes como as aprova\u00e7\u00f5es\"}]}]},{\"title\":\"Certid\u00e3o negativa de tributos municipais\"},{\"title\":\"Instrumento de garantia\"}]},{\"title\":\"Exce\u00e7\u00e3o as Exigencias\",\"children\":[{\"title\":\"Imoveis destinados a parcelamento popular, com processo de desapropria\u00e7\u00e3o em curso\"}]}]}]},{\"title\":\"Proj. de Desmembramento\",\"children\":[{\"title\":\"Tbm h\u00e1 apresenta\u00e7\u00e3o de requerimento\"},{\"title\":\"Requerimento \u00e9 acompanhado com certidao atualizada da matricula da gleba\"},{\"title\":\"Aqui tbm os lotes devem obedecer padroes minimos\"},{\"title\":\"Sendo necessario ter as seguintes indica\u00e7\u00f5es:(3)\",\"children\":[{\"title\":\"Divis\u00e3o de Lotes\"},{\"title\":\"Uso predominante\"},{\"title\":\"Vias existentes\"}]},{\"title\":\"\u00c9 um procedimento mais sucinto\"},{\"title\":\"Somente no caso do Art. 11 a prefeitura municipal atua mais efetivamente\"},{\"title\":\"O caso do art. 11 \u00e9 qnd o desmembramento nao observou areas min.(Art. 4\u02da, I, da Lei)\"},{\"title\":\"OBS\",\"children\":[{\"title\":\"CESPE - 2018 - PGM - Jo\u00e3o Pessoa - PB - Procurador do Munic\u00edpio Lei 6.766/79 - Art. 10. Para a aprova\u00e7\u00e3o de projeto de desmembramento, o interessado apresentar\u00e1 requerimento \u00e0 Prefeitura Municipal, ou ao Distrito Federal quando for o caso, acompanhado de certid\u00e3o atualizada da matr\u00edcula da gleba, expedida pelo Cart\u00f3rio de Registro de Im\u00f3veis competente, ressalvado o disposto no \u00a7 4o do art. 18, e de planta do im\u00f3vel a ser desmembrado contendo:                       (Reda\u00e7\u00e3o dada pela Lei n\u00ba 9.785, de 1999) I - a indica\u00e7\u00e3o das vias existentes e dos loteamentos pr\u00f3ximos; II - a indica\u00e7\u00e3o do tipo de uso predominante no local; III - a indica\u00e7\u00e3o da divis\u00e3o de lotes pretendida na \u00e1rea.\"}]}]}]},{\"title\":\"Aprova\u00e7\u00e3o do loteamento  e desmembramento\",\"children\":[{\"title\":\"Competencia\",\"children\":[{\"title\":\"Prefeitura M ou DF\",\"children\":[{\"title\":\"Estados tem alguma competencia?\",\"children\":[{\"title\":\"Sim, em hipoteses da Lei compete ao Estado definir os proced. de aprova\u00e7\u00e3o\"},{\"title\":\"A lei traz as condi\u00e7\u00f5es em rela\u00e7\u00e3o ao Estado\"},{\"title\":\"Relaciona a empreendimentos de grande porte ou ares de interesse especial\"}]}]}]},{\"title\":\"Consequencia\",\"children\":[{\"title\":\"Implica subdividr as quadra em lotes, com respectivas dimens\u00f5es e numerac\u00e3o\"}]},{\"title\":\"Cadastro Nacional de M\",\"children\":[{\"title\":\"Previsto pela Lei 12.008 em rela\u00e7ao a locais em risco de desabamento de grandes propor\u00e7\u00f5es\"},{\"title\":\"Exige observancia a carta geotecnica. Abrange inunda\u00e7\u00f5es bruscas e outros problemas\"}]},{\"title\":\"Areas de Risco\",\"children\":[{\"title\":\"\u00c9 vedada constru\u00e7\u00e3o de loteamento em areas consideradas NAO EDIFICAVEIS\"},{\"title\":\"Previstas no plano diretor ou legisla\u00e7\u00e3o dele derivada\"}]},{\"title\":\"Caducidade da Aprova\u00e7\u00e3o\",\"children\":[{\"title\":\"Ocore em caso de passar o prazo do proj., SOB PENA DE NOVA APROVA\u00c3O\"}]},{\"title\":\"Prazos de Aprova\u00e7\u00e3o\",\"children\":[{\"title\":\"A Lei deixou aos M a responsabildiade, alem das obras serem aceitas ou rejeitadas\"},{\"title\":\"Fluindo os prazos sem manif.?\",\"children\":[{\"title\":\"Considera-se o proj. REPROVADO/REJEITADO, sem prejuizo da indeniza\u00e7\u00e3o\"}]},{\"title\":\"Sendo a legisla\u00e7\u00e3o OMISSA\",\"children\":[{\"title\":\"O prazo \u00e9 de 90 dias\"},{\"title\":\"E de 60 dias p/ aceita\u00e7\u00e3o das OBRAS de URBANIZA\u00c7\u00c3O\"}]}]},{\"title\":\"quais sao os efeitos  da aprova\u00e7\u00e3o do loteamento? REGISTRO: dominio do M\",\"children\":[{\"title\":\"Imutabilidade dos QUE...:\",\"children\":[{\"title\":\"Espa\u00e7os Livres de Uso Comum\"},{\"title\":\"Vias e Pra\u00e7as\"},{\"title\":\"Areas destinadas a predios publicos e outros equip. urbanos\"}]},{\"title\":\"...Nao podem ter sua destina\u00e7\u00e3o alterada, salvo CADUCIDADE(licen\u00e7a) ou DESISTENCIA\"}]}]},{\"title\":\"Registro do Loteamento  de Desmembramento Lotes podem ser negociados pelo contrato acima\",\"children\":[{\"title\":\"Conceito\",\"children\":[{\"title\":\"Apos a aprovac\u00e3o acontece o registro(por extrato em livro proprio)\"},{\"title\":\"A partir do registro podem ser estabelecidas matriculas imobiliarias especificas de cada lote\"},{\"title\":\"Qual crime impede o registro?\",\"children\":[{\"title\":\"Contra admin. publica e patrimonio apenas\"},{\"title\":\"Demais condena\u00e7\u00f5es obstam se forem capazes de prejudicar adquirentes\"}]}]},{\"title\":\"Prazo CETAP - 2019 - Prefeitura - PA - Advogado CESPE / CEBRASPE - 2023 - DPE-RO - Defensor\",\"children\":[{\"title\":\"O prazo para isso \u00e9 de 180 dias, sob pena de caducidade(nat. decadencial)\"},{\"title\":\"Tem pena de multa?\",\"children\":[{\"title\":\"N\u00e3o, somente caducidade\"}]}]},{\"title\":\"Documentos\",\"children\":[{\"title\":\"A lei traz a necessidade de algums documentos, s\u00e3o 7\"},{\"title\":\"Ex:\",\"children\":[{\"title\":\"Inexistencia da certid\u00e3o negativa de a\u00e7\u00f5es reais pelo periodo de 10 anos\"},{\"title\":\"Certid\u00e3o negativa de tributos federais, estaduais e municipais\"}]},{\"title\":\"Finalidade dos docs.\",\"children\":[{\"title\":\"Evitar que se divida e transfira a terceiros imoveis comprometidos com divida\"}]},{\"title\":\"Desapropria\u00e7\u00e3o\",\"children\":[{\"title\":\"Qnd o terreno loteado est\u00e1 sendo desapropriado a Lei dispensa alguns docs\"},{\"title\":\"Exige outros documentos referentes ao processo\"}]},{\"title\":\"OBS\",\"children\":[{\"title\":\"O art. 18, VI, da Lei n\u00ba 6.766/79, que disp\u00f5e sobre o parcelamento do solo urbano, exige que o loteador submeta o projeto de loteamento ao registro imobili\u00e1rio, acompanhado, dentre outros documentos, do exemplar do contrato-padr\u00e3o de promessa de venda, ou de cess\u00e3o ou de promessa de cess\u00e3o, do qual constar\u00e3o, obrigatoriamente, as indica\u00e7\u00f5es previstas no seu art. 26 e, eventualmente, outras de car\u00e1ter negocial, desde que n\u00e3o ofensivas dos princ\u00edpios cogentes da referida lei. \u00c9 v\u00e1lida a estipula\u00e7\u00e3o, na escritura de compra e venda, espelhada no contrato-padr\u00e3o depositado no registro imobili\u00e1rio, de cl\u00e1usula que preveja a cobran\u00e7a, pela administradora do loteamento, das despesas realizadas com obras e servi\u00e7os de manuten\u00e7\u00e3o e/ou infraestrutura, porque dela foram devidamente cientificados os compradores, que a ela anu\u00edram inequivocamente. STJ. 3\u00aa Turma. REsp 1.569.609-SP, Rel. Min. Nancy Andrighi, julgado em 07/05/2019 (Info 648).\"}]},{\"title\":\"obs\",\"children\":[{\"title\":\"\u00a7 8\u00ba O mesmo im\u00f3vel poder\u00e1 servir como garantia ao Munic\u00edpio ou ao Distrito Federal na execu\u00e7\u00e3o das obras de infraestrutura e a cr\u00e9ditos constitu\u00eddos em favor de credor em opera\u00e7\u00f5es de financiamento a produ\u00e7\u00e3o do lote urbanizado.   (Inclu\u00eddo pela Lei n\u00ba 14.711, de 2023)\"}]}]},{\"title\":\"Outorga Uxoria Ausencia causa nulidade?\",\"children\":[{\"title\":\"Exigida p/  R E G I S T R O  e todos demais atos de aliena\u00e7\u00e3o\"},{\"title\":\"Ausencia\",\"children\":[{\"title\":\"N\u00e3o \u00e9 causa de nulidade, possibilida desfazimento do negocio\"}]}]},{\"title\":\"Loteamento Legalizado Diferen\u00e7a de loteamento irregular e cladestino\",\"children\":[{\"title\":\"RGI nao aceita projetos que nao foram aprovados. \u00c9 legal qnd foi aprovado e registrado\"},{\"title\":\"O ato de aprova\u00e7\u00e3o \u00e9 PRIVATIVO do M\"},{\"title\":\"Loteamento Irregulares(2 tipos)\",\"children\":[{\"title\":\"Irregular\",\"children\":[{\"title\":\"Aprovados, mas nao sujeitos a registro OU\"},{\"title\":\"Implantados de forma diversa da aprovada pelo M\"}]},{\"title\":\"Clandestino\",\"children\":[{\"title\":\"Implantados sem aprova\u00e7\u00e3o\"}]},{\"title\":\"E as FAVELAS?\",\"children\":[{\"title\":\"\u00c9 loteamento ILEGAL. Pode ser irregular ou clandestino\"}]}]},{\"title\":\"ACP pode ser usada p/ obrigar?\",\"children\":[{\"title\":\"Sim, inclusive o M pode ser polo passivo na a\u00e7\u00e3o em raz\u00e3o de sua obrig. de fiscalizar\"},{\"title\":\"O ex. de tal atividade \u00e9 VINCULADA\"},{\"title\":\"Sendo que o MP tem legitimidade inclusive p pedir indeniza\u00e7\u00e3o p/ quem adquiriu\"}]}]},{\"title\":\"Loteamento Intermunicipal Como ser\u00e1 feito o registro? Podem ser registrados juntos? Lotes podem estar em mais de um M? CESPE / CEBRASPE - 2023 - PGM - SP - Procurador do Munic\u00edpio\",\"children\":[{\"title\":\"Loteador deve registrar no M que tenha maior parte do empreendimento\"},{\"title\":\"Regulariza do maior para o menor\"},{\"title\":\"Registra-los juntos causa nulidade. Apenas apos o ultimo registro \u00e9 valido\"},{\"title\":\"No tocante a LOTES, nenhum pode estar em mais de um M\"}]},{\"title\":\"Efeitos do Registro(3)  Instituto Consulplan - 2019 - MPE-SC - Promotor\",\"children\":[{\"title\":\"1. Os lotes podem ser negociados\"},{\"title\":\"2. Impossibildiade de mudan\u00e7a unilateral\"},{\"title\":\"3. Doa\u00e7\u00e3o Legal ao M(CONCURSO VOLUNT\u00c1RIO)\"}]},{\"title\":\"Impugna\u00e7\u00e3o Previsto em Lei\",\"children\":[{\"title\":\"Apos a documenta\u00e7\u00e3o estar toda em ordem, o oficial de registro encaminha comunica\u00e7\u00e3o ao M\"},{\"title\":\"E faz publicar em RESUMO e com pequeno DESENHO edital do pedido de registro\"},{\"title\":\"Publica\u00e7\u00e3o deve ocorrer por 3 dias CONSECUTIVOS e pode ser impugnado em 15dias\"},{\"title\":\"O prazo de 15 dias conta-se da ultima publica\u00e7\u00e3o\"},{\"title\":\"Por qual meio ocorre a publica\u00e7\u00e3o\",\"children\":[{\"title\":\"Capitais\",\"children\":[{\"title\":\"D.O. do Estado\"},{\"title\":\"Jornais de circula\u00e7\u00e3o diaria\"}]},{\"title\":\"Demais M\",\"children\":[{\"title\":\"Jornais\"}]}]},{\"title\":\"Oficial que registrar em desacordo\",\"children\":[{\"title\":\"Sujeita-se a multa de 10x emolumentos\"}]},{\"title\":\"Surgem 2 caminhos\",\"children\":[{\"title\":\"Impugna\u00e7\u00e3o\",\"children\":[{\"title\":\"Oficial deve intimar requerente e o M p/ manif. em 5 dias, sob pena de arquiv.\"},{\"title\":\"Apos isso o processo \u00e9 enviado ao juiz que ouve o MP em 5 dias\"},{\"title\":\"Apos isso juiz pode decidir de plano ou determinar instru\u00e7\u00e3o sumaria\"}]},{\"title\":\"S/ Impugna\u00e7\u00e3o\",\"children\":[{\"title\":\"Faz-se imediatamente o REGISTRO\"}]}]}]},{\"title\":\"Concurso Volunt\u00e1rio ou  Doa\u00e7\u00e3o Legal Depende de pagamento, doa\u00e7\u00e3o ou IP? Cabe usucapi\u00e3o dessa \u00e1rea? Se o solo for implantado e nao registrado?\",\"children\":[{\"title\":\"Nome dado a transferencia de areas destinadas a logradouros publico ao M\"},{\"title\":\"\u00c9 tbm um dos efeitos do PAL. Ocorre incorpora\u00e7\u00e3o da area ao pratrim. publico\"},{\"title\":\"INDEPENDENTE DE PAGTO ou DOACAO ou INSTRUMENTO PUBLICO\"},{\"title\":\"O ato que transfere \u00e9 o REGISTRO\"},{\"title\":\"Como a area \u00e9 publica, n\u00e3o cabe usucapi\u00e3o\"},{\"title\":\"Doutrina diz que basta a aprova\u00e7\u00e3o p/ transferencia(STJ)\"},{\"title\":\"Se o solo for implantado e nao registrado? (LOTEAMENTOS ILEGAIS)\",\"children\":[{\"title\":\"Art. 22. Par\u00e1grafo \u00fanico. Na hip\u00f3tese de parcelamento do solo implantado e n\u00e3o registrado, o Munic\u00edpio poder\u00e1 requerer, por meio da apresenta\u00e7\u00e3o de planta de parcelamento elaborada pelo loteador ou aprovada pelo Munic\u00edpio e de declara\u00e7\u00e3o de que o parcelamento se encontra implantado, o registro das \u00e1reas destinadas a uso p\u00fablico, que passar\u00e3o dessa forma a integrar o seu dom\u00ednio. (Inclu\u00eddo pela Lei n\u00ba 12.424, de 2011)\"}]}]},{\"title\":\"Apos registro um loteamento pode ser cancelado? \u00c9 somente por decis\u00e3o judicial? CESPE / CEBRASPE - 2023 - DPE-RO - Defensor\",\"children\":[{\"title\":\"Sim, em alguns casos(3)\",\"children\":[{\"title\":\"Decis\u00e3o Judicial\"},{\"title\":\"Por requerimento do loteador, com anu\u00eancia da Prefeitura enquanto nenhum lote houver sido objeto de contrato;\"},{\"title\":\"A requerimento conjunto do loteador e de todos os adquirentes de lotes, com anu\u00eancia da Prefeitura\"}]},{\"title\":\"Estado \u00e9 obrigado a consentir? Sim, s\u00f3 pode se opor em 2 casos\",\"children\":[{\"title\":\"inconveniente p/ desenvolvimento urb. OU\"},{\"title\":\"Se ja fez melhorias no local\"}]},{\"title\":\"Nas 2 ultimas hipoteses\",\"children\":[{\"title\":\"Ofical do registro de imoveis deve publicar edital. Possibilida impugna\u00e7\u00e3o em 30 dias\"},{\"title\":\"Com ou sem impugna\u00e7\u00e3o o processo vai ao Juiz p homologar, ouvido o MP\"},{\"title\":\"Homologa\u00e7\u00e3o deve ser precedida de  vistoria judicial p/ comprovar inexistencia de adquirentes\"}]}]}]},{\"title\":\"Regime de Afeta\u00e7\u00e3o - Art. 18-A Lei 14.711/2023\",\"children\":[{\"title\":\"O que \u00e9?\",\"children\":[{\"title\":\"A criterio do loteador, o terreno e a infraestrutura, e demais bens e direitos\"},{\"title\":\"Manter-se-ao apartados do patrimonio do loteador e ser\u00e3o patrim. de afeta\u00e7\u00e3o\"}]},{\"title\":\"Efeitos\",\"children\":[{\"title\":\"Nao se comunica com demais bens, direitos e obriga\u00e7oes do patrim.onio loteador\"},{\"title\":\"e s\u00f3 responde por d\u00edvidas e obriga\u00e7\u00f5es vinculadas ao loteamento respectivo e \u00e0 entrega dos lotes urbanizados aos respectivos adquirentes\"}]},{\"title\":\"Responsa do loteador\",\"children\":[{\"title\":\"O loteador responde pelos preju\u00edzos que causar ao patrim\u00f4nio de afeta\u00e7\u00e3o\"}]},{\"title\":\"Como ocorre? como \u00e9 Extinto?\",\"children\":[{\"title\":\"mediante averba\u00e7\u00e3o, a qualquer tempo, no Registro de Im\u00f3veis, de termo firmado pelo loteador\"},{\"title\":\"e, quando for o caso, tamb\u00e9m pelos titulares de direitos reais de aquisi\u00e7\u00e3o de lotes objeto de loteamento.\"},{\"title\":\"A averba\u00e7\u00e3o n\u00e3o ser\u00e1 obstada pela exist\u00eancia de \u00f4nus reais que tenham sido constitu\u00eddos sobre o im\u00f3vel\"},{\"title\":\"extinguir-se-\u00e1 pela averba\u00e7\u00e3o do termo de verifica\u00e7\u00e3o emitido pelo \u00f3rg\u00e3o p\u00fablico competente, pelo registro dos t\u00edtulos de dom\u00ednio ou de direito de aquisi\u00e7\u00e3o em nome dos respectivos adquirentes e, quando for o caso, pela extin\u00e7\u00e3o das obriga\u00e7\u00f5es do loteador perante eventual institui\u00e7\u00e3o financiadora da obra.\"}]},{\"title\":\"Fiscaliza\u00e7\u00e3o\",\"children\":[{\"title\":\"A Comiss\u00e3o de Representantes, a Prefeitura e a institui\u00e7\u00e3o financiadora da infraestrutura\"},{\"title\":\"poder\u00e3o nomear, \u00e0s suas expensas, pessoa f\u00edsica ou jur\u00eddica para fiscalizar\"}]},{\"title\":\"Art. 18-D cuida dos deveres do loteador\"},{\"title\":\"Afeta\u00e7\u00e3o e Falencia\",\"children\":[{\"title\":\"Art. 18-F. Os efeitos da decreta\u00e7\u00e3o da fal\u00eancia ou da insolv\u00eancia civil do loteador n\u00e3o atingem os patrim\u00f4nios de afeta\u00e7\u00e3o constitu\u00eddos, n\u00e3o integrando a massa concursal o terreno, a obra at\u00e9 ent\u00e3o realizada e os demais bens, direitos credit\u00f3rios, obriga\u00e7\u00f5es e encargos objeto do loteamento.    (Inclu\u00eddo pela Lei n\u00ba 14.620, de 2023)\"}]},{\"title\":\"obs\",\"children\":[{\"title\":\"\u00a7 1\u00ba  A nomea\u00e7\u00e3o a que se refere o caput n\u00e3o transfere para o nomeante qualquer responsabilidade pela qualidade da implementa\u00e7\u00e3o da infraestrutura, pelo prazo do termo de verifica\u00e7\u00e3o da sua realiza\u00e7\u00e3o ou por qualquer outra obriga\u00e7\u00e3o decorrente da responsabilidade do loteador, seja legal ou oriunda dos contratos de aliena\u00e7\u00e3o dos lotes, de obra e de outros contratos eventualmente vinculados ao loteamento.      (Inclu\u00eddo pela Lei n\u00ba 14.620, de 2023) \u00a7 2\u00ba A pessoa que, em decorr\u00eancia do exerc\u00edcio da fiscaliza\u00e7\u00e3o de que trata o caput deste artigo, obtiver acesso \u00e0s informa\u00e7\u00f5es comerciais, tribut\u00e1rias ou de qualquer outra natureza referentes ao patrim\u00f4nio afetado responder\u00e1 pela falta de zelo, de dedica\u00e7\u00e3o e de sigilo dessas informa\u00e7\u00f5es.      (Inclu\u00eddo pela Lei n\u00ba 14.620, de 2023) \u00a7 3\u00ba  A pessoa nomeada pela institui\u00e7\u00e3o financiadora dever\u00e1 fornecer c\u00f3pia de seu relat\u00f3rio ou parecer \u00e0 Comiss\u00e3o de Representantes, a requerimento desta, n\u00e3o constituindo esse fornecimento quebra do sigilo a que se refere o \u00a7 2\u00ba deste artigo.    (Inclu\u00eddo pela Lei n\u00ba 14.620, de 2023)\"}]}]},{\"title\":\"Contratos\",\"children\":[{\"title\":\"Intro\",\"children\":[{\"title\":\"A Lei regula o parcelamento do solo em vis\u00e3o publicista, mas sem esquecer os aspectos civis\"},{\"title\":\"Ex:\\tAliena\u00e7\u00e3o de Lotes e Direitos de terceiros adquirentes\"},{\"title\":\"A Lei aborda a materia prevendo estabilidade dos contratos de direito real\"},{\"title\":\"CC prev\u00ea o direito de promitente comprador como direito real(1.225, VII do CC)\"},{\"title\":\"Alem disso o CC regulou o seu contrato premilinar\"}]},{\"title\":\"Irretratabiliadde(3)\",\"children\":[{\"title\":\"Compromissos de compra e venda\",\"children\":[{\"title\":\"OBS\",\"children\":[{\"title\":\"Compra e Venda - Semelhan\u00e7a\",\"children\":[{\"title\":\"Com a nat. juridica de direito real e possib. de adjudica\u00e7\u00e3o compuls\u00f3ria\"},{\"title\":\"A promessa passa a fazer os ef. de compra e venda\"},{\"title\":\"A unica diferen\u00e7a reside na hip. de nao haver pagto do pre\u00e7o\"},{\"title\":\"Na promessa de compra e venda h\u00e1 devolu\u00e7\u00e3o do bem\"},{\"title\":\"Na compra e venda, j\u00e1 havendo a transf., resolve-se em perdas e danos\"}]},{\"title\":\"Admite-se clausula de arrependimento na promessa de compra e venda?\",\"children\":[{\"title\":\"Admite-se\"},{\"title\":\"Nesse caso some a adjudica\u00e7\u00e3o compuls\u00f3ria\"}]}]}]},{\"title\":\"Cess\u00f5es e promessas de cess\u00e3o\"},{\"title\":\"Direito de Adjudica\u00e7\u00e3o Compuls\u00f3ria\",\"children\":[{\"title\":\"OBS\",\"children\":[{\"title\":\"Lei 11.232/2005\",\"children\":[{\"title\":\"Regula proced. especifico de adjudica\u00e7\u00e3o compuls\u00f3ria\"},{\"title\":\"Hip. em que a senten\u00e7a substitui a vontade da parte q\"},{\"title\":\"Se nega a celebrar o contrato definitivo\"}]},{\"title\":\"Doutrina\",\"children\":[{\"title\":\"Discute se \u00e9 necessario registro p/ ter dirieto a adjudi\u00e7\u00e3o compuls\u00f3ria\"},{\"title\":\"S. 239 do STJ diz que NAO se condiciona ao registro\"}]}]}]}]},{\"title\":\"Aspecto Formal Art. 26 + Art. 26-A Art. 26-A foi incluido pela lei do Distrato\",\"children\":[{\"title\":\"Intro CESPE - 2021 - PG-DF - AnA\",\"children\":[{\"title\":\"O Art. 26 traz exigencias formais p/ validade desse contrato\"},{\"title\":\"Admite-se tanto a escritura publica como a particular\"},{\"title\":\"Contratos devem ser iniciados por quadro resumo\"},{\"title\":\"Faltando qlq dos requisitos abaixo \u00e9 concedido 30 dias p/ aditamento contratual\"},{\"title\":\"N\u00e3o sanar as omissoes \u00e9 considerado justa causa pra rescisao contratual\"},{\"title\":\"A minuta do contrato deve ser apresentada pelo loteador qnd registrar o PAL\"},{\"title\":\"A promessa com a comprova\u00e7\u00e3o de quita\u00e7\u00e3o do pre\u00e7o \u00e9 titulo habil ao registro definitivo da propriedade\"}]},{\"title\":\"Rol taxativo ou n\u00e3o? N\u00e3o\",\"children\":[{\"title\":\"As partes podem ajustar outros itens do loteamento\"},{\"title\":\"obs\",\"children\":[{\"title\":\"D. de Arrependimento VII - as informa\u00e7\u00f5es acerca da possibilidade do exerc\u00edcio, por parte do adquirente do im\u00f3vel, do direito de arrependimento previsto no art. 49 da Lei n.\u00ba 8.078, de 11 de setembro de 1990 (C\u00f3digo de Defesa do Consumidor), em todos os contratos firmados em estandes de vendas e fora da sede do loteador ou do estabelecimento comercial;\"},{\"title\":\"V - as consequ\u00eancias do desfazimento do contrato, seja mediante distrato, seja pormeio de resolu\u00e7\u00e3o contratual motivada por inadimplemento de obriga\u00e7\u00e3o do adquirente ou doloteador, com destaque negritado para as penalidades aplic\u00e1veis e para os prazos paradevolu\u00e7\u00e3o de valores ao adquirente;\"}]}]},{\"title\":\"Restri\u00e7\u00f5es Urbanisticas\",\"children\":[{\"title\":\"A Lei admite que o contrato preveja outras restri\u00e7\u00f5es de cunho privado, supletivas das publicas\"},{\"title\":\"O poder publico tem um jus varianti em rela\u00e7\u00f5a a tais restri\u00e7\u00f5es, mas submete a nao regressao\"},{\"title\":\"Nao dependem de estarem previstas no contrato de compra e venda celebrado entre as partes\"},{\"title\":\"Incorporam natureza propter rem em sua rela\u00e7\u00e3o com o imovel\"},{\"title\":\"Independe de lacunas na lei.\"}]},{\"title\":\"Clausula Penal\",\"children\":[{\"title\":\"Previs\u00e3o no inciso V do art., limitada a 10% do valor atualizado do contrato\"},{\"title\":\"Se a relac\u00e3o for sujeita ao CDC est\u00e1 limitada a 2%\"},{\"title\":\"A norma \u00e9 de ordem publica, nao podendo as partes convencionarem de modo diverso\"}]},{\"title\":\"Cess\u00e3o de Posse\",\"children\":[{\"title\":\"Junto com a transmissao da propriedade o art. prev\u00ea a transmiss\u00e3o da posse de...\"},{\"title\":\"Terrenos objetos de desapropria\u00e7\u00e3o, onde ser\u00e3o feitos parcelamentos populares\"},{\"title\":\"A norma admite a posse como garantia nesses ocntratos de financiamento\"},{\"title\":\"Essa posse pode ser transformada em propriedade?\",\"children\":[{\"title\":\"Sim, em raz\u00e3o do registro publico da senten\u00e7a do proc. de desapropria\u00e7\u00e3o que fixa indeniz.\"}]}]},{\"title\":\"obs\",\"children\":[{\"title\":\"Exemplo hipot\u00e9tico: Jasmim Ltda. ajuizou a\u00e7\u00e3o de adjudica\u00e7\u00e3o compuls\u00f3ria contra Dimens\u00e3o Ltda. alegando em s\u00edntese que celebrou contrato de promessa de compra e venda de um lote que se encontrava em fase de desmembramento perante a \u201cPrefeitura\u201d (Munic\u00edpio). Afirma que, apesar de celebrado o neg\u00f3cio, a r\u00e9 ainda n\u00e3o outorgou a escritura definitiva do im\u00f3vel. A requerida defendeu-se afirmando que n\u00e3o outorgou a escritura p\u00fablica porque ainda n\u00e3o houve o desdobro do im\u00f3vel prometido \u00e0 venda e que isso seria obst\u00e1culo \u00e0 proced\u00eancia da adjudica\u00e7\u00e3o compuls\u00f3ria. Em um caso semelhante a esse, o STJ decidiu que n\u00e3o \u00e9 poss\u00edvel a proced\u00eancia da a\u00e7\u00e3o de adjudica\u00e7\u00e3o compuls\u00f3ria. O art. 37 da Lei n\u00ba 6.766/79 (Lei de parcelamento do solo urbano) afirma que \u201c\u00e9 vedado vender ou prometer vender parcela de loteamento ou desmembramento n\u00e3o registrado\u201d. Al\u00e9m disso, segundo o regramento previsto no Decreto-Lei n\u00ba 58/1937, julgada procedente a a\u00e7\u00e3o de adjudica\u00e7\u00e3o compuls\u00f3ria, a senten\u00e7a valer\u00e1 como t\u00edtulo para transcri\u00e7\u00e3o no cart\u00f3rio de registro de im\u00f3veis respectivo. Assim, se o im\u00f3vel de cuja escritura se exige a outorga n\u00e3o tem matr\u00edcula pr\u00f3pria, individualizada no registro de im\u00f3veis, eventual senten\u00e7a que substitua a declara\u00e7\u00e3o de vontade do promitente vendedor torna-se in\u00f3cua, considerando que n\u00e3o ser\u00e1 poss\u00edvel a sua transcri\u00e7\u00e3o. A exist\u00eancia de im\u00f3vel registr\u00e1vel (im\u00f3vel que pode ser levado a registro) \u00e9 condi\u00e7\u00e3o espec\u00edfica da a\u00e7\u00e3o de adjudica\u00e7\u00e3o compuls\u00f3ria, de modo que a averba\u00e7\u00e3o do desmembramento de im\u00f3vel urbano, devidamente aprovado pelo Munic\u00edpio, \u00e9 formalidade que antecede necessariamente o registro de \u00e1rea fracionada. STJ. 3\u00aa Turma. REsp 1851104-SP, Rel. Min. Ricardo Villas B\u00f4as Cueva, julgado em 12/05/2020 (Info 672).\"}]}]},{\"title\":\"Regime do Pr\u00e9 Contrato - Art. 27\",\"children\":[{\"title\":\"Intro\",\"children\":[{\"title\":\"A lei regula um contrato importante na vida das pessoas\"},{\"title\":\"Esse regime visa nao frustar as expectivativas\"},{\"title\":\"A prmessa de cess\u00e3o e qlq doc. de composi\u00e7\u00e3o de vontades \u00e9 considerado pre-contrato\"}]},{\"title\":\"Direito de Preferencia\",\"children\":[{\"title\":\"O promitente tem preferencia na aquisi\u00e7\u00e3o do imovel\"},{\"title\":\"Em rela\u00e7\u00e3o a ele, s\u00e3o ineficazes atos de aliena\u00e7\u00e3o e gravame operados posteriormente\"},{\"title\":\"Segundo STJ essa ineficacia independe de registro do contrato\"}]},{\"title\":\"Se aquele que se obrigou a conlcuir o contrato n\u00e3o o cumprir?\",\"children\":[{\"title\":\"O credor pode notifica-lo p. outorga do contrato ou oferecimento de impug. em 15 dias\"},{\"title\":\"Sob pena de registro do pr\u00e9 contrato, Havendo impugna\u00e7\u00e3o observa-se o NCPC\"},{\"title\":\"Esse registro nao pode ser feito se quem requereu nao provar q cumpriu sua obrigac\u00e3o\"}]}]},{\"title\":\"Sucess\u00e3o de Adquirentes\",\"children\":[{\"title\":\"Quem adquirir propriedade loteada por atos intervivos ou mortis causa\"},{\"title\":\"Sucede o transmitente em todos os direitos e deve respeitar contratos\"},{\"title\":\"Pode ter clausulas ao contrario? NUNCA! S\u00e3o NULAS\"},{\"title\":\"Evidente que o herdeiro pode renunciar sua heran\u00e7a\"}]},{\"title\":\"Falencia ou Insolvencia de qlq das partes\",\"children\":[{\"title\":\"Nao extingue as promessas\"},{\"title\":\"Sendo do titular da area ou de direito sobre ela\",\"children\":[{\"title\":\"Nomeia-se um sindico para seguir os contratos\"}]},{\"title\":\"Sendo do adquirente\",\"children\":[{\"title\":\"Imoveis v\u00e3o a pra\u00e7a\"}]}]},{\"title\":\"Cess\u00e3o do Contrato - TRESPASSE\",\"children\":[{\"title\":\"O contrato pode ser cedido/transferido, com subrogac\u00e3o de todos os dirietos\"},{\"title\":\"lan\u00e7ado no verso das vias em poder das partes, ou por instrumento em separado,\"},{\"title\":\"Depende de Anuencia?\",\"children\":[{\"title\":\"Independe da anuencia, mas gera efeitos q p/ o loteador s\u00f3 ocorrem apos a ciencia\"}]},{\"title\":\"Sendo sem anuencia, o of. de registro dar\u00e1 ciencia em 10 dias, por escrito, se registrada a cessao\"},{\"title\":\"Sendo S E M ciencia do vendedor?\",\"children\":[{\"title\":\"O cedente continua respondendo junto ao cessionario pelo pagto do pre\u00e7o\"}]},{\"title\":\"Credito do contrato pode ser cedido?\",\"children\":[{\"title\":\"Sim, nesse caso \u00e9 o vendedor que cede\"}]}]},{\"title\":\"Rescis\u00e3o do Contrato Art. 32-A traz outras hipoteses de rescisao por culpa do aquirente FCC - 2022 - DPE-AP - Defensor P\u00fablico\",\"children\":[{\"title\":\"Vencido o contrato e nao pago, 30d apos a mora o ocntrato considera-se rescindido\"},{\"title\":\"O devedor deve ser intimado(pessoalmente) pelo oficial de registro p/ pagar\"},{\"title\":\"Purgada a mora o contrato convalesce\"},{\"title\":\"O inadimplemento pode ser objeto de clausula resolutiva expressa(intimac\u00e3o \u00e9 ncessaria)\"},{\"title\":\"Art .39. Ser\u00e1 nula de pleno direito a cl\u00e1usula de rescis\u00e3o de contrato por inadimplemento do adquirente, quando o loteamento n\u00e3o estiver regularmente inscrito.\"},{\"title\":\"STJ\",\"children\":[{\"title\":\"INTIMA\u00c7\u00c3O PARA MORA\",\"children\":[{\"title\":\"O caput art. 32 da Lei n\u00ba 6.766/78 afirma que, se o promitente-comprador atrasar o pagamento da presta\u00e7\u00e3o, o contrato ser\u00e1 rescindido 30 dias depois de constitu\u00eddo em mora o devedor. O \u00a7 1\u00ba do art. 32 estabelece que o devedor ser\u00e1 constitu\u00eddo em mora por meio de intima\u00e7\u00e3o feita pelo Oficial do Registro de Im\u00f3veis. Mesmo sem estar expressamente previsto no dispositivo, o STJ entende que essa intima\u00e7\u00e3o de que trata o \u00a7 1\u00ba do art. 32 pode ser feita atrav\u00e9s de carta com aviso de recebimento, desde que assinado o recibo pelo devedor. Assim, a constitui\u00e7\u00e3o em mora, para fins de rescis\u00e3o de contrato de compromisso de compra e venda de im\u00f3vel em loteamento, sujeito \u00e0 disciplina da Lei n\u00ba 6.766/79, pode se dar por carta com aviso de recebimento,  D E S D E   Q U E   A S S I N A D O  o recibo pelo pr\u00f3prio devedor, nos termos do art. 49 da mesma Lei. STJ. 3\u00aa Turma. REsp 1745407/SP, Rel. Min. Marco Aur\u00e9lio Bellizze, julgado em 11/05/2021 (Info 696)\"}]}]}]},{\"title\":\"Consigna\u00e7\u00e3o em Pagto\",\"children\":[{\"title\":\"Devedor pode consigna-las\"},{\"title\":\"A consigna\u00e7\u00e3o nao levantada em 15d importa em adimplencia\"},{\"title\":\"S\u00f3 nao causa esse efeito se impugnada\"}]},{\"title\":\"Benfeitorias Necessarias e Uteis\",\"children\":[{\"title\":\"Em qlq caso de rescis\u00e3o pelo adquirente elas devem ser indenizadas\"},{\"title\":\"Mesmo que haja previsao contratual ao ocntrario\"},{\"title\":\"Se feitas em desconformidade com o contrato ou lei nao ser\u00e3oindenizadas(RETENCAO)\"},{\"title\":\"O disposto abarca as ACESSOES\"},{\"title\":\"OBS\",\"children\":[{\"title\":\"Art. 34. Em qualquer caso de rescis\u00e3o por inadimplemento do adquirente, as benfeitorias necess\u00e1rias ou \u00fateis por ele levadas a efeito no im\u00f3vel dever\u00e3o ser indenizadas, sendo de nenhum efeito qualquer disposi\u00e7\u00e3o contratual em contr\u00e1rio. \u00a7 1\u00ba  N\u00e3o ser\u00e3o indenizadas as benfeitorias feitas em desconformidade com o contrato ou com a lei.                   (Reda\u00e7\u00e3o dada pela Lei n\u00ba 13.786, de 2018) \u00a7 2\u00ba  No prazo de 60 (sessenta) dias, contado da constitui\u00e7\u00e3o em mora, fica o loteador, na hip\u00f3tese do caput deste artigo, obrigado a alienar o im\u00f3vel mediante leil\u00e3o judicial ou extrajudicial, nos termos da Lei n\u00ba 9.514, de 20 de novembro de 1997.                    (Inclu\u00eddo pela Lei n\u00ba 13.786, de 2018)\"}]}]},{\"title\":\"Valor do Pagto Cancelamento do Registro por Inadimplemento FCC - 2022 - DPE-AP - Defensor P\u00fablico\",\"children\":[{\"title\":\"Em caso de cancelamento e havendo pagto de + de 1/3\"},{\"title\":\"Oficial deve mencionar isso, e somente ser\u00e1 feito novo registro se houver restitui\u00e7\u00e3o\"},{\"title\":\"Havendo deposito, ofiicial intima p/ levantar em 10 dias\"},{\"title\":\"Deve ter o distrato tambem\"},{\"title\":\"OBS\",\"children\":[{\"title\":\"Art. 35.  Se ocorrer o cancelamento do registro por inadimplemento do contrato, e tiver sido realizado o pagamento de mais de 1/3 (um ter\u00e7o) do pre\u00e7o ajustado, o oficial do registro de im\u00f3veis mencionar\u00e1 esse fato e a quantia paga no ato do cancelamento, e somente ser\u00e1 efetuado novo registro relativo ao mesmo lote, mediante apresenta\u00e7\u00e3o do distrato assinado pelas partes e a comprova\u00e7\u00e3o do pagamento da parcela \u00fanica ou da primeira parcela do montante a ser restitu\u00eddo ao adquirente, na forma do art. 32-A desta Lei, ao titular do registro cancelado, ou mediante dep\u00f3sito em dinheiro \u00e0 sua disposi\u00e7\u00e3o no registro de im\u00f3veis.                   (Reda\u00e7\u00e3o dada pela Lei n\u00ba 13.786, de 2018) \u00a7 1\u00ba Ocorrendo o dep\u00f3sito a que se refere este artigo, o Oficial do Registro de Im\u00f3veis intimar\u00e1 o interessado para vir receb\u00ea-lo no prazo de 10 (dez) dias, sob pena de ser devolvido ao depositante. \u00a7 2\u00ba No caso de n\u00e3o se encontrado o interessado, o Oficial do Registro de Im\u00f3veis depositar\u00e1 quantia em estabelecimento de cr\u00e9dito, segundo a ordem prevista no inciso I do art. 666 do C\u00f3digo de Processo Civil, em conta com incid\u00eancia de juros e corre\u00e7\u00e3o monet\u00e1ria. \u00a7 3\u00ba  A obriga\u00e7\u00e3o de comprova\u00e7\u00e3o pr\u00e9via de pagamento da parcela \u00fanica ou da primeira parcela como condi\u00e7\u00e3o para efetiva\u00e7\u00e3o de novo registro, prevista no caput deste artigo, poder\u00e1 ser dispensada se as partes convencionarem de modo diverso e de forma expressa no documento de distrato por elas assinado.                    (Inclu\u00eddo pela Lei n\u00ba 13.786, de 2018)\"}]}]}]},{\"title\":\"Disposi\u00e7\u00f5es Gerais\",\"children\":[{\"title\":\"Ilicito Civil e Penal Promotor MP/MS 2018\",\"children\":[{\"title\":\"\u00c9 vedado vender o prometer parcela de loteamento n\u00e3o REGISTRADO\",\"children\":[{\"title\":\"Quest\u00e3o Cespe\",\"children\":[{\"title\":\"Afirmou que nesse caso a promessa de compra e venda\"},{\"title\":\"Estaria sujeita a condi\u00e7\u00e3o. \u00c9 vedado, conforme vemos abaixo\"}]}]},{\"title\":\"STJ\",\"children\":[{\"title\":\"A averba\u00e7\u00e3o do desmembramento de im\u00f3vel urbano \u00e9 condi\u00e7\u00e3o indispens\u00e1vel para a proced\u00eancia da a\u00e7\u00e3o de adjudica\u00e7\u00e3o compuls\u00f3ria. STJ. 3\u00aa Turma. REsp 1.851.104-SP, Rel. Min. Ricardo Villas B\u00f4as Cueva, julgado em 12/05/2020 (Info 672)\"},{\"title\":\"A aliena\u00e7\u00e3o de terrenos a consumidores de baixa renda em loteamento irregular, tendo sido veiculada publicidade enganosa sobre a exist\u00eancia de autoriza\u00e7\u00e3o do \u00f3rg\u00e3o p\u00fablico e de registro no cart\u00f3rio de im\u00f3veis, configura les\u00e3o ao direito da coletividade e d\u00e1 ensejo \u00e0 indeniza\u00e7\u00e3o por dano moral coletivo. STJ. 4\u00aa Turma. REsp 1539056/MG, Rel. Min. Luis Felipe Salom\u00e3o, julgado em 06/04/2021 (Info 691).\"}]}]},{\"title\":\"AUSENCIA DE REGISTRO JUSTA CAUSA CESPE / CEBRASPE - 2023 - PGM - SP - Procurador do Munic\u00edpio\",\"children\":[{\"title\":\"Adquirente deve suspender o pagto e notificar o loteador p/ regularizar\"},{\"title\":\"Ausencia de registro \u00e9 justa causa p/ suspens\u00e3o do pagto\"},{\"title\":\"Adquirente pode depositar os valores junto ao registro de imoveis\"},{\"title\":\"Municipalidade ou MP podem notificar o loteador\"},{\"title\":\"E se regularizar?\",\"children\":[{\"title\":\"Loteador deve entrar no PJ p/ levantar os valores\"},{\"title\":\"Poder publico e MP devem integrar o processo\"},{\"title\":\"Apos a decis\u00e3o loteador pode notificar adquirentes p/ pagto direto\"}]},{\"title\":\"E se nao atender notifica\u00e7\u00e3o\",\"children\":[{\"title\":\"Nao tem direito a levantar os valores\"}]}]},{\"title\":\"Co-rela\u00e7\u00e3o entre as presta\u00e7\u00f5es\",\"children\":[{\"title\":\"Compromisso de compra e venda de imoveis \u00e9 COMUTATIVO\"},{\"title\":\"Sendo o loteamento ilegal o loteador nao pode exigir recebimento dos valores\"},{\"title\":\"\u00c9 nulo de pleno direito a clausula de rescis\u00e3o por inad. do adquirente, qnd lote nao estiver regular\"}]},{\"title\":\"Responsa Municipal\",\"children\":[{\"title\":\"Pode regularizar o loteamento se loteador nao atender a notificac\u00e3o\"},{\"title\":\"Visando evitar les\u00e3o ao desenvolvimento urbano e na defesa dos adquirentes\"},{\"title\":\"O M tbm obtem os valores depositados judicialmente p/ ressarcir suas despesas\"},{\"title\":\"A parte faltante em caso de ressarcimento \u00e9 cobrada do loteador\"},{\"title\":\"Nao cumprindo o montante, a prefeitura pode receber diretamente dos adquirentes\"},{\"title\":\"As medidas judiciais necessarias podem ser feitas liminarmente\"},{\"title\":\"Apos regulariza\u00e7\u00e3o, o adquirente, comprovando todo o pagto, pode requerer o registro\",\"children\":[{\"title\":\"OBS\",\"children\":[{\"title\":\"Serve a promessa de compra e venda\"}]}]},{\"title\":\"Entendimento STJ\",\"children\":[{\"title\":\"Diz que o M tem poder-dever de agir, por ser responsa pelo proced.\"},{\"title\":\"Nao age as suas expensas\"},{\"title\":\"O fato de ter aplicado multa e embargado a obra?\",\"children\":[{\"title\":\"Nao o exime de responsa. Deve regularizar as expensas o loteador\"}]},{\"title\":\"Se nao avocar essa responsa e resultar dano ambiental o M responde\"}]},{\"title\":\"obs\",\"children\":[{\"title\":\"O Munic\u00edpio \u00e9 titular do dever de regularizar loteamentos clandestinos ou irregulares, mas a sua atua\u00e7\u00e3o deve-se restringir \u00e0s obras essenciais a serem implantadas, em conformidade com a legisla\u00e7\u00e3o urban\u00edstica local (art. 40, \u00a7 5\u00ba, da Lei 6.799/1979), em especial \u00e0 infraestrutura necess\u00e1ria para melhoria na malha urbana, como ruas, esgoto, energia e ilumina\u00e7\u00e3o p\u00fablica, de modo a atender aos moradores j\u00e1 instalados. Inexiste tal dever em rela\u00e7\u00e3o \u00e0s parcelas do loteamento irregular ainda n\u00e3o ocupadas. (STJ: AgInt no REsp 1338246/SP, Rel. Ministro HERMAN BENJAMIN, SEGUNDA TURMA, julgado em 14/03/2017, DJe 20/04/2017)\"},{\"title\":\"STJ: \u201c\u00c9 pac\u00edfico o entendimento desta Corte Superior de que o Munic\u00edpio tem o poder-dever de agir para fiscalizar e regularizar loteamento irregular, pois \u00e9 o respons\u00e1vel pelo parcelamento, uso e ocupa\u00e7\u00e3o do solo urbano, atividade essa que \u00e9 vinculada, e n\u00e3o discricion\u00e1ria\u201d. CESPE - 2017 - PGE-SE - Procurador do Estado\"}]}]},{\"title\":\"Desapropria\u00e7\u00f5es CESPE / CEBRASPE - 2023 - PGM - SP - Procurador do Munic\u00edpio\",\"children\":[{\"title\":\"Se o loteamento ainda nao foi registrado nao \u00e9 possivel...\"},{\"title\":\"Considerar o bem como um conj. de lotes. A unidade inteira \u00e9 avaliada\"},{\"title\":\"Art. 42. Nas desapropria\u00e7\u00f5es N \u00c3 O ser\u00e3o considerados como loteados ou lote\u00e1veis, para fins de indeniza\u00e7\u00e3o, os terrenos ainda n\u00e3o vendidos ou compromissados, objeto de loteamento ou desmembramento n\u00e3o registrado.\"}]},{\"title\":\"San\u00e7\u00e3o\",\"children\":[{\"title\":\"Implantac\u00e3o de loteamento nao registrado nao impede a doa\u00e7\u00e3o de areas ao M\"},{\"title\":\"Nesse caso a lei comina pagto \\\"em dobro\\\"\"}]},{\"title\":\"Reloteamento -  Desapropria\u00e7\u00e3o por Int. Social\",\"children\":[{\"title\":\"M, DF e Estado podem desapropriar areas urb. p/ fins de RELOTEAMENTO e outros...\"},{\"title\":\"Os expropriados tem PREFERENCIA p/ aquisi\u00e7\u00e3o das novas unidades\"}]},{\"title\":\"Norma Processual\",\"children\":[{\"title\":\"Loteador, ainda que vendido todos os lotes \u00e9 parte legitima p/ a\u00e7\u00e3o destinada a...\"},{\"title\":\"Imepdir constru\u00e7\u00f5es em desacordo com a Lei ou Contrato\"},{\"title\":\"Vizinhos tbm tem legitimidade?\",\"children\":[{\"title\":\"Sim!\"}]},{\"title\":\"Loteador nao pode fundamentar qlq a\u00e7\u00e3o sem comprova\u00e7\u00e3o do REGISTRO e dos contratos\"},{\"title\":\"STJ - Comprovado o registro, \u00e9 desnecessario o contrato\"}]},{\"title\":\"Responsa Solidaria\",\"children\":[{\"title\":\"Grupos economicos, qlq PF ou PJ desses grupos tem essa responsa\"},{\"title\":\"Tanto perante compradores como perante o poder publico\"}]},{\"title\":\"Foro Competente\",\"children\":[{\"title\":\"Local do Lote\"}]},{\"title\":\"Norma Procedimental\",\"children\":[{\"title\":\"Preferencialmente, as intima\u00e7\u00f5es devem ser pessoais\"},{\"title\":\"A Lei permite AR e admite Edital(10d)\"}]},{\"title\":\"Transparencia\",\"children\":[{\"title\":\"Art . 24. O processo de loteamento e os contratos de depositados em Cart\u00f3rio poder\u00e3o ser examinados por qualquer pessoa, a qualquer tempo, independentemente do pagamento de custas ou emolumentos, ainda que a t\u00edtulo de busca.\"}]}]},{\"title\":\"Disposi\u00e7\u00f5es Penais\",\"children\":[{\"title\":\"A Lei prev\u00ea crimes expressamente no art. 50, todos de perigo ABSTRATO\"},{\"title\":\"Registrar loteamento n\u00e3o aprovado pelos \u00f3rg\u00e3os competentes sujeita o agente \u00e0 pena de deten\u00e7\u00e3o e multa\"},{\"title\":\"A Lei exige DOLO\"},{\"title\":\"Entendimento STJ\",\"children\":[{\"title\":\"Se o parcelamento \u00e9 regularizado antes do of. da denuncia?\",\"children\":[{\"title\":\"N\u00e3o h\u00e1 dolo, logo, nao h\u00e1 crime\"}]},{\"title\":\"Crime permanente ou instantaneo?\",\"children\":[{\"title\":\"Instantaneo de ef. permanentes(marco inicial da prescri\u00e7\u00e3o = data de inciio do loteamento)\"}]}]},{\"title\":\"Competencia da Ac\u00e3o Penal\",\"children\":[{\"title\":\"Estadual, mesmo que diante de bens da Uni\u00e3o\"}]},{\"title\":\"S\u00e3o crimes considerados contra admin. publica(3)\",\"children\":[{\"title\":\"Parcelamentos irregulares\"},{\"title\":\"Ocultac\u00e3o de vicios\"},{\"title\":\"Divulga\u00e7\u00e3o de parcelamentos irregulares\"}]},{\"title\":\"A Lei traz 2 hip. que qualificam o crime:  Instituto Consulplan - 2019 - MPE-SC - Promotor\",\"children\":[{\"title\":\"OBS\",\"children\":[{\"title\":\"CESPE - 2018 - PGM - Jo\u00e3o Pessoa - PB - Procurador do Munic\u00edpio Par\u00e1grafo \u00fanico - O crime definido neste artigo \u00e9 qualificado, se cometido. I - por meio de venda, promessa de venda, reserva de lote ou quaisquer outros instrumentos que manifestem a inten\u00e7\u00e3o de vender lote em loteamento ou desmembramento n\u00e3o registrado no Registro de Im\u00f3veis competente. II - com inexist\u00eancia de t\u00edtulo leg\u00edtimo de propriedade do im\u00f3vel loteado ou desmembrado, ressalvado o disposto no art. 18, \u00a7\u00a7 4o e 5o, desta Lei, ou com omiss\u00e3o fraudulenta de fato a ele relativo, se o fato n\u00e3o constituir crime mais grave.\"}]}]}]},{\"title\":\"Disposi\u00e7\u00f5es Finais\",\"children\":[{\"title\":\"Transi\u00e7\u00e3o da Area Urbana p Rural\",\"children\":[{\"title\":\"Depende do INCRA!\"}]}]}]},\"cap2\":{\"title\":\"2. Concess\u00e3o de Uso Especial \u2014 MP 2.220/2001\",\"children\":[{\"title\":\"Modalidade Individual\",\"children\":[{\"title\":\"Destina\u00e7\u00e3o Especifica\",\"children\":[{\"title\":\"Regula concess\u00e3o de uso com finalidade especifica de cria\u00e7\u00e3o de moradia\"},{\"title\":\"Pode ocorrer em imoveis remanescente de desapropria\u00e7\u00e3o transf. a EP e SEM(Art. 25 da Lei 11.481/07)\"}]},{\"title\":\"Limite Temporal\",\"children\":[{\"title\":\"MP de 2016 alterou a reda\u00e7\u00e3o e previu a data de 22.12.2016\"}]},{\"title\":\"Req. da Norma\",\"children\":[{\"title\":\"Intro\",\"children\":[{\"title\":\"Se assemelham ao usucapi\u00e3o, com a diferen\u00e7a que aqui \u00e9 do TERRENO PUBLICO\"}]},{\"title\":\"Registro\",\"children\":[{\"title\":\"\u00c9 direito REAL sendo necessario REGISTRO PUBLICO\"}]},{\"title\":\"Rol FCC - 2022 - DPE-AP - Defensor P\u00fablico\",\"children\":[{\"title\":\"Lapso Temporal de 5 anos\"},{\"title\":\"Area de at\u00e9 250m2\",\"children\":[{\"title\":\"Entendimento STJ - N\u00e3o h\u00e1 limite max.. O que se tem \u00e9 tamanho ocupado\"},{\"title\":\"Admite-se de apartamentos onde a area comum nao conta no limite(STJ)\"}]},{\"title\":\"Imovel publico situado em area urbana\"},{\"title\":\"Finalidade:  \u00c0 CONCESS\u00c3O DE USO ESPECIAL PARA FINS DE MORADIA\"},{\"title\":\"Nao seja proprietario ou concessionario, a qlq titulo de outro imovel, seja urbano ou rural. N\u00e3o exige justo titulo e nem boa-f\u00e9\"},{\"title\":\"obs\",\"children\":[{\"title\":\"O benefici\u00e1rio n\u00e3o pode receber a concess\u00e3o de uso especial para fins de moradia novamente em rela\u00e7\u00e3o a um segundo im\u00f3vel se comprovar que o primeiro se tornou inserv\u00edvel por deteriora\u00e7\u00e3o ap\u00f3s a concess\u00e3o. A concess\u00e3o \u00e9 espec\u00edfica para o im\u00f3vel objeto da posse inicial.\"}]}]}]},{\"title\":\"Concess\u00e3o Gratuita A Lei confere Gratuidade de Justi\u00e7a CESPE / CEBRASPE - 2023 - DPE-RO - Defensor FCC - 2022 - DPE-AP - Defensor P\u00fablico CESPE / CEBRASPE - 2023 - PGM - SP - Procurador\",\"children\":[{\"title\":\"Uso especial \u00e9 concedido de forma gratuita, independente do estado civil\"},{\"title\":\"Concedido ao H ou M ou a ambos\"},{\"title\":\"N\u00e3o exige contrapartida\"}]},{\"title\":\"Soma de Posses\",\"children\":[{\"title\":\"Soma de periodos p/ os fins da norma em caso de falecimento\"},{\"title\":\"O herdeiro j\u00e1 deve morar no local\"},{\"title\":\"N\u00e3o BASTA a POSSE DECORRENTE da SAISINE(acessio possessiones)\"}]},{\"title\":\"Natureza Juridica do Direito\",\"children\":[{\"title\":\"Ato VINCULADO com natureza juridica de DIREITO REAL\"},{\"title\":\"Callout\",\"children\":[{\"title\":\"Medida Provis\u00f3ria n.\u00b0 2.220/2001, Art. 6o  O t\u00edtulo de concess\u00e3o de uso especial para fins de moradia ser\u00e1 obtido pela via administrativa perante o \u00f3rg\u00e3o competente da Administra\u00e7\u00e3o P\u00fablica ou, em caso de recusa ou omiss\u00e3o deste, pela via judicial.\"}]}]}]},{\"title\":\"Modalidade Coletiva Ler a Lei de Regulariza\u00e7\u00e3o Fundiaria MPE-SP - 2022 - MPE-SP - Promotor de Justi\u00e7a Substituto\",\"children\":[{\"title\":\"Conceito\",\"children\":[{\"title\":\"Ocorre qnd nao \u00e9 possivel identificar as posses individuais\"},{\"title\":\"A Lei fala em popula\u00e7\u00e3o de baixa renda\"},{\"title\":\"H\u00e1 co-titularidade entre os ocupantes. N\u00e3o h\u00e1 disposi\u00e7\u00e3o qnt ao administrador\"},{\"title\":\"Req.\",\"children\":[{\"title\":\"Iguais aos de cima, sendo q o imovel maior de 250 m2\"}]}]},{\"title\":\"Soma de Posses\",\"children\":[{\"title\":\"A Lei admite soma de posses entre PESSOAS VIVAS\"},{\"title\":\"Nao exige que se mantenha o msm n\u02da de possuidores\"}]},{\"title\":\"Fra\u00e7\u00f5es do Imovel\",\"children\":[{\"title\":\"Ser\u00e3o definidas fra\u00e7\u00f5es identicas para cada participante, salvo em caso de acordo\"},{\"title\":\"O limite do tamanho \u00e9 250m2\"}]}]},{\"title\":\"Dirietos\",\"children\":[{\"title\":\"Inconstitucionalidade da Norma\",\"children\":[{\"title\":\"A concessao de uso tem assento CF. A CF deixou p/ legisla\u00e7\u00e3o regulamentar\"},{\"title\":\"Alguns refutam tal previs\u00e3o sob fundamento de q o art. trata da aquisi\u00e7\u00e3o e nao poderia...\"},{\"title\":\"Dispor sobre direito real em bem publico\"},{\"title\":\"De todo modo, MP \u00e9 lei federal que trata da gest\u00e3o do bem publico\"},{\"title\":\"Norma da U n\u00e3o poderia dispor de bens estaduais e M, violando separa\u00e7\u00e3o/autonomia\"},{\"title\":\"Outros dizem que \u00e9 faculdade da U e nao seria inconstitucional\"}]},{\"title\":\"Areas de Risco\",\"children\":[{\"title\":\"Assegura-se o Direito em outro local\"},{\"title\":\"Em caso de qual tipo de bem?\",\"children\":[{\"title\":\"De uso comum\"},{\"title\":\"Destinado a projeto de urbaniz\u00e7\u00e3o\"},{\"title\":\"Interesse da defesa nacional e preserv. ambiental\"},{\"title\":\"Destinado a constru\u00e7\u00e3o de represas\"},{\"title\":\"Situado em via de comunica\u00e7\u00e3o\"},{\"title\":\"OBS\",\"children\":[{\"title\":\"Bens Dominicais?\",\"children\":[{\"title\":\"Nao tem previs\u00e3o\"}]}]}]}]},{\"title\":\"Manifesta\u00e7\u00e3o Expressa Qual procedimento pode ser usado? Pode ser por procedimento arbitral? VUNESP - 2014 - PGM - SP - Procurador FCC - 2018 - DPE-MA - Defensor P\u00fablico\",\"children\":[{\"title\":\"P/ constitui\u00e7\u00e3o do Direito \u00e9 necessario manif. expressa da admin.\"},{\"title\":\"O titulo de concess\u00e3o \u00e9 concedido administrativamente com prazo maximo de 12m\"},{\"title\":\"Em caso de recusa ou omiss\u00e3o, pela via judicial POR SENTENCA.(lei nao fala nada arbitral)\"},{\"title\":\"Se o bem for FEDERAL ou Estadual?\",\"children\":[{\"title\":\"Cabe ao particular apresentar certid\u00e3o municipal atestando a nat. urbana do bem\"},{\"title\":\"Tbm deve demonstrar a natureza residencial\"}]},{\"title\":\"Nao abrange imoveis RURAIS e nem com destinacao diferente de moradia\"}]},{\"title\":\"O concession\u00e1rio transferir seu direito de concess\u00e3o?\",\"children\":[{\"title\":\"O direito a concess\u00e3o de uso \u00e9 transferivel por ato inter vivos ou causa mortis\"},{\"title\":\"O direito nao \u00e9 personalissimo\"}]},{\"title\":\"E como funciona a extin\u00e7\u00e3o do direito \u00e0 concess\u00e3o?\",\"children\":[{\"title\":\"I - o concession\u00e1rio dar ao im\u00f3vel destina\u00e7\u00e3o diversa da moradia para si ou para sua fam\u00edlia; ou\"},{\"title\":\"II - o concession\u00e1rio adquirir a propriedade ou a concess\u00e3o de uso de outro im\u00f3vel urbano ou rural.\"},{\"title\":\"obs\",\"children\":[{\"title\":\"Par\u00e1grafo \u00fanico. A extin\u00e7\u00e3o de que trata este artigo ser\u00e1 averbada no cart\u00f3rio de registro de im\u00f3veis, por meio de declara\u00e7\u00e3o do Poder P\u00fablico concedente.\"}]}]},{\"title\":\"Autoriza\u00e7\u00e3o de Uso\",\"children\":[{\"title\":\"Pode o Poder Publico dar autoriza\u00e7\u00e3o de uso com msms req. da concess\u00e3o\"},{\"title\":\"De imovel publico situado em area caracteristicas e finaldiades urbanas p/ fins comerciais\"},{\"title\":\"Tbm permite-se a soma de posses, e tbm \u00e9 gratuito\"},{\"title\":\"Nao se aplica art. 7\u02da e 8\u02da, por ser precaria.(transferibilidade e extin\u00e7\u00e3o)\"},{\"title\":\"Pode ser dada em outro local tbm!\"}]}]},{\"title\":\"Conselho Nacional de  Desenvolvimento Urbano\"}]}}";const DATA = JSON.parse(RAW);
+
+const CHAPTERS = ["cap0","cap1","cap2"];
+const LABELS = {"cap0": "0. Estatuto da Cidade — Lei 10.257/2001", "cap1": "1. Parcelamento do Solo Urbano — Lei 6.766/1979", "cap2": "2. Concessão de Uso Especial — MP 2.220/2001"};
+
+let cur = CHAPTERS[0];
+let expanded = new Set();
+let term = "";
+let hits = 0;
+
+function detectType(t){
+  const s=(t||"").toLowerCase();
+  if(/cespe|cebraspe|fgv|vunesp|fundatec|ibfc|prova/.test(s)) return "cespe";
+  if(/stj|stf|resp|adi|adpf|adc|\bre\b|rms|agrg|info \d|súmula|sumula|julgado/.test(s)) return "stj";
+  return "obs";
+}
+
+function extractText(n,d=0){
+  if(d>4) return n.title||"";
+  let p=[n.title||""];
+  (n.children||[]).forEach(c=>p.push(extractText(c,d+1)));
+  (n.callouts||[]).forEach(c=>p.push(extractText(c,d+1)));
+  return p.filter(Boolean).join(" • ");
+}
+
+function matches(n,t){
+  if(!t) return true;
+  if((n.title||"").toLowerCase().includes(t)) return true;
+  if((n.children||[]).some(c=>matches(c,t))) return true;
+  if((n.callouts||[]).some(c=>matches(c,t))) return true;
+  return false;
+}
+
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+
+function hilite(s,t){
+  if(!t) return esc(s);
+  const re=new RegExp(`(${t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")})`,"gi");
+  return esc(s).replace(re,"<mark>$1</mark>");
+}
+
+function renderCallout(node){
+  const tipo=detectType(node.title||"");
+  const label={cespe:"CESPE/CEBRASPE",stj:"STF/STJ",obs:"OBS"}[tipo];
+  const text=extractText(node);
+  const isTrivial=!node.title||/^(obs|callout|atenção)$/i.test((node.title||"").trim());
+  const titleHtml=isTrivial?"":(`<div class="callout-title">${hilite(node.title,term)}</div>`);
+  return `<div class="callout-box ${tipo}"><div class="callout-label">${label}</div>${titleHtml}<div class="callout-body">${esc(text)}</div></div>`;
+}
+
+function renderNode(n,depth,path){
+  const id=path;
+  const hasKids=(n.children&&n.children.length)||(n.callouts&&n.callouts.length);
+  const isExp=expanded.has(id)||(term&&matches(n,term));
+  const isHit=term&&(n.title||"").toLowerCase().includes(term);
+  if(isHit) hits++;
+
+  if(n.callout) return renderCallout(n);
+
+  const tog=hasKids?(isExp?"▾":"▸"):"·";
+  const dc=depth===0?"d0":depth===1?"d1":depth===2?"d2":"dn";
+  const rowCls=`row${isHit?" hit":""}`;
+  const titleHtml=`<span class="txt ${dc}">${hilite(n.title||"",term)}</span>`;
+
+  let childHtml="";
+  if(isExp&&hasKids){
+    childHtml='<div class="children">';
+    (n.children||[]).forEach((c,i)=>{if(!term||matches(c,term)) childHtml+=renderNode(c,depth+1,path+"_"+i);});
+    (n.callouts||[]).forEach((c,i)=>{if(!term||matches(c,term)) childHtml+=renderNode({...c,callout:true},depth+1,path+"_c"+i);});
+    childHtml+="</div>";
+  }
+  return `<div class="node" id="n${id}"><div class="${rowCls}" onclick="toggle('${id}')"><span class="tog">${tog}</span>${titleHtml}</div>${childHtml}</div>`;
+}
+
+function render(){
+  const tree=DATA[cur];
+  hits=0;
+  let html="";
+  if(tree.children){
+    tree.children.forEach((n,i)=>{
+      if(!term||matches(n,term)) html+=renderNode(n,0,"r"+i);
+    });
+  }
+  document.getElementById("content").innerHTML=html||`<p class="no-res">Nenhum resultado para "${esc(term)}"</p>`;const em=document.getElementById("empty-msg");if(em)em.remove();
+  const mb=document.getElementById("matchBar");
+  if(term){mb.style.display="block";mb.textContent=`${hits} ocorrência(s) para "${term}"`;}
+  else{mb.style.display="none";}
+}
+
+function renderTabs(){
+  document.getElementById("tabs").innerHTML=CHAPTERS.map((k,i)=>{
+    const cid='durbanistico_'+i;
+    const isDone=_TRK&&_TRK.done&&_TRK.done[cid];
+    return `<div class="tab${k===cur?' active':''}" onclick="selChap('${k}')">
+      <input type="checkbox" class="_trk_chk" data-cid="${cid}" ${isDone?'checked':''} onclick="event.stopPropagation();_trkToggle('${cid}',this.checked,this)"/>
+      <span>${LABELS[k]||k}</span>
+    </div>`;
+  }).join("");
+}
+
+function selChap(k){cur=k;expanded.clear();document.getElementById("search").value="";term="";document.getElementById("matchBar").style.display="none";renderTabs();render();}
+function toggle(id){if(expanded.has(id))expanded.delete(id);else expanded.add(id);render();}
+function expandAll(){function add(n,p){expanded.add(p);(n.children||[]).forEach((c,i)=>add(c,p+"_"+i));(n.callouts||[]).forEach((c,i)=>add(c,p+"_c"+i));}const t=DATA[cur];(t.children||[]).forEach((n,i)=>add(n,"r"+i));render();}
+function collapseAll(){expanded.clear();render();}
+
+let deb;
+document.getElementById("search").addEventListener("input",function(){
+  clearTimeout(deb);
+  deb=setTimeout(()=>{term=this.value.toLowerCase().trim();render();},250);
+});
+
+renderTabs();
+render();
+</script>
+
+<button id="theme-toggle-btn" onclick="toggleMapTheme()">☀️ Claro</button>
+<script>
+(function(){
+  const saved = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  window.addEventListener('DOMContentLoaded', function(){
+    const btn = document.getElementById('theme-toggle-btn');
+    if(btn) btn.textContent = saved === 'dark' ? '☀️ Claro' : '🌙 Escuro';
+  });
+})();
+function toggleMapTheme(){
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  const btn = document.getElementById('theme-toggle-btn');
+  if(btn) btn.textContent = next === 'dark' ? '☀️ Claro' : '🌙 Escuro';
+}
+</script>
+
+<!-- WORD-STYLE TOOLBAR -->
+<div id="_wtb">
+  <!-- Theme -->
+  <div class="_grp">
+    <button class="_tb-btn" id="_tb" onclick="_tT()" title="Alternar tema">☀️</button>
+  <a href="index.html" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;text-decoration:none;white-space:nowrap;">← Portal</a>
+  <a href="index.html" onclick="try{sessionStorage.setItem('_gotoTab','tracker')}catch(e){}" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;text-decoration:none;white-space:nowrap;">📊 Tracker</a>
+  <button class="_tb-btn" id="_mm_btn" onclick="window.__MM&&window.__MM.toggle(window.__MM_getData())" title="Mapa Mental" style="font-size:15px;padding:2px 8px;">🌐</button>
+  </div>
+  <div class="_sep"></div>
+
+  <!-- Highlight -->
+  <div class="_grp">
+    <span class="_grp-label">Destaque</span>
+    <span class="_sw" style="background:rgba(250,204,21,0.7)" onclick="_hl('yellow')" id="_sw_y" title="Amarelo"></span>
+    <span class="_sw" style="background:rgba(34,197,94,0.65)" onclick="_hl('green')"  id="_sw_g" title="Verde"></span>
+    <span class="_sw" style="background:rgba(59,130,246,0.65)" onclick="_hl('blue')"  id="_sw_b" title="Azul"></span>
+    <span class="_sw" style="background:rgba(239,68,68,0.65)"  onclick="_hl('red')"   id="_sw_r" title="Vermelho"></span>
+    <button class="_tb-btn" onclick="_hl(null)" title="Remover destaque">✕</button>
+  </div>
+  <div class="_sep"></div>
+
+  <!-- Font Color -->
+  <div class="_grp">
+    <span class="_grp-label">Cor</span>
+    <span class="_sw" style="background:#818cf8" onclick="_fc('#818cf8')" id="_fc_1" title="Amarelo"></span>
+    <span class="_sw" style="background:#34d399" onclick="_fc('#34d399')" id="_fc_2" title="Verde"></span>
+    <span class="_sw" style="background:#60a5fa" onclick="_fc('#60a5fa')" id="_fc_3" title="Azul"></span>
+    <span class="_sw" style="background:#f87171" onclick="_fc('#f87171')" id="_fc_4" title="Vermelho"></span>
+    <span class="_sw" style="background:#c084fc" onclick="_fc('#c084fc')" id="_fc_5" title="Roxo"></span>
+    <span class="_sw" style="background:#fb923c" onclick="_fc('#fb923c')" id="_fc_6" title="Laranja"></span>
+    <button class="_tb-btn" onclick="_fc(null)" title="Cor padrão">✕</button>
+  </div>
+  <div class="_sep"></div>
+
+  <!-- Font Size -->
+  <div class="_grp">
+    <span class="_grp-label">Tamanho</span>
+    <button class="_tb-btn" onclick="_fs(-1)" title="Diminuir">A−</button>
+    <input class="_fs-num" id="_fsv" type="text" value="—" readonly title="Tamanho atual">
+    <button class="_tb-btn" onclick="_fs(1)" title="Aumentar">A+</button>
+    <button class="_tb-btn" onclick="_fs(0)" title="Reset">↺</button>
+  </div>
+  <div class="_sep"></div>
+
+  <!-- Flags -->
+  <div class="_grp">
+    <span class="_grp-label">Flag</span>
+    <button class="_tb-btn" id="_f0" onclick="_fl('hard')"   title="Difícil">🔴</button>
+    <button class="_tb-btn" id="_f1" onclick="_fl('review')" title="Revisar">🟡</button>
+    <button class="_tb-btn" id="_f2" onclick="_fl('done')"   title="Dominado">🟢</button>
+    <button class="_tb-btn" onclick="_fl(null)" title="Remover flag">✕</button>
+  </div>
+  <div class="_sep"></div>
+
+  <!-- Note -->
+  <div class="_grp">
+    <button class="_tb-btn" id="_ntbtn" onclick="_on()" title="Adicionar nota">✏️ Nota</button>
+  </div>
+  <div class="_sep"></div>
+  <div class="_grp">
+    <button onclick="_doLogout()" style="font-size:12px;font-family:monospace;color:#ef4444;background:none;border:1px solid #ef4444;border-radius:6px;padding:3px 10px;cursor:pointer;white-space:nowrap;">Sair</button>
+  </div>
+
+  <!-- Selected node info -->
+  <div id="_sel-info">← Clique num nó para marcar</div>
+</div>
+
+<!-- NOTE MODAL -->
+<div id="_np">
+  <div class="_npb">
+    <div class="_nptitle" id="_npt">📝 Nota</div>
+    <textarea class="_npta" id="_npta" placeholder="Escreva sua anotação..."></textarea>
+    <div class="_npact">
+      <button class="_npcxl" onclick="_cn()">Cancelar</button>
+      <button class="_npsave" onclick="_sn()">Salvar nota</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ── THEME ──
+(function(){
+  var s=localStorage.getItem('theme')||'dark';
+  document.documentElement.setAttribute('data-theme',s);
+  window.addEventListener('DOMContentLoaded',function(){
+    var b=document.getElementById('_tb');
+    if(b)b.textContent=s==='dark'?'☀️':'🌙';
+  });
+})();
+function _tT(){
+  var h=document.documentElement;
+  var n=h.getAttribute('data-theme')==='dark'?'light':'dark';
+  h.setAttribute('data-theme',n);localStorage.setItem('theme',n);
+  var b=document.getElementById('_tb');if(b)b.textContent=n==='dark'?'☀️':'🌙';
+}
+
+// ── AUTH via URL hash token ──
+var _sb=supabase.createClient('https://qseismabfaonggrwzuiu.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzZWlzbWFiZmFvbmdncnd6dWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzU4MTMsImV4cCI6MjA5Mzc1MTgxM30.eYnWJo9NI_-wGJCd2HalmnCGMhMvlKZxmZKuTpx3xS0', {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: false,
+    storage: {
+      getItem: (k) => { try { return localStorage.getItem(k); } catch(e) { return null; } },
+      setItem: (k,v) => { try { localStorage.setItem(k,v); } catch(e) {} },
+      removeItem: (k) => { try { localStorage.removeItem(k); } catch(e) {} }
+    }
+  }
+});
+var _mid='durbanistico';
+var _u=null,_m={},_sid=null,_sel=null;
+
+// Auth: read directly from Supabase localStorage (same domain, same storage)
+window.addEventListener('DOMContentLoaded',function(){
+  _sb.auth.getSession().then(function(r){
+    if(r.data&&r.data.session&&r.data.session.user){
+      _u=r.data.session.user;
+      _lm().then(_aa);
+    }
+  });
+});
+
+// ── LOAD MARKS ──
+async function _lm(){
+  if(!_u)return;
+  try{
+    var opts={headers:{'Authorization':'Bearer '+(_u._token||''),'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzZWlzbWFiZmFvbmdncnd6dWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzU4MTMsImV4cCI6MjA5Mzc1MTgxM30.eYnWJo9NI_-wGJCd2HalmnCGMhMvlKZxmZKuTpx3xS0'}};
+    var [a,b,c,d]=await Promise.all([
+      _sb.from('highlights').select('node_id,color').eq('user_id',_u.id).eq('map_id',_mid),
+      _sb.from('node_flags').select('node_id,flag').eq('user_id',_u.id).eq('map_id',_mid),
+      _sb.from('node_notes').select('node_id,content').eq('user_id',_u.id).eq('map_id',_mid),
+      _sb.from('node_style').select('node_id,font_color,font_size').eq('user_id',_u.id).eq('map_id',_mid),
+    ]);
+    _m={};
+    if(a.data)a.data.forEach(function(r){if(!_m[r.node_id])_m[r.node_id]={};_m[r.node_id].hl=r.color;});
+    if(b.data)b.data.forEach(function(r){if(!_m[r.node_id])_m[r.node_id]={};_m[r.node_id].fl=r.flag;});
+    if(c.data)c.data.forEach(function(r){if(!_m[r.node_id])_m[r.node_id]={};_m[r.node_id].nt=r.content;});
+    if(d.data)d.data.forEach(function(r){if(!_m[r.node_id])_m[r.node_id]={};_m[r.node_id].fc=r.font_color;_m[r.node_id].fs=r.font_size;});
+  }catch(e){console.warn('load err',e);}
+}
+
+// ── APPLY MARKS TO DOM ──
+function _aa(){Object.keys(_m).forEach(function(nid){var el=document.querySelector('[data-mnid="'+nid+'"]');if(el)_am(el,nid);});}
+
+function _txt(el){return el.querySelector('.node-text,.txt,.node-content>span')||el.querySelector('span')||el;}
+
+function _am(el,nid){
+  var mk=_m[nid]||{};
+  var t=_txt(el);
+  t.classList.remove('hl-yellow','hl-green','hl-blue','hl-red');
+  el.querySelectorAll('._fb2,._nb3').forEach(function(e){e.remove();});
+  if(mk.hl)t.classList.add('hl-'+mk.hl);
+  if(mk.fc)t.style.color=mk.fc; else t.style.removeProperty('color');
+  if(mk.fs)t.style.fontSize=mk.fs+'px'; else t.style.removeProperty('font-size');
+  if(mk.fl){var fb=document.createElement('span');fb.className='_fb2';fb.style.cssText='margin-left:5px;font-size:12px;';fb.textContent=mk.fl==='hard'?'🔴':mk.fl==='review'?'🟡':'🟢';t.after(fb);}
+  if(mk.nt&&mk.nt.trim()){var nb=document.createElement('span');nb.className='_nb3';nb.style.cssText='margin-left:4px;cursor:help;font-size:11px;';nb.title=mk.nt;nb.textContent='📝';t.after(nb);}
+}
+
+// ── NODE SELECTION ──
+function _mkid(el){
+  var t=_txt(el);
+  var lbl=(t?t.textContent:'').trim().slice(0,40);
+  return lbl.replace(/\s+/g,'_').replace(/[^a-z0-9_]/gi,'').toLowerCase()+'__'+_mid;
+}
+
+document.addEventListener('click',function(e){
+  if(e.target.closest('#_wtb,#_np'))return;
+  var row=e.target.closest('.node-row,.row,.node-content');
+  if(!row)return;
+  if(_sel)_sel.classList.remove('_sel');
+  var nid=row.getAttribute('data-mnid');
+  if(!nid){nid=_mkid(row);row.setAttribute('data-mnid',nid);}
+  _sid=nid;_sel=row;row.classList.add('_sel');
+  var t=_txt(row);
+  var lbl=(t?t.textContent:'').trim().slice(0,50);
+  var si=document.getElementById('_sel-info');if(si)si.textContent=lbl||'Nó selecionado';
+  // Update flag buttons
+  document.querySelectorAll('#_f0,#_f1,#_f2').forEach(function(b){b.classList.remove('_on');});
+  var mk=_m[nid]||{};
+  if(mk.fl){var fi={hard:'_f0',review:'_f1',done:'_f2'};var fb=document.getElementById(fi[mk.fl]);if(fb)fb.classList.add('_on');}
+  // Update font size display
+  var fv=document.getElementById('_fsv');if(fv)fv.value=mk.fs?(mk.fs+'px'):'—';
+  // Update color swatches
+  document.querySelectorAll('._sw').forEach(function(s){s.classList.remove('_on');});
+  if(mk.hl){var sw=document.getElementById('_sw_'+mk.hl[0]);if(sw)sw.classList.add('_on');}
+  if(mk.fc){var fcb=document.querySelector('._sw[onclick*="'+mk.fc+'"]');if(fcb)fcb.classList.add('_on');}
+});
+
+// ── ACTIONS ──
+function _uid(){return _u?_u.id:null;}
+
+async function _hl(color){
+  if(!_sid)return;if(!_u){alert('Faça login para usar marcações');return;}
+  if(!_m[_sid])_m[_sid]={};_m[_sid].hl=color;
+  if(_sel)_am(_sel,_sid);
+  document.querySelectorAll('._sw[id^="_sw_"]').forEach(function(s){s.classList.remove('_on');});
+  if(color){var sw=document.getElementById('_sw_'+color[0]);if(sw)sw.classList.add('_on');await _sb.from('highlights').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,color:color},{onConflict:'user_id,map_id,node_id'});}
+  else await _sb.from('highlights').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
+}
+
+async function _fc(color){
+  if(!_sid)return;if(!_u){alert('Faça login para usar marcações');return;}
+  if(!_m[_sid])_m[_sid]={};_m[_sid].fc=color;
+  if(_sel)_am(_sel,_sid);
+  document.querySelectorAll('._sw[id^="_fc_"]').forEach(function(s){s.classList.remove('_on');});
+  if(color){var fcb=document.querySelector('._sw[onclick*="'+color+'"]');if(fcb)fcb.classList.add('_on');}
+  var sz=(_m[_sid]&&_m[_sid].fs)||null;
+  if(color||sz)await _sb.from('node_style').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,font_color:color,font_size:sz},{onConflict:'user_id,map_id,node_id'});
+  else await _sb.from('node_style').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
+}
+
+async function _fs(delta){
+  if(!_sid)return;if(!_u){alert('Faça login para usar marcações');return;}
+  if(!_m[_sid])_m[_sid]={};
+  var t=_sel?_txt(_sel):null;
+  var cur=(_m[_sid].fs)||(t?parseInt(window.getComputedStyle(t).fontSize)||13:13);
+  var nv=delta===0?null:Math.max(8,Math.min(28,cur+delta));
+  _m[_sid].fs=nv;
+  if(_sel)_am(_sel,_sid);
+  var fv=document.getElementById('_fsv');if(fv)fv.value=nv?(nv+'px'):'—';
+  var fc=(_m[_sid]&&_m[_sid].fc)||null;
+  if(nv||fc)await _sb.from('node_style').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,font_color:fc,font_size:nv},{onConflict:'user_id,map_id,node_id'});
+  else await _sb.from('node_style').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
+}
+
+async function _fl(flag){
+  if(!_sid)return;if(!_u){alert('Faça login para usar marcações');return;}
+  if(!_m[_sid])_m[_sid]={};_m[_sid].fl=flag;
+  if(_sel)_am(_sel,_sid);
+  document.querySelectorAll('#_f0,#_f1,#_f2').forEach(function(b){b.classList.remove('_on');});
+  if(flag){var fi={hard:'_f0',review:'_f1',done:'_f2'};var fb=document.getElementById(fi[flag]);if(fb)fb.classList.add('_on');await _sb.from('node_flags').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,flag:flag},{onConflict:'user_id,map_id,node_id'});}
+  else await _sb.from('node_flags').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
+}
+
+function _on(){
+  if(!_sid)return;
+  var mk=_m[_sid]||{};
+  document.getElementById('_npta').value=mk.nt||'';
+  var si=document.getElementById('_sel-info');
+  document.getElementById('_npt').textContent='📝 Nota: '+(si?si.textContent:'');
+  document.getElementById('_np').classList.add('_o');
+}
+function _cn(){document.getElementById('_np').classList.remove('_o');}
+async function _sn(){
+  if(!_sid||!_u)return _cn();
+  var content=document.getElementById('_npta').value;
+  if(!_m[_sid])_m[_sid]={};_m[_sid].nt=content;
+  if(_sel)_am(_sel,_sid);
+  if(content.trim())await _sb.from('node_notes').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,content:content},{onConflict:'user_id,map_id,node_id'});
+  else await _sb.from('node_notes').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
+  _cn();
+}
+</script>
+
+<script>
+async function _doLogout(){
+  var sb2=supabase.createClient('https://qseismabfaonggrwzuiu.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzZWlzbWFiZmFvbmdncnd6dWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzU4MTMsImV4cCI6MjA5Mzc1MTgxM30.eYnWJo9NI_-wGJCd2HalmnCGMhMvlKZxmZKuTpx3xS0');
+  await sb2.auth.signOut();
+  window.location.href='index.html';
+}
+</script>
+
+<script>
+// ── TRACKER INTEGRATION ──
+var _TRK = {
+  mapId: 'durbanistico',
+  total: 3,
+  done: {},  // chapter_id -> true
+  user: null,
+};
+
+// Auth
+window.addEventListener('DOMContentLoaded', function(){
+  _sb.auth.getSession().then(function(r){
+    if(r.data&&r.data.session&&r.data.session.user){
+      _TRK.user = r.data.session.user;
+      _trkLoad();
+    } else {
+      _trkRender();
+    }
+  });
+});
+
+async function _trkLoad(){
+  try{
+    var r = await _sb.from('progress')
+      .select('chapter_id,done')
+      .eq('user_id', _TRK.user.id);
+    _TRK.done = {};
+    if(r.data) r.data.forEach(function(row){
+      if(row.done && row.chapter_id.startsWith(_TRK.mapId+'_'))
+        _TRK.done[row.chapter_id] = true;
+    });
+    try{ Object.keys(_TRK.done).forEach(function(cid){ localStorage.setItem('_pgprog_'+cid,JSON.stringify({done:true,date:null})); }); }catch(_){}
+    _trkRender();
+  }catch(e){ console.warn('tracker load err', e); }
+}
+
+function _trkRender(){
+  var count = Object.keys(_TRK.done).length;
+  var pct = _TRK.total ? Math.round(count/_TRK.total*100) : 0;
+  // Update both injected header bar and sidebar bar
+  ['_trk_fill','trk-fill'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.width=pct+'%';});
+  ['_trk_pct','trk-pct'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=pct+'%';});
+  ['_trk_cnt','trk-cnt'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=count+'/'+_TRK.total;});
+  // Update checkboxes
+  document.querySelectorAll('._trk_chk').forEach(function(chk){
+    var cid = chk.getAttribute('data-cid');
+    chk.checked = !!_TRK.done[cid];
+    var w = chk.closest('._chk_wrap');
+    if(w) w.classList.toggle('_chk_done', !!_TRK.done[cid]);
+  });
+  renderTabs();
+}
+
+async function _trkToggle(chapterId, done, chk){
+  if(!_TRK.user){
+    // Try to recover session
+    try {
+      const r = await _sb.auth.getSession();
+      if(r.data && r.data.session && r.data.session.user){
+        _TRK.user = r.data.session.user;
+      } else {
+        console.warn('No session found, cannot save tracker');
+        return;
+      }
+    } catch(e) { console.error('getSession error:', e); return; }
+  }
+  var now = done ? new Date().toISOString() : null;
+  if(done) _TRK.done[chapterId] = true;
+  else delete _TRK.done[chapterId];
+  _trkRender();
+  try{
+    await _sb.from('progress').upsert({
+      user_id: _TRK.user.id,
+      chapter_id: chapterId,
+      done: done,
+      done_at: now
+    }, {onConflict: 'user_id,chapter_id'});
+  }catch(e){ console.warn('tracker save err', e); }
+  try{ localStorage.setItem('_pgprog_'+chapterId, JSON.stringify({done, date:now})); }catch(_){}
+}
+</script>
+
+<style id="_mm_css">
+#_mm_wrap{display:none;position:fixed;z-index:500;}
+#_mm_svg{width:100%;height:100%;display:block;}
+._mm_on{background:rgba(240,180,41,0.12)!important;color:var(--accent,#f0b429)!important;border-color:rgba(240,180,41,0.4)!important;}
+[data-theme="light"] #_mm_wrap{background:#f4f5f8;}
+</style>
+<script id="_mm_js">
+;(function(){
+var _P=['#3b82f6','#10b981','#ef4444','#f97316','#8b5cf6','#eab308','#14b8a6','#ec4899','#ea580c','#22c55e'];
+var _GX=30,_GY=8,_MXW=175,_MNW=90,_FS=11,_CW=6.2,_LH=15,_VP=10;
+var _col=new Set(),_nid=0,_cur=null,_tr={x:0,y:0,sc:1},_act=false;
+
+function _norm(n){
+  var t=(typeof n==='object'&&n)?(n.text||n.title||n.label||n.t||''):'';
+  var c=n.children||n.c||[];
+  return{text:t,children:c.map(_norm)};
+}
+function _wt(s,mw){
+  var mc=Math.floor(mw/_CW),ws=(s||'').split(/\s+/),ls=[],c='';
+  ws.forEach(function(w){var t=c?c+' '+w:w;if(t.length>mc&&c){ls.push(c);c=w;}else c=t;});
+  if(c)ls.push(c);
+
+  return ls.length?ls:[''];
+}
+function _di(s,d){
+  if(d===0){var t=(s||'').length>22?s.slice(0,21)+'…':s;return{lines:[t],w:Math.max(100,(t.length||5)*8+24),h:42};}
+  var mw=d===1?_MXW:Math.min(_MXW,155);
+  var ls=_wt(s,mw);
+  var w=Math.min(mw,Math.max(_MNW,Math.max.apply(null,ls.map(function(l){return l.length*_CW+24;}))));
+  return{lines:ls,w:w,h:ls.length*_LH+_VP};
+}
+function _meta(n,d){n._id=_nid++;n._depth=d;var di=_di(n.text,d);n._lines=di.lines;n._w=di.w;n._h=di.h;if(n.children)n.children.forEach(function(c){_meta(c,d+1);});}
+function _ac(n,ci){n._ci=ci;if(n.children)n.children.forEach(function(c){_ac(c,ci);});}
+function _ic(n){if(n._depth>=2&&n.children&&n.children.length)_col.add(n._id);if(n.children)n.children.forEach(_ic);}
+function _vc(n){return _col.has(n._id)?[]:(n.children||[]);}
+function _sh(n){var ch=_vc(n);if(!ch.length)return n._h+_GY;return ch.reduce(function(s,c){return s+_sh(c);},0);}
+function _td(n){if(!n.children||!n.children.length)return 0;return n.children.reduce(function(s,c){return s+1+_td(c);},0);}
+function _lay(n,y0,ex,sd){
+  var sh=_sh(n),cy=y0+sh/2;n._cy=cy;n._y=cy-n._h/2;n._side=sd;
+  if(sd===1)n._x=ex;else n._x=ex-n._w;
+  var ne=sd===1?n._x+n._w+_GX:n._x-_GX;
+  var cy2=y0;_vc(n).forEach(function(c){c._side=sd;_lay(c,cy2,ne,sd);cy2+=_sh(c);});
+}
+function _layR(r){
+  r._cy=0;r._y=-r._h/2;r._x=-r._w/2;r._side=0;
+  var ac=_vc(r),ul=ac.length>3,rn=ul?Math.ceil(ac.length/2):ac.length;
+  var rc=ac.slice(0,rn),lc=ac.slice(rn);
+  ac.forEach(function(c,i){_ac(c,i%_P.length);});
+  var ry=-rc.reduce(function(s,c){return s+_sh(c);},0)/2;
+  rc.forEach(function(c){c._side=1;_lay(c,ry,r._w/2+_GX,1);ry+=_sh(c);});
+  if(lc.length){var ly=-lc.reduce(function(s,c){return s+_sh(c);},0)/2;lc.forEach(function(c){c._side=-1;_lay(c,ly,-r._w/2-_GX,-1);ly+=_sh(c);});}
+}
+var NS='http://www.w3.org/2000/svg';
+function E(t,a){var e=document.createElementNS(NS,t);if(a)for(var k in a)e.setAttribute(k,a[k]);return e;}
+function _cl(n,a){a.push(n);_vc(n).forEach(function(c){_cl(c,a);});}
+function _rend(){
+  var iL=document.documentElement.getAttribute('data-theme')==='light';
+  var w=document.getElementById('_mm_world');while(w.firstChild)w.removeChild(w.firstChild);
+  if(!_cur)return;_layR(_cur);
+  var nodes=[];_cl(_cur,nodes);
+  document.getElementById('_mm_svg').style.background=iL?'#f4f5f8':'#0f1117';
+  var eg=E('g');
+  nodes.forEach(function(n){_vc(n).forEach(function(c){
+    var col=n._depth===0?_P[c._ci]:_P[n._ci];var x1,x2,y1=n._cy,y2=c._cy;
+    if(n._depth===0){x1=c._side===1?n._x+n._w:n._x;x2=c._side===1?c._x:c._x+c._w;}
+    else if(n._side===1){x1=n._x+n._w;x2=c._x;}else{x1=n._x;x2=c._x+c._w;}
+    var mx=(x1+x2)/2,sw=Math.max(1.2,3.8-c._depth*0.7);
+    eg.appendChild(E('path',{d:'M '+x1+' '+y1+' C '+mx+' '+y1+' '+mx+' '+y2+' '+x2+' '+y2,
+      stroke:col,'stroke-opacity':'0.75','stroke-width':sw,fill:'none','stroke-linecap':'round'}));
+  });});
+  w.appendChild(eg);
+  nodes.forEach(function(n){
+    var col=n._depth===0?(iL?'#1a1a2e':'#e2e4ec'):_P[n._ci];
+    var rv=parseInt(col.slice(1,3),16),gv=parseInt(col.slice(3,5),16),bv=parseInt(col.slice(5,7),16);
+    var rgb=rv+','+gv+','+bv;
+    var g=E('g',{style:'cursor:pointer'});
+    if(n._depth===0){
+      g.appendChild(E('ellipse',{cx:n._x+n._w/2,cy:n._cy,rx:n._w/2+6,ry:n._h/2+4,
+        fill:iL?'rgba(0,0,0,0.05)':'rgba(255,255,255,0.06)',stroke:iL?'#888':'#5a5f70','stroke-width':'2'}));
+    }else{
+      g.appendChild(E('rect',{x:n._x,y:n._y,width:n._w,height:n._h,rx:'5',ry:'5',
+        fill:'rgba('+rgb+','+(iL?(n._depth===1?'0.28':'0.16'):(n._depth===1?'0.42':'0.26'))+')',stroke:col,'stroke-width':n._depth===1?'2.2':'1.5'}));
+    }
+    var tx=E('text',{x:n._x+n._w/2,'text-anchor':'middle',fill:n._depth===0?col:(iL?'#111111':'#f0f0f0'),
+      'font-family':"'SF Mono','Fira Code','Courier New',monospace",
+      'font-size':n._depth===0?13:_FS,'font-weight':n._depth<=1?'600':'normal',
+      style:'pointer-events:none;user-select:none;'});
+    var tH=n._lines.length*_LH,sY=n._cy-tH/2+_LH*0.75;
+    n._lines.forEach(function(l,i){var ts=E('tspan',{x:n._x+n._w/2,y:sY+i*_LH});ts.textContent=l;tx.appendChild(ts);});
+    g.appendChild(tx);
+    if(n.children&&n.children.length&&_col.has(n._id)){
+      var d=_td(n),bx=n._side===-1?n._x-13:n._x+n._w+13,by=n._cy;
+      g.appendChild(E('circle',{cx:bx,cy:by,r:'10',fill:'rgba('+rgb+',0.18)',stroke:col,'stroke-width':'1.2'}));
+      var bt=E('text',{x:bx,y:by+0.5,'text-anchor':'middle','dominant-baseline':'middle',
+        fill:col,'font-size':'8.5','font-weight':'bold','font-family':'monospace',style:'pointer-events:none;user-select:none;'});
+      bt.textContent=String(d);g.appendChild(bt);
+    }
+    g.addEventListener('click',function(e){
+      e.stopPropagation();
+      if(n.children&&n.children.length){
+        var _px=n._x+n._w/2,_py=n._cy;
+        if(_col.has(n._id))_col.delete(n._id);else _col.add(n._id);
+        _rend();
+        _tr.x+=((_px-(n._x+n._w/2))*_tr.sc);
+        _tr.y+=(_py-n._cy)*_tr.sc;
+        _apT();
+      }
+    });
+    w.appendChild(g);
+  });
+  _apT();
+}
+function _apT(){document.getElementById('_mm_world').setAttribute('transform','translate('+_tr.x+','+_tr.y+') scale('+_tr.sc+')');}
+function _fit(){
+  if(!_cur)return;var nodes=[];_cl(_cur,nodes);
+  var mnX=1e9,mxX=-1e9,mnY=1e9,mxY=-1e9;
+  nodes.forEach(function(n){if(n._x<mnX)mnX=n._x;if(n._x+n._w>mxX)mxX=n._x+n._w;if(n._y<mnY)mnY=n._y;if(n._y+n._h>mxY)mxY=n._y+n._h;});
+  var W=mxX-mnX+80,H=mxY-mnY+60,sv=document.getElementById('_mm_svg'),cW=sv.clientWidth||900,cH=sv.clientHeight||600;
+  var s=Math.min(1.1,(cW-60)/W,(cH-60)/H);
+  _tr.sc=s;_tr.x=cW/2-(mnX+(mxX-mnX)/2)*s;_tr.y=cH/2-(mnY+(mxY-mnY)/2)*s;_apT();
+}
+window.__MM={
+  norm:_norm,
+  init:function(){
+    if(document.getElementById('_mm_wrap'))return;
+    var div=document.createElement('div');div.id='_mm_wrap';
+    div.style.cssText='display:none;position:fixed;z-index:500;';
+    div.innerHTML='<svg id="_mm_svg"><g id="_mm_world"></g></svg>';
+    document.body.appendChild(div);
+    var svg=document.getElementById('_mm_svg');
+    var isPan=false,pSt={x:0,y:0},pOr={x:0,y:0};
+    svg.style.cursor='grab';
+    svg.addEventListener('mousedown',function(e){
+      if(e.target===svg||e.target.id==='_mm_world'){
+        isPan=true;svg.style.cursor='grabbing';pSt={x:e.clientX,y:e.clientY};pOr={x:_tr.x,y:_tr.y};e.preventDefault();}});
+    window.addEventListener('mousemove',function(e){if(!isPan)return;_tr.x=pOr.x+(e.clientX-pSt.x);_tr.y=pOr.y+(e.clientY-pSt.y);_apT();});
+    window.addEventListener('mouseup',function(){isPan=false;svg.style.cursor='grab';});
+    svg.addEventListener('wheel',function(e){
+      e.preventDefault();var f=e.deltaY<0?1.12:0.89,r=svg.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+      _tr.x=mx-(mx-_tr.x)*f;_tr.y=my-(my-_tr.y)*f;_tr.sc=Math.max(0.05,Math.min(6,_tr.sc*f));_apT();},{passive:false});
+  },
+  show:function(rawData){
+    _nid=0;_col=new Set();_cur=_norm(rawData);_meta(_cur,0);_ic(_cur);
+    var wrap=document.getElementById('_mm_wrap');
+    var sb=document.getElementById('sidebar');
+    var tb=document.getElementById('_wtb')||document.getElementById('_hdr');
+    var sW=sb?sb.offsetWidth:0,tH=tb?tb.offsetHeight:42;
+    wrap.style.left=sW+'px';wrap.style.top=tH+'px';wrap.style.right='0';wrap.style.bottom='0';
+    wrap.style.display='block';_act=true;_rend();setTimeout(_fit,50);
+    var btn=document.getElementById('_mm_btn');if(btn)btn.classList.add('_mm_on');
+  },
+  hide:function(){
+    var wrap=document.getElementById('_mm_wrap');if(wrap)wrap.style.display='none';_act=false;
+    var btn=document.getElementById('_mm_btn');if(btn)btn.classList.remove('_mm_on');
+  },
+  toggle:function(rawData){if(_act)this.hide();else this.show(rawData);},
+  refresh:function(rawData){if(_act)this.show(rawData);},
+  isActive:function(){return _act;},
+  fitView:function(){_fit();}
+};
+document.addEventListener('DOMContentLoaded',function(){window.__MM.init();});
+})();
+</script>
+<script>
+// MM adapter — ambiental
+window.__MM_getData = function(){
+  if(typeof DATA==='undefined'||typeof cur==='undefined') return null;
+  return DATA[cur]||null;
+};
+(function(){
+  if(typeof selChap!=='undefined'){
+    var _o=selChap;
+    selChap=function(k){_o(k);window.__MM&&window.__MM.isActive()&&window.__MM.refresh(window.__MM_getData());};
+  }
+})();
+</script>
+<script>
+// Mobile sidebar + color picker (called from #_hdr)
+var _sbo=window.innerWidth>768;
+function _sbT(){_sbo=!_sbo;_sbA();localStorage.setItem('_sbo',_sbo?'1':'0');}
+function _sbC(){_sbo=false;_sbA();}
+function _sbA(){var sb=document.getElementById('sidebar'),ov=document.getElementById('_sbov'),mob=window.innerWidth<=768;if(sb)sb.classList.toggle('sb-off',!_sbo);if(ov)ov.classList.toggle('open',_sbo&&mob);}
+function _logout(){_doLogout();}
+function _pickColor(c){var m={y:'yellow',g:'green',b:'blue',p:'pink',o:'orange'};_hl(c?m[c]:null);}
+window.addEventListener('DOMContentLoaded',function(){var sv=localStorage.getItem('_sbo');_sbo=window.innerWidth>768?(sv!=='0'):false;_sbA();});
+window.addEventListener('resize',function(){if(window.innerWidth>768&&!_sbo){_sbo=true;_sbA();}if(window.innerWidth<=768&&_sbo){_sbo=false;_sbA();}});
+</script>
+</body>
+</html>
+
+<div id="_sbov" onclick="_sbC()"></div>
+<div id="_hdr">
+  <button class="hbtn" onclick="_sbT()" style="padding:4px 8px;font-size:16px;" title="Menu">&#9776;</button>
+  <a href="index.html" class="hbtn">&#8592; Portal</a>
+  <a href="index.html" onclick="try{sessionStorage.setItem('_gotoTab','tracker')}catch(e){}" class="hbtn">&#128202; Tracker</a>
+  <span id="_htit">Dir. Urbanístico</span>
+  <div id="_hlbar">
+    <div class="hlsw" style="background:rgba(250,204,21,0.85)" onclick="_pickColor('y')" id="_sw_y" title="Amarelo"></div>
+    <div class="hlsw" style="background:rgba(34,197,94,0.75)"  onclick="_pickColor('g')" id="_sw_g" title="Verde"></div>
+    <div class="hlsw" style="background:rgba(59,130,246,0.75)" onclick="_pickColor('b')" id="_sw_b" title="Azul"></div>
+    <div class="hlsw" style="background:rgba(236,72,153,0.75)" onclick="_pickColor('p')" id="_sw_p" title="Rosa"></div>
+    <div class="hlsw" style="background:rgba(249,115,22,0.75)" onclick="_pickColor('o')" id="_sw_o" title="Laranja"></div>
+    <div class="hlsw clr" onclick="_pickColor(null)" id="_sw_x" title="Limpar">&#x2715;</div>
+  </div>
+  <button class="hbtn" onclick="_tT()" id="_thb" style="margin-left:4px;">&#9728;&#65039;</button>
+  <button onclick="_logout()" class="hbtn" style="color:#ef4444;border-color:#ef4444;">Sair</button>
+</div>
+
+
