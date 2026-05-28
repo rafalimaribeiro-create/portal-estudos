@@ -374,7 +374,9 @@ body{padding-top:42px!important;}
     letter-spacing:.02em;
   }
   .exam-tag:hover::after{display:block;}
-  </style>
+  .txt.long{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100% - 20px);display:inline-block;cursor:pointer;vertical-align:bottom;}
+.txt.long.open{white-space:normal;overflow:visible;text-overflow:clip;}
+</style>
 </head>
 <body>
 <div id="sidebar">
@@ -508,6 +510,7 @@ function _examShort(t){
   return banca+(y?' '+y[0]:'');
 }
 
+function xpand(el,ev){el.classList.toggle('open');ev.stopPropagation();}
 function renderNode(node, depth) {
   if(!node) return '';
   const q = searchQ;
