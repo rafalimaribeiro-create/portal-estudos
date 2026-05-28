@@ -500,6 +500,24 @@ function _examShort(t){
   var banca=(b?b[1].replace(/\s*\/\s*CEBRASPE/i,'').replace(/\s*CEBRASPE\s*\/\s*/i,'').trim():'');
   return banca+(y?' '+y[0]:'');
 }
+var _BANCA_PAT=/(CESPE\s*[\/]?\s*CEBRASPE|CEBRASPE|CESPE|FCC|FGV|VUNESP|ESAF|CESGRANRIO|MPT|AOCP|IBFC|IADES|FUNCAB|FUNDEP|QUADRIX|SELECON|OBJETIVA|NUCEPE|CS-UFG|INAZ|CONSULPLAN|NC-UFPR)\b/gi;
+function _inlineExams(t){
+  var m,first=null,p=new RegExp(_BANCA_PAT.source,'gi');
+  while((m=p.exec(t))!==null){if(_YEAR_RE.test(t.slice(m.index,Math.min(t.length,m.index+120)))){first=m.index;break;}}
+  if(first===null||first===0)return null;
+  var content=t.slice(0,first).trim(),ep=t.slice(first);
+  p.lastIndex=0;var cuts=[0];
+  while((m=p.exec(ep))!==null){if(m.index>0)cuts.push(m.index);}
+  var tags=[];
+  for(var i=0;i<cuts.length;i++){
+    var ref=ep.slice(cuts[i],i+1<cuts.length?cuts[i+1]:ep.length).trim().replace(/[-–,\s]+$/,'');
+    if(!_YEAR_RE.test(ref))continue;
+    var b=ref.match(_EXAM_RE),y=ref.match(_YEAR_RE);
+    var sh=(b?b[1].replace(/\s*\/\s*CEBRASPE/i,'').replace(/CEBRASPE\s*\/\s*/i,'').trim():'')+(y?' '+y[0]:'');
+    tags.push({full:ref,short:sh.trim()});
+  }
+  return tags.length?{content:content,tags:tags}:null;
+}
 
 function xpand(el,ev){el.classList.toggle('open');ev.stopPropagation();}
 function renderNode(n,depth,path){
@@ -511,11 +529,25 @@ function renderNode(n,depth,path){
 
   if(n.callout) return renderCallout(n);
 
+  // Exam reference node → pill
+  if(_isExam(n.title||'')&&depth>0){
+    const full=esc(n.title||'');const short=esc(_examShort(n.title||''));
+    return `<div class="node exam-node" id="n${id}"><div class="row"><span class="exam-tag" data-full="${full}">${short}</span></div></div>`;
+  }
+
   const tog=hasKids?(isExp?"▾":"▸"):"·";
   const dc=depth===0?"d0":depth===1?"d1":depth===2?"d2":"dn";
   const rowCls=`row${isHit?" hit":""}`;
-  const _long=(n.title||"").length>120&&depth>0;
-  const titleHtml=_long?`<span class="txt ${dc} long" onclick="xpand(this,event)">${hilite(n.title||"",term)}</span>`:`<span class="txt ${dc}">${hilite(n.title||"",term)}</span>`;
+  const _ie=depth>0?_inlineExams(n.title||''):null;
+  let titleHtml;
+  if(_ie){
+    const pills=_ie.tags.map(function(t){return `<span class="exam-tag" data-full="${esc(t.full)}">${esc(t.short)}</span>`;}).join(' ');
+    const _xl=_ie.content.length>120;
+    titleHtml=`<span class="txt ${dc}${_xl?' long':''}"${_xl?' onclick="xpand(this,event)"':''} >${hilite(_ie.content,term)}</span> ${pills}`;
+  } else {
+    const _long=(n.title||"").length>120&&depth>0;
+    titleHtml=_long?`<span class="txt ${dc} long" onclick="xpand(this,event)">${hilite(n.title||"",term)}</span>`:`<span class="txt ${dc}">${hilite(n.title||"",term)}</span>`;
+  }
 
   let childHtml="";
   if(isExp&&hasKids){
