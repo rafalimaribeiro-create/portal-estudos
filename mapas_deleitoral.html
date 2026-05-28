@@ -519,7 +519,7 @@ function renderNode(n,depth,path){
   const tog=hasKids?(isExp?"▾":"▸"):"·";
   const dc=depth===0?"d0":depth===1?"d1":depth===2?"d2":"dn";
   const rowCls=`row${isHit?" hit":""}`;
-  const _ie=depth>0?_inlineExams(n.title||''):null;
+  const _ie=_inlineExams(n.title||'');
   let titleHtml;
   if(_ie){
     const pills=_ie.tags.map(function(t){return `<span class="exam-tag" data-full="${esc(t.full)}">${esc(t.short)}</span>`;}).join(' ');
