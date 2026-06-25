@@ -1218,7 +1218,7 @@ document.addEventListener('DOMContentLoaded',function(){window.__MM.init();});
     document.body.classList.toggle('timer-c',f==='c');
     document.querySelectorAll('.tfmt-opt').forEach(function(el){el.classList.toggle('active',el.dataset.fmt===f);});
   };
-  function _init(){_createTopbar();var f=localStorage.getItem('_timer_fmt')||'a';window._timerSetFmt(f);_render();_start();}
+  function _init(){_createTopbar();var f=localStorage.getItem('_timer_fmt')||'a';window._timerSetFmt(f);_render();}
   if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',_init);}else{_init();}
 })();
 window.__MM_getData = function(){
