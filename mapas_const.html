@@ -351,7 +351,30 @@ body{padding-top:42px!important;}
   margin-right: 6px; margin-left: 4px;
 }
 ._chk_done { opacity: 0.5; text-decoration: line-through; }
-</style>
+
+  /* EXAM REFERENCE PILLS */
+  .exam-node>.row{cursor:default!important;pointer-events:none;}
+  .exam-tag{
+    display:inline-block;font-family:'DM Mono',monospace;font-size:9.5px;
+    color:var(--muted);border:1px solid var(--border);border-radius:3px;
+    padding:1px 6px 1px 4px;background:var(--surface2);cursor:default;
+    position:relative;line-height:1.5;letter-spacing:.04em;
+    vertical-align:middle;user-select:none;
+    transition:color .15s,border-color .15s;
+  }
+  .exam-tag::before{content:'◈ ';font-size:7px;opacity:.5;vertical-align:middle;}
+  .exam-tag:hover{color:var(--accent);border-color:var(--accent);}
+  .exam-tag::after{
+    content:attr(data-full);
+    position:absolute;left:0;top:calc(100% + 5px);
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:7px;padding:7px 12px;font-size:11px;color:var(--text);
+    white-space:nowrap;z-index:200;display:none;
+    box-shadow:0 6px 20px rgba(0,0,0,.15);pointer-events:none;
+    letter-spacing:.02em;
+  }
+  .exam-tag:hover::after{display:block;}
+  </style>
 </head>
 <body>
 <div id="sidebar">
@@ -473,6 +496,16 @@ function renderChapter() {
   document.getElementById('ch-info').textContent = `${children.length} seções`;
   const tree = document.getElementById('tree');
   tree.innerHTML = children.map(n => renderNode(n, 0)).join('');
+}
+
+
+var _EXAM_RE=/^\s*(CESPE\s*[\/]?\s*CEBRASPE|CEBRASPE|CESPE|FCC|FGV|VUNESP|ESAF|CESGRANRIO|MPT|AOCP|IBFC|IADES|FUNCAB|FUNDEP|QUADRIX|SELECON|OBJETIVA|NUCEPE|CS-UFG|INAZ|CONSULPLAN|NC-UFPR)\b/i;
+var _YEAR_RE=/\b(20\d{2}|199\d)\b/;
+function _isExam(t){return _EXAM_RE.test(t)&&_YEAR_RE.test(t);}
+function _examShort(t){
+  var b=t.match(_EXAM_RE);var y=t.match(_YEAR_RE);
+  var banca=(b?b[1].replace(/\s*\/\s*CEBRASPE/i,'').replace(/\s*CEBRASPE\s*\/\s*/i,'').trim():'');
+  return banca+(y?' '+y[0]:'');
 }
 
 function renderNode(node, depth) {
