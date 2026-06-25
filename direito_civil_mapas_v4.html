@@ -1343,7 +1343,7 @@ document.addEventListener('DOMContentLoaded',function(){window.__MM.init();});
   function _createTopbar(){
     if(document.getElementById('tb-timer-bar'))return;
     var bar=document.createElement('div');bar.id='tb-timer-bar';
-    bar.innerHTML='<span class="tb-tlabel">\u23f1 sess\u00e3o<\/span><span class="tb-ttime" id="tb-ttime-val">00:00:00<\/span><button class="tb-tmbtn tmbtn-p" id="tb-pause-btn" onclick="_timerToggle()">\u23f8<\/button><button class="tb-tmbtn" onclick="_timerReset()">\u00d7<\/button>';
+    bar.innerHTML='<span class="tb-tlabel">\u23f1 sess\u00e3o<\/span><span class="tb-ttime" id="tb-ttime-val">00:00:00<\/span><button class="tb-tmbtn tmbtn-p" id="tb-pause-btn" onclick="_timerToggle()">\u23f8<\/button><button class="tb-tmbtn" onclick="_timerReset()">\u00d7<\/button><button class="tb-tmbtn" style="margin-left:6px" onclick="_timerSetFmt(\'a\')">\u2261 Sidebar<\/button>';
     var main=document.getElementById('main-area')||document.getElementById('main');
     if(main)main.insertBefore(bar,main.firstChild);
   }

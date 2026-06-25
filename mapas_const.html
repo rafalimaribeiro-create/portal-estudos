@@ -539,8 +539,8 @@ document.addEventListener('keydown',function(e){
   if(document.activeElement&&document.activeElement.tagName==='INPUT')return;
   if(e.key==='ArrowDown'){e.preventDefault();if(selectedIdx<CHAPTERS_META.length-1)selectChapter(selectedIdx+1);}
   else if(e.key==='ArrowUp'){e.preventDefault();if(selectedIdx>0)selectChapter(selectedIdx-1);}
-  else if(e.key==='ArrowRight'){if(!expandAll){expandAll=true;document.getElementById('expand-btn').textContent='⊟ Recolher';renderChapter();}}
-  else if(e.key==='ArrowLeft'){if(expandAll){expandAll=false;document.getElementById('expand-btn').textContent='⊞ Expandir';renderChapter();}}
+  else if(e.key==='ArrowRight'){if(selectedIdx<CHAPTERS_META.length-1)selectChapter(selectedIdx+1);}
+  else if(e.key==='ArrowLeft'){if(selectedIdx>0)selectChapter(selectedIdx-1);}
 });
 
 function renderChapter() {
@@ -1266,7 +1266,7 @@ document.addEventListener('DOMContentLoaded',function(){window.__MM.init();});
   function _createTopbar(){
     if(document.getElementById('tb-timer-bar'))return;
     var bar=document.createElement('div');bar.id='tb-timer-bar';
-    bar.innerHTML='<span class="tb-tlabel">\u23f1 sess\u00e3o<\/span><span class="tb-ttime" id="tb-ttime-val">00:00:00<\/span><button class="tb-tmbtn tmbtn-p" id="tb-pause-btn" onclick="_timerToggle()">\u23f8<\/button><button class="tb-tmbtn" onclick="_timerReset()">\u00d7<\/button>';
+    bar.innerHTML='<span class="tb-tlabel">\u23f1 sess\u00e3o<\/span><span class="tb-ttime" id="tb-ttime-val">00:00:00<\/span><button class="tb-tmbtn tmbtn-p" id="tb-pause-btn" onclick="_timerToggle()">\u23f8<\/button><button class="tb-tmbtn" onclick="_timerReset()">\u00d7<\/button><button class="tb-tmbtn" style="margin-left:6px" onclick="_timerSetFmt(\'a\')">\u2261 Sidebar<\/button>';
     var main=document.getElementById('main-area')||document.getElementById('main');
     if(main)main.insertBefore(bar,main.firstChild);
   }
