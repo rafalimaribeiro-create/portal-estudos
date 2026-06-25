@@ -487,7 +487,7 @@ window.__MM={
     if(document.getElementById('_mm_wrap'))return;
     var div=document.createElement('div');div.id='_mm_wrap';
     div.style.cssText='display:none;position:fixed;z-index:500;';
-    div.innerHTML='<svg id="_mm_svg"><g id="_mm_world"></g></svg><div id="_mm_ft" style="display:none;position:fixed;max-width:340px;padding:12px 15px;font-size:12px;line-height:1.65;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,.3);pointer-events:none;white-space:pre-wrap;word-break:break-word;border-radius:10px;background:var(--surface,#1e2030);border:1px solid var(--border,#3c4066);color:var(--text,#cdd6f4);"></div>';
+    div.innerHTML='<svg id="_mm_svg"><g id="_mm_world"></g></svg><div id="_mm_ft" style="display:none;position:fixed;max-width:420px;max-height:60vh;overflow-y:auto;padding:12px 15px;font-size:12px;line-height:1.65;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,.3);pointer-events:auto;white-space:pre-wrap;word-break:break-word;border-radius:10px;background:var(--surface,#1e2030);border:1px solid var(--border,#3c4066);color:var(--text,#cdd6f4);"></div>';
     document.body.appendChild(div);
     var svg=document.getElementById('_mm_svg');
     var isPan=false,pSt={x:0,y:0},pOr={x:0,y:0};
