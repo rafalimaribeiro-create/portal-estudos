@@ -378,6 +378,33 @@ body{padding-top:42px!important;}
 .txt.long.open{white-space:normal;overflow:visible;text-overflow:clip;}
 #kb-hint{font-size:9px;font-family:monospace;color:var(--muted);padding:8px 16px 10px;
   letter-spacing:.06em;border-top:1px solid var(--border);text-align:center;opacity:.6;}
+/* ── Study timer ────────────────────────────────────────────────────── */
+#timer-block{border-top:1px solid var(--border);padding:11px 14px 13px;flex-shrink:0;}
+.timer-lbl{font-size:9px;letter-spacing:.1em;color:#64748b;text-transform:uppercase;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center;}
+[data-theme="light"] .timer-lbl{color:#888070;}
+.timer-stag{font-size:9px;background:#1e3a5f;border:1px solid #3b82f6;color:#60a5fa;border-radius:3px;padding:1px 5px;}
+.timer-stag.paused{background:#1c1917;border-color:#64748b;color:#64748b;}
+#timer-display{font-size:24px;font-family:'Courier New',monospace;font-weight:700;color:#4ade80;letter-spacing:.04em;margin-bottom:8px;}
+.timer-btns-row{display:flex;gap:5px;}
+.tmbtn{flex:1;padding:5px 0;border-radius:5px;border:1px solid var(--border);background:var(--bg);color:#64748b;font-size:11px;cursor:pointer;text-align:center;font-family:inherit;}
+.tmbtn:hover{color:#94a3b8;}
+.tmbtn.tmbtn-p{background:#1e3a5f;border-color:#3b82f6;color:#60a5fa;font-weight:600;}
+[data-theme="light"] .tmbtn{background:#fff;color:#888070;}
+.timer-today{margin-top:7px;font-size:10px;color:#64748b;text-align:center;}
+.timer-today b{color:#94a3b8;font-weight:600;}
+[data-theme="light"] .timer-today{color:#888070;}[data-theme="light"] .timer-today b{color:#4a4a4a;}
+.timer-fmt{border-top:1px solid var(--border);padding:7px 14px 9px;display:flex;align-items:center;gap:6px;font-size:10px;color:#64748b;flex-shrink:0;}
+.timer-fmt>span{flex:1;}
+.timer-fmt-pill{display:flex;background:var(--bg);border:1px solid var(--border);border-radius:20px;overflow:hidden;}
+.tfmt-opt{padding:3px 9px;font-size:10px;color:#64748b;cursor:pointer;border-radius:20px;transition:all .15s;}
+.tfmt-opt.active{background:var(--border);color:var(--text);}
+#tb-timer-bar{display:flex;align-items:center;gap:8px;padding:5px 14px 5px 16px;background:var(--bg2,#161b27);border-bottom:1px solid var(--border);flex-shrink:0;}
+#tb-timer-bar .tb-tlabel{font-size:10px;color:#64748b;letter-spacing:.06em;}
+#tb-timer-bar .tb-ttime{font-family:'Courier New',monospace;font-weight:700;color:#4ade80;font-size:13px;margin-left:auto;}
+.tb-tmbtn{padding:3px 8px;border-radius:4px;border:1px solid var(--border);background:var(--bg);color:#64748b;font-size:10px;cursor:pointer;font-family:inherit;}
+.tb-tmbtn.tmbtn-p{background:#1e3a5f;border-color:#3b82f6;color:#60a5fa;}
+body.timer-c #timer-block,body.timer-c .timer-fmt{display:none!important;}
+body.timer-a #tb-timer-bar{display:none!important;}
 </style>
 </head>
 <body>
@@ -388,6 +415,22 @@ body{padding-top:42px!important;}
   </div>
   <div id="subject-filter"></div>
   <div id="chapter-list"></div>
+<div id="timer-block">
+  <div class="timer-lbl">⏱ sessão <span id="timer-stag" class="timer-stag">▶ rodando</span></div>
+  <div id="timer-display">00:00:00</div>
+  <div class="timer-btns-row">
+    <button class="tmbtn tmbtn-p" id="timer-pause-btn" onclick="_timerToggle()">⏸ Pausar</button>
+    <button class="tmbtn" onclick="_timerReset()">✕ Zerar</button>
+  </div>
+  <div class="timer-today">Total hoje: <b id="timer-today-val">0s</b></div>
+</div>
+<div class="timer-fmt">
+  <span>Formato</span>
+  <div class="timer-fmt-pill">
+    <div class="tfmt-opt" data-fmt="a" onclick="_timerSetFmt('a')">Sidebar</div>
+    <div class="tfmt-opt" data-fmt="c" onclick="_timerSetFmt('c')">Topo</div>
+  </div>
+</div>
   <div id="kb-hint">↑ ↓ capítulo &nbsp;·&nbsp; → expandir &nbsp;·&nbsp; ← recolher</div>
 </div>
 <div id="main">
@@ -1211,6 +1254,46 @@ document.addEventListener('DOMContentLoaded',function(){window.__MM.init();});
 </script>
 <script>
 // MM adapter — const
+/* ── Study timer ── */
+(function(){
+  'use strict';
+  var _s=0,_run=false,_iv=null;
+  var _dk='_timer_'+new Date().toISOString().slice(0,10);
+  var _base=parseInt(localStorage.getItem(_dk)||'0',10);
+  function _p(n){return n<10?'0'+n:''+n;}
+  function _fmt(s){return _p(Math.floor(s/3600))+':'+_p(Math.floor((s%3600)/60))+':'+_p(s%60);}
+  function _fmtTot(s){if(s<60)return s+'s';var m=Math.floor(s/60);return m<60?m+'min':(Math.floor(m/60)+'h '+_p(m%60)+'min');}
+  function _createTopbar(){
+    if(document.getElementById('tb-timer-bar'))return;
+    var bar=document.createElement('div');bar.id='tb-timer-bar';
+    bar.innerHTML='<span class="tb-tlabel">\u23f1 sess\u00e3o<\/span><span class="tb-ttime" id="tb-ttime-val">00:00:00<\/span><button class="tb-tmbtn tmbtn-p" id="tb-pause-btn" onclick="_timerToggle()">\u23f8<\/button><button class="tb-tmbtn" onclick="_timerReset()">\u00d7<\/button>';
+    var main=document.getElementById('main-area')||document.getElementById('main');
+    if(main)main.insertBefore(bar,main.firstChild);
+  }
+  function _render(){
+    var t=_fmt(_s);
+    var d=document.getElementById('timer-display'),tb=document.getElementById('tb-ttime-val');
+    if(d)d.textContent=t;if(tb)tb.textContent=t;
+    var tot=_base+_s;var tl=document.getElementById('timer-today-val');if(tl)tl.textContent=_fmtTot(tot);
+    var st=document.getElementById('timer-stag');
+    if(st){st.textContent=_run?'\u25b6 rodando':'\u23f8 pausado';st.className='timer-stag'+(_run?'':' paused');}
+    var pb=document.getElementById('timer-pause-btn'),ptb=document.getElementById('tb-pause-btn');
+    if(pb){pb.textContent=_run?'\u23f8 Pausar':'\u25b6 Retomar';pb.className='tmbtn'+(_run?' tmbtn-p':'');}
+    if(ptb){ptb.textContent=_run?'\u23f8':'\u25b6';ptb.className='tb-tmbtn'+(_run?' tmbtn-p':'');}
+  }
+  function _start(){if(!_run){_run=true;_iv=setInterval(function(){_s++;localStorage.setItem(_dk,_base+_s);_render();},1000);_render();}}
+  function _pause(){if(_run){_run=false;clearInterval(_iv);_base+=_s;_s=0;localStorage.setItem(_dk,_base);_render();}}
+  window._timerToggle=function(){_run?_pause():_start();};
+  window._timerReset=function(){_run=false;clearInterval(_iv);_s=0;_base=0;localStorage.setItem(_dk,0);_render();};
+  window._timerSetFmt=function(f){
+    localStorage.setItem('_timer_fmt',f);
+    document.body.classList.toggle('timer-a',f==='a');
+    document.body.classList.toggle('timer-c',f==='c');
+    document.querySelectorAll('.tfmt-opt').forEach(function(el){el.classList.toggle('active',el.dataset.fmt===f);});
+  };
+  function _init(){_createTopbar();var f=localStorage.getItem('_timer_fmt')||'a';window._timerSetFmt(f);_render();_start();}
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',_init);}else{_init();}
+})();
 window.__MM_getData = function(){
   if(typeof ALL_DATA==='undefined'||typeof CHAPTERS_META==='undefined'||typeof selectedIdx==='undefined') return null;
   var ch=CHAPTERS_META[selectedIdx];
