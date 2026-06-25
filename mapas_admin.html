@@ -636,6 +636,8 @@ body { padding-top: 42px !important; }
 [data-theme="light"] .node-row:hover,[data-theme="light"] .row:hover { background:rgba(0,0,0,0.04)!important; }
 [data-theme="light"] .ch-item { color:#4a4a4a!important; } [data-theme="light"] .ch-item.active { color:#a07840!important; }
 [data-theme="light"] .tab { color:#4a4a4a!important; }
+#kb-hint{font-size:9px;font-family:monospace;color:var(--muted);padding:8px 16px 10px;
+  letter-spacing:.06em;border-top:1px solid var(--border);text-align:center;opacity:.6;}
 </style>
 </head>
 <body>
@@ -652,6 +654,7 @@ body { padding-top: 42px !important; }
     <button class="ctrl-btn" onclick="expandAll()">EXPANDIR</button>
     <button class="ctrl-btn" onclick="collapseAll()">RECOLHER</button>
   </div>
+  <div id="kb-hint">← → capítulo &nbsp;·&nbsp; E expandir &nbsp;·&nbsp; R recolher</div>
 </div>
 
 <div id="main">
@@ -896,6 +899,13 @@ function collapseAll() {
     if (i > 0) el.classList.remove('open');
   });
 }
+document.addEventListener('keydown',function(e){
+  if(document.activeElement&&document.activeElement.tagName==='INPUT')return;
+  if(e.key==='ArrowRight'){if(currentMapIdx<MAPS.length-1)loadMap(currentMapIdx+1);}
+  else if(e.key==='ArrowLeft'){if(currentMapIdx>0)loadMap(currentMapIdx-1);}
+  else if(e.key==='e'||e.key==='E'){expandAll();}
+  else if(e.key==='r'||e.key==='R'){collapseAll();}
+});
 </script>
 
 <button id="theme-toggle-btn" onclick="toggleMapTheme()">☀️ Claro</button>
