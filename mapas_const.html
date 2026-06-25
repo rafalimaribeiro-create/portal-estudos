@@ -509,6 +509,24 @@ function _examShort(t){
   var banca=(b?b[1].replace(/\s*\/\s*CEBRASPE/i,'').replace(/\s*CEBRASPE\s*\/\s*/i,'').trim():'');
   return banca+(y?' '+y[0]:'');
 }
+var _BANCA_PAT=/(CESPE\s*[\/]?\s*CEBRASPE|CEBRASPE|CESPE|FCC|FGV|VUNESP|ESAF|CESGRANRIO|MPT|AOCP|IBFC|IADES|FUNCAB|FUNDEP|QUADRIX|SELECON|OBJETIVA|NUCEPE|CS-UFG|INAZ|CONSULPLAN|NC-UFPR)\b/gi;
+function _inlineExams(t){
+  var m,first=null,p=new RegExp(_BANCA_PAT.source,'gi');
+  while((m=p.exec(t))!==null){if(_YEAR_RE.test(t.slice(m.index,Math.min(t.length,m.index+120)))){first=m.index;break;}}
+  if(first===null||first===0)return null;
+  var content=t.slice(0,first).trim(),ep=t.slice(first);
+  p.lastIndex=0;var cuts=[0];
+  while((m=p.exec(ep))!==null){if(m.index>0)cuts.push(m.index);}
+  var tags=[];
+  for(var i=0;i<cuts.length;i++){
+    var ref=ep.slice(cuts[i],i+1<cuts.length?cuts[i+1]:ep.length).trim().replace(/[-–,\s]+$/,'');
+    if(!_YEAR_RE.test(ref))continue;
+    var b=ref.match(_EXAM_RE),y=ref.match(_YEAR_RE);
+    var sh=(b?b[1].replace(/\s*\/\s*CEBRASPE/i,'').replace(/CEBRASPE\s*\/\s*/i,'').trim():'')+(y?' '+y[0]:'');
+    tags.push({full:ref,short:sh.trim()});
+  }
+  return tags.length?{content:content,tags:tags}:null;
+}
 
 function xpand(el,ev){el.classList.toggle('open');ev.stopPropagation();}
 function renderNode(node, depth) {
