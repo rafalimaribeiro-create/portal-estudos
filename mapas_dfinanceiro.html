@@ -395,7 +395,9 @@ body { padding-top: 46px !important; }
     letter-spacing:.02em;
   }
   .exam-tag:hover::after{display:block;}
-  </style>
+  .txt.long{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100% - 20px);display:inline-block;cursor:pointer;vertical-align:bottom;}
+.txt.long.open{white-space:normal;overflow:visible;text-overflow:clip;}
+</style>
 </head>
 <body>
 <div id="app">
@@ -480,6 +482,7 @@ function _examShort(t){
   return banca+(y?' '+y[0]:'');
 }
 
+function xpand(el,ev){el.classList.toggle('open');ev.stopPropagation();}
 function renderNode(n,depth,path){
   const id=path;
   const hasKids=(n.children&&n.children.length)||(n.callouts&&n.callouts.length);
@@ -492,7 +495,8 @@ function renderNode(n,depth,path){
   const tog=hasKids?(isExp?"▾":"▸"):"·";
   const dc=depth===0?"d0":depth===1?"d1":depth===2?"d2":"dn";
   const rowCls=`row${isHit?" hit":""}`;
-  const titleHtml=`<span class="txt ${dc}">${hilite(n.title||"",term)}</span>`;
+  const _long=(n.title||"").length>120&&depth>0;
+  const titleHtml=_long?`<span class="txt ${dc} long" onclick="xpand(this,event)">${hilite(n.title||"",term)}</span>`:`<span class="txt ${dc}">${hilite(n.title||"",term)}</span>`;
 
   let childHtml="";
   if(isExp&&hasKids){
