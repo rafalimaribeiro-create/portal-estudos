@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html data-theme="dark" lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direito Coletivo - Mapas Mentais</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--bg2:#161b27;--bg3:#1e2535;--border:#2a3348;
+  --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  --accent:#e11d48;--accent2:#be123c;
+  --cespe:#c2440a;--cespe-bg:#0f0f2e;--cespe-border:#312e81;
+  --stj:#3b82f6;--stj-bg:#0c1426;--stj-border:#1e3a5f;
+  --obs:#10b981;--obs-bg:#061410;--obs-border:#064e3b;
+  --h1:#a5b4fc;--h2:#818cf8;--h3:#e11d48;
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;line-height:1.6}
+#app{display:flex;flex-direction:row;height:100vh;overflow:hidden;}
+#sidebar{width:220px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;height:calc(100vh - 46px);}
+#sb-header{padding:10px 12px 8px;border-bottom:1px solid var(--border);flex-shrink:0;}
+#sb-title{font-size:13px;font-family:monospace;color:var(--accent);font-weight:500;margin-bottom:6px;}
+#search{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:5px 8px;font-size:11px;color:var(--text);font-family:monospace;outline:none;}
+#search:focus{border-color:var(--accent);}
+#trk-bar{padding:8px 12px 6px;border-bottom:1px solid var(--border);flex-shrink:0;}
+#trk-label{font-size:10px;font-family:monospace;letter-spacing:.08em;text-transform:uppercase;color:#7c8db5;display:flex;justify-content:space-between;margin-bottom:5px;}
+#trk-pct{color:var(--accent);font-weight:700;}
+#trk-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;}
+#trk-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s;}
+#tabs{overflow-y:auto;flex:1;padding:4px 0;}
+.tab{display:flex;align-items:center;gap:6px;padding:7px 12px;cursor:pointer;transition:background .12s;font-size:12px;color:var(--text);font-family:monospace;border-left:3px solid transparent;}
+.tab:hover{background:var(--bg);}
+.tab.active{border-left-color:var(--accent);background:rgba(200,169,110,0.08);color:var(--accent);}
+.tab input[type=checkbox]{width:13px;height:13px;accent-color:var(--accent);flex-shrink:0;cursor:pointer;}
+#main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);}
+.match-bar{padding:6px 16px;font-size:12px;font-family:monospace;color:var(--accent);background:var(--bg2);border-bottom:1px solid var(--border);display:none;}
+.content{flex:1;overflow-y:auto;padding:20px 24px;}
+#empty-msg{display:flex;align-items:center;justify-content:center;height:100%;font-family:monospace;font-size:12px;letter-spacing:.15em;opacity:.3;color:var(--text);}
+.node{margin:0}
+.row{display:flex;align-items:flex-start;gap:6px;padding:3px 6px;border-radius:5px;cursor:pointer;transition:background .1s}
+.row:hover{background:var(--bg3)}
+.row.hit{background:#1a2e1a}
+.tog{width:14px;height:14px;flex-shrink:0;margin-top:1px;font-size:10px;color:var(--text3);display:flex;align-items:center;justify-content:center}
+.txt{flex:1;word-break:break-word}
+.txt.d0{font-size:14px;font-weight:600;color:var(--h1)}
+.txt.d1{font-size:13px;font-weight:500;color:var(--h2)}
+.txt.d2{font-size:13px;color:var(--h3)}
+.txt.dn{font-size:13px;color:var(--text)}
+.txt.callout{font-size:12px;color:var(--text2);border-left:2px solid var(--cespe);padding-left:6px;font-style:italic}
+.children{padding-left:18px;border-left:1px solid var(--border);margin-left:7px}
+mark{background:#312e81;color:#a5b4fc;border-radius:2px;padding:0 1px}
+.callout-box{border-radius:6px;padding:8px 12px;margin:6px 0;font-size:12px;line-height:1.6}
+.callout-box.cespe{background:var(--cespe-bg);border:1px solid var(--cespe-border)}
+.callout-box.stj{background:var(--stj-bg);border:1px solid var(--stj-border)}
+.callout-box.obs{background:var(--obs-bg);border:1px solid var(--obs-border)}
+.callout-label{font-size:11px;font-weight:700;letter-spacing:.05em;margin-bottom:4px}
+.cespe .callout-label{color:var(--cespe)}
+.stj .callout-label{color:var(--stj)}
+.obs .callout-label{color:var(--obs)}
+.callout-title{font-weight:600;margin-bottom:3px;font-size:12px}
+.cespe .callout-title{color:#a5b4fc}
+.stj .callout-title{color:#93c5fd}
+.obs .callout-title{color:#6ee7b7}
+.callout-body{color:#94a3b8}
+.no-res{color:var(--text3);padding:24px;text-align:center}
+
+/* ── LIGHT THEME ── */
+[data-theme="light"] {
+  --bg: #f8f7f2 !important;
+  --bg2: #eeeae0 !important;
+  --bg3: #e5e0d5 !important;
+  --surface: #ffffff !important;
+  --surface2: #f0ede8 !important;
+  --border: #d8d3c8 !important;
+  --border-hover: #b8b3a8 !important;
+  --text: #1a1a1a !important;
+  --text2: #4a4a4a !important;
+  --text3: #888070 !important;
+  --text-muted: #888070 !important;
+  --text-dim: #bbbbbb !important;
+  --accent: #a07840 !important;
+  --accent-dim: rgba(160,120,64,0.12) !important;
+  --accent2: #2563eb !important;
+  --accent2-dim: rgba(37,99,235,0.10) !important;
+  --cespe: #c2440a !important;
+  --cespe-bg: #fff7ed !important;
+  --cespe-border: #c2440a !important;
+  --stj: #1d4ed8 !important;
+  --stj-bg: #dbeafe !important;
+  --stj-border: #3b82f6 !important;
+  --obs: #047857 !important;
+  --obs-bg: #d1fae5 !important;
+  --obs-border: #10b981 !important;
+  --node-l1: #1d4ed8 !important;
+  --node-l2: #7c3aed !important;
+  --node-l3: #047857 !important;
+  --node-l4: #c2410c !important;
+  --node-l5: #be185d !important;
+  --h1: #c2440a !important;
+  --h2: #9a3510 !important;
+  --h3: #7c2d12 !important;
+}
+
+[data-theme="light"] body { background: #f8f7f2 !important; color: #1a1a1a !important; }
+[data-theme="light"] #sidebar,
+[data-theme="light"] #sidebar-header,
+[data-theme="light"] #toolbar,
+[data-theme="light"] header { background: #eeeae0 !important; border-color: #d8d3c8 !important; }
+[data-theme="light"] #search,
+[data-theme="light"] input[type=text],
+[data-theme="light"] input[type=search] { background: #ffffff !important; color: #1a1a1a !important; border-color: #d8d3c8 !important; }
+[data-theme="light"] .ch-item:hover { background: rgba(0,0,0,0.04) !important; }
+[data-theme="light"] .ch-item.active { background: rgba(160,120,64,0.1) !important; }
+[data-theme="light"] #content,
+[data-theme="light"] #map-content,
+[data-theme="light"] .content,
+[data-theme="light"] main { background: #f8f7f2 !important; }
+
+/* Toggle button */
+#theme-toggle-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  background: #c8a96e;
+  color: #1a1a1a;
+  border: none;
+  border-radius: 50px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-family: monospace;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: opacity 0.2s;
+  font-weight: 600;
+}
+#theme-toggle-btn:hover { opacity: 0.85; }
+
+/* LIGHT THEME */
+[data-theme="light"] {
+  --bg:#f8f7f2!important;--bg2:#eeeae0!important;--bg3:#e5e0d5!important;
+  --surface:#ffffff!important;--surface2:#f0ede8!important;--border:#d8d3c8!important;
+  --text:#1a1a1a!important;--text2:#4a4a4a!important;--text3:#888070!important;
+  --text-muted:#888070!important;--accent:#a07840!important;--accent2:#2563eb!important;
+  --cespe:#4338ca!important;--cespe-bg:#eef2ff!important;--cespe-border:#e11d48!important;
+  --stj:#1d4ed8!important;--stj-bg:#dbeafe!important;--stj-border:#3b82f6!important;
+  --obs:#047857!important;--obs-bg:#d1fae5!important;--obs-border:#10b981!important;
+  --node-l1:#1d4ed8!important;--node-l2:#7c3aed!important;--node-l3:#047857!important;
+  --node-l4:#c2410c!important;--node-l5:#be185d!important;
+}
+[data-theme="light"] body{background:#f8f7f2!important;color:#1a1a1a!important;}
+[data-theme="light"] #sidebar,[data-theme="light"] #sidebar-header,
+[data-theme="light"] #chapter-list,[data-theme="light"] header,
+[data-theme="light"] #toolbar,[data-theme="light"] #tabs{background:#eeeae0!important;border-color:#d8d3c8!important;}
+[data-theme="light"] #search,[data-theme="light"] #search-box,[data-theme="light"] input{background:#fff!important;color:#1a1a1a!important;border-color:#d8d3c8!important;}
+[data-theme="light"] .node-row:hover,[data-theme="light"] .row:hover{background:rgba(0,0,0,0.04)!important;}
+[data-theme="light"] .tab,[data-theme="light"] .ch-item{color:#4a4a4a!important;}
+
+/* HIGHLIGHTS */
+.hl-yellow{background:rgba(250,204,21,0.45)!important;border-radius:2px;}
+.hl-green{background:rgba(34,197,94,0.38)!important;border-radius:2px;}
+.hl-blue{background:rgba(59,130,246,0.38)!important;border-radius:2px;}
+.hl-red{background:rgba(239,68,68,0.38)!important;border-radius:2px;}
+._sel{outline:2px solid #c8a96e!important;outline-offset:1px;border-radius:3px;}
+
+/* WORD-STYLE TOOLBAR */
+#_wtb{
+  position:fixed;top:0;left:0;right:0;z-index:9999;
+  background:var(--surface,#1a1d2e);
+  border-bottom:1px solid var(--border,#2e3350);
+  display:flex;align-items:center;gap:2px;
+  padding:4px 10px;height:42px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+  flex-wrap:nowrap;overflow-x:auto;
+}
+[data-theme="light"] #_wtb{background:#f3f2f1;border-color:#d0ccc8;box-shadow:0 2px 4px rgba(0,0,0,0.1);}
+
+body{padding-top:42px!important;}
+
+#_wtb ._sep{width:1px;height:24px;background:var(--border,#2e3350);margin:0 4px;flex-shrink:0;}
+[data-theme="light"] #_wtb ._sep{background:#d0ccc8;}
+
+#_wtb ._grp{display:flex;align-items:center;gap:2px;flex-shrink:0;}
+
+#_wtb ._grp-label{
+  font-size:9px;font-family:monospace;letter-spacing:0.08em;
+  text-transform:uppercase;color:var(--text-muted,#5a6070);
+  padding:0 4px;white-space:nowrap;
+}
+
+/* Toolbar buttons */
+._tb-btn{
+  background:none;border:1px solid transparent;border-radius:4px;
+  padding:3px 7px;cursor:pointer;font-size:13px;
+  color:var(--text,#e8eaf0);transition:background 0.12s,border-color 0.12s;
+  display:flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0;
+  font-family:system-ui,sans-serif;
+}
+._tb-btn:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.15);}
+[data-theme="light"] ._tb-btn{color:#1a1a1a;}
+[data-theme="light"] ._tb-btn:hover{background:rgba(0,0,0,0.07);border-color:rgba(0,0,0,0.15);}
+._tb-btn._on{background:rgba(200,169,110,0.25);border-color:rgba(200,169,110,0.5);}
+
+/* Color swatches inline */
+._sw{
+  width:18px;height:18px;border-radius:3px;border:1px solid rgba(255,255,255,0.2);
+  cursor:pointer;flex-shrink:0;transition:transform 0.12s;display:inline-block;
+}
+._sw:hover{transform:scale(1.25);}
+._sw._on{outline:2px solid #c8a96e;outline-offset:1px;}
+[data-theme="light"] ._sw{border-color:rgba(0,0,0,0.2);}
+
+/* Font size */
+._fs-num{
+  width:36px;text-align:center;background:var(--bg,#0d0f14);
+  border:1px solid var(--border,#2e3350);border-radius:4px;
+  color:var(--text,#e8eaf0);font-size:12px;font-family:monospace;
+  padding:2px 4px;
+}
+[data-theme="light"] ._fs-num{background:#fff;color:#1a1a1a;border-color:#d0ccc8;}
+
+/* Selected node indicator */
+#_sel-info{
+  font-size:11px;font-family:monospace;color:var(--text-muted,#5a6070);
+  max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  margin-left:8px;flex-shrink:1;
+}
+
+/* Note modal */
+#_np{display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;}
+#_np._o{display:flex;}
+._npb{background:var(--surface,#13161e);border:1px solid var(--border,#2e3350);border-radius:14px;padding:24px;width:100%;max-width:460px;box-shadow:0 12px 40px rgba(0,0,0,0.5);}
+[data-theme="light"] ._npb{background:#fff;border-color:#d8d3c8;}
+._nptitle{font-size:13px;font-weight:600;color:var(--text,#e8eaf0);margin-bottom:12px;}
+._npta{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border,#2e3350);border-radius:8px;padding:12px;font-size:14px;color:var(--text,#e8eaf0);font-family:sans-serif;resize:vertical;min-height:120px;outline:none;line-height:1.6;}
+[data-theme="light"] ._npta{background:#eef2ff;color:#1a1a1a;border-color:#e11d48;}
+._npact{display:flex;justify-content:flex-end;gap:10px;margin-top:14px;}
+._npcxl{font-size:13px;background:none;border:1px solid var(--border,#2e3350);border-radius:7px;padding:7px 16px;cursor:pointer;color:var(--text-muted,#5a6070);font-family:sans-serif;}
+._npsave{font-size:13px;background:#c8a96e;color:#1a1a1a;border:none;border-radius:7px;padding:7px 16px;cursor:pointer;font-weight:600;font-family:sans-serif;}
+
+@media (max-width: 768px) {
+  #_wtb { display: none !important; }
+  #_sel-info { display: none; }
+  .tabs { font-size: 12px; }
+  #_hdr { display: flex !important; }
+}
+@media (min-width: 769px) {
+  #_hdr { display: none !important; }
+}
+
+/* ── TRACKER INTEGRATION ── */
+#_trk_bar {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border, #1e2330);
+  background: var(--surface, #13161e);
+  flex-shrink: 0;
+}
+[data-theme="light"] #_trk_bar { background: #f0ede8; border-color: #d8d3c8; }
+#_trk_label {
+  font-size: 10px; font-family: monospace; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--text-muted, #5a6070);
+  display: flex; justify-content: space-between; margin-bottom: 6px;
+}
+#_trk_pct { color: var(--accent, #c8a96e); font-weight: 700; }
+#_trk_track {
+  height: 5px; background: var(--border, #2e3350);
+  border-radius: 3px; overflow: hidden;
+}
+#_trk_fill {
+  height: 100%; background: var(--accent, #c8a96e);
+  border-radius: 3px; transition: width 0.4s ease;
+}
+
+/* Checkbox in sidebar items */
+._chk_wrap {
+  display: flex; align-items: center; gap: 0; width: 100%;
+}
+._chk_wrap input[type=checkbox] {
+  width: 14px; height: 14px;
+  accent-color: var(--accent, #c8a96e);
+  cursor: pointer; flex-shrink: 0;
+  margin-right: 6px; margin-left: 4px;
+}
+._chk_done { opacity: 0.5; text-decoration: line-through; }
+
+/* ══ UI INJECTED ══ */
+body { padding-top: 46px !important; }
+
+#_hdr {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 9900;
+  height: 46px; background: var(--surface, #13161e);
+  border-bottom: 1px solid var(--border, #2e3350);
+  display: flex; align-items: center; gap: 8px; padding: 0 12px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.2);
+}
+[data-theme="light"] #_hdr { background: #fff; border-color: #d8d3c8; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+.hbtn {
+  font-size: 12px; font-family: monospace;
+  background: none; border: 1px solid var(--border, #2e3350);
+  border-radius: 6px; padding: 4px 10px; cursor: pointer;
+  color: var(--text, #e8eaf0); white-space: nowrap;
+  transition: background 0.15s; text-decoration: none; display: inline-flex; align-items: center;
+}
+.hbtn:hover { background: var(--surface2, #1c2030); }
+[data-theme="light"] .hbtn { color: #1a1a1a; }
+[data-theme="light"] .hbtn:hover { background: #f0ede8; }
+
+#_htit {
+  font-size: 13px; font-family: monospace;
+  color: var(--muted, #5a6070); flex: 1; text-align: center;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* HIGHLIGHT SWATCHES */
+#_hlbar {
+  display: flex; align-items: center; gap: 5px;
+  padding: 0 6px; border-left: 1px solid var(--border, #2e3350);
+  margin-left: 4px;
+}
+[data-theme="light"] #_hlbar { border-color: #d8d3c8; }
+
+.hlsw {
+  width: 20px; height: 20px; border-radius: 50%; cursor: pointer;
+  border: 2px solid transparent; transition: transform 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.hlsw:hover { transform: scale(1.2); }
+.hlsw.on { border-color: var(--text, #e8eaf0); transform: scale(1.15); }
+[data-theme="light"] .hlsw.on { border-color: #1a1a1a; }
+.hlsw.clr {
+  background: var(--border, #2e3350) !important;
+  font-size: 11px; display: flex; align-items: center; justify-content: center;
+  color: var(--text, #e8eaf0); border-radius: 50%;
+}
+[data-theme="light"] .hlsw.clr { background: #e5e0d5 !important; color: #1a1a1a; }
+
+/* HIGHLIGHT APPLIED STYLES */
+._hly { border-radius: 2px; padding: 0 1px; cursor: pointer; }
+._hly.y { background: rgba(250,204,21,0.45) !important; border-left: 3px solid rgba(202,138,4,0.8); padding-left: 5px; }
+._hly.g { background: rgba(34,197,94,0.3)  !important; border-left: 3px solid rgba(22,163,74,0.8);  padding-left: 5px; }
+._hly.b { background: rgba(59,130,246,0.3) !important; border-left: 3px solid rgba(37,99,235,0.8);  padding-left: 5px; }
+._hly.p { background: rgba(236,72,153,0.3) !important; border-left: 3px solid rgba(219,39,119,0.8); padding-left: 5px; }
+._hly.o { background: rgba(249,115,22,0.3) !important; border-left: 3px solid rgba(234,88,12,0.8);  padding-left: 5px; }
+
+/* SIDEBAR */
+#sidebar { top: 46px !important; height: calc(100vh - 46px) !important; }
+@media(min-width:769px) { #sidebar.sb-off { width:0!important; min-width:0!important; overflow:hidden!important; border-right:none!important; } }
+@media(max-width:768px) {
+  #sidebar { position:fixed!important; left:0!important; z-index:8900!important; }
+  #sidebar.sb-off { transform:translateX(-100%)!important; }
+  #_sbov { display:none; position:fixed; inset:0; z-index:8800; background:rgba(0,0,0,0.4); }
+  #_sbov.open { display:block; }
+}
+
+/* TRACKER in sidebar */
+#_trk_bar { padding:10px 12px; border-bottom:1px solid var(--border,#1e2330); background:var(--surface,#13161e); flex-shrink:0; }
+[data-theme="light"] #_trk_bar { background:#f0ede8; border-color:#d8d3c8; }
+#_trk_label { font-size:10px; font-family:monospace; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-muted,#5a6070); display:flex; justify-content:space-between; margin-bottom:6px; }
+#_trk_pct { color:#c8a96e; font-weight:700; }
+#_trk_track { height:4px; background:var(--border,#2e3350); border-radius:2px; overflow:hidden; }
+#_trk_fill { height:100%; background:#c8a96e; border-radius:2px; transition:width 0.4s; }
+._chk_wrap { display:flex; align-items:center; width:100%; }
+._chk_wrap input[type=checkbox] { width:14px; height:14px; accent-color:#c8a96e; cursor:pointer; flex-shrink:0; margin-right:6px; margin-left:4px; }
+._chk_done { opacity:0.5; text-decoration:line-through; }
+
+/* LIGHT THEME */
+[data-theme="light"] { --bg:#f8f7f2!important; --surface:#ffffff!important; --surface2:#f0ede8!important; --border:#d8d3c8!important; --text:#1a1a1a!important; --text-muted:#888070!important; --accent:#a07840!important; }
+[data-theme="light"] body { background:#f8f7f2!important; color:#1a1a1a!important; }
+[data-theme="light"] #sidebar,[data-theme="light"] #sidebar-header,[data-theme="light"] #chapter-list,[data-theme="light"] header { background:#e8e8f0!important; border-color:#c8c8dc!important; }
+[data-theme="light"] #search,[data-theme="light"] #search-box,[data-theme="light"] input[type=text] { background:#fff!important; color:#1a1a1a!important; border-color:#d8d3c8!important; }
+[data-theme="light"] .node-row:hover,[data-theme="light"] .row:hover { background:rgba(0,0,0,0.04)!important; }
+[data-theme="light"] .ch-item { color:#4a4a4a!important; } [data-theme="light"] .ch-item.active { color:#a07840!important; }
+[data-theme="light"] .tab { color:#4a4a4a!important; }
+</style>
+</head>
+<body>
+<div id="app">
+<nav id="sidebar">
+  <div id="sb-header">
+    <div id="sb-title">§ DIR. COLETIVO</div>
+    <input id="search" placeholder="buscar em todos os capítulos..." type="text" autocomplete="off">
+  </div>
+  <div id="trk-bar">
+    <div id="trk-label"><span>Revisão</span><span><span id="trk-cnt">0/5</span>&nbsp;<span id="trk-pct">0%</span></span></div>
+    <div id="trk-track"><div id="trk-fill" style="width:0%"></div></div>
+  </div>
+  <div id="tabs"></div>
+</nav>
+<div id="main-area">
+  <div class="match-bar" id="matchBar"></div>
+  <div class="content" id="content">
+    <div id="empty-msg">SELECIONE UM CAPÍTULO</div>
+  </div>
+</div>
+</div>
+<script>
+var _TRK = window._TRK || {done:{}};
+
+const RAW = "{\"cap0\":{\"title\":\"0. Hist\u00f3rico Legislativo das A\u00e7\u00f5es Coletivas\",\"children\":[{\"title\":\"Inicio\",\"children\":[{\"title\":\"Pa\u00edses da Civil Law\",\"children\":[{\"title\":\"A origem da tutela coletiva se confunde com a origem das a\u00e7\u00f5es populares\"},{\"title\":\"A actio romana exigia direito individual e pessoal, mas as a\u00e7\u00f5es populares n\u00e3o\"},{\"title\":\"Na tradi\u00e7\u00e3o romana as a\u00e7oes coletivas eram exce\u00e7\u00f5es as individuais\"},{\"title\":\"N\u00e3o se tinha definido o conceito de estado, mas o cidadao tinha rela\u00e7\u00e3o com a\"},{\"title\":\"Res publica, que ajuda a compreender  o cabimento da a\u00e7ao coletiva romana\"},{\"title\":\"Todos os cidad\u00e3os eram donos da res publica(copropriet\u00e1rios)\"},{\"title\":\"Msm que a a\u00e7\u00e3o fosse positiva a todos, a prentens\u00e3o era individual\"},{\"title\":\"A a\u00e7\u00e3o popular romana come\u00e7ou sendo penal, dps passou a tutelar a coleta\"}]},{\"title\":\"Pa\u00edses da Commom Law\",\"children\":[{\"title\":\"doutrina aponta a origem na inglaterra medieval do Sec. VII\"},{\"title\":\"Grupos sociais litigavam em conjunto por representa\u00e7\u00e3o de seus lider\"},{\"title\":\"Tinham como caracteristica a defesa em juizo do direito de membros de comunida\"},{\"title\":\"Defendia em juizo o direito de membros e uma comunidade\"},{\"title\":\"No sec. XVII criaram o bill of peace(deixaram de exigir presen\u00e7a de todos)\"},{\"title\":\"E passaram a permitir a\u00e7oes representativas\"},{\"title\":\"A\u00e7\u00f5es representativas eram permitidas qnd o litisconsorcio era grande\"},{\"title\":\"As a\u00e7\u00f5es representativas da inglaterra sao a origem remota da class action\"},{\"title\":\"as a\u00e7\u00f5es representativas eram admitidas qnd o numero de ligantes era imensa\"}]},{\"title\":\"No Brasil\",\"children\":[{\"title\":\"A primeira a\u00e7\u00e3o reconhecida, por influencia do D. Portugues foi a a\u00e7\u00e3o popular. A a\u00e7\u00e3o popular vigorou no periodo imperial e inicio da republica. P/ alguns estaria consagrada na CF de 1824 no art. 157. Com CC/16 a doutrina passou a entender que nao cabia a\u00e7\u00e3o coletiva. Em 1934 a a\u00e7\u00e3o popular foi incluida expressamente na CF e em 37 removida. Em 1946 a a\u00e7\u00e3o foi restituida e mantida at\u00e9 hoje. Cria\u00e7\u00e3o da Lei da A\u00e7\u00e3o Popular - Lei 4717/65. Foi a primeira a tratar da tutela coletiva Inicialmente a tutela coletiva voltava-se p/ direitos transindividuais Posteriormente passou a abarcar direitos individuais feridos em grande escala. A a\u00e7\u00e3o civil p\u00fablica brasileira inspirou-se no sistema de legitima\u00e7\u00e3o ad causam da class action americana? O modelo americano de processo coletivo \u00e9 marcado pela representa\u00e7\u00e3o adequada, que significa que o juiz faz o controle do legitimado coletivo, que pode ser inclusive o indiv\u00edduo. No sistema brasileiro quem faz esse controle \u00e9 a lei, que indica quais s\u00e3o os legitimados ativos. Principais Influ\u00eancias da class action sobre a ACP: 1) O requisito de C O M U N H \u00c3 O  DE  F A T O S  ou direitos entre os interessados \u00e9 presente tanto nas class actions quanto em nossas a\u00e7\u00f5es coletivas; 2) Em ambas os autores atuam S E M  necessidade de A U T O R I Z A \u00c7 \u00c3 O expressa dos interessados; 3) Em ambas os efeitos da coisa julgada podem atingir os membros da classe, categoria e grupos de pessoas que N \u00c3 O participaram pessoalmente do processo; 4) FLUID RECOVERY - Nossas a\u00e7\u00f5es coletivas tamb\u00e9m adotaram um sistema de fluid recovery nos casos de interesses individuais homog\u00eaneos, embora com algumas diferen\u00e7as em rela\u00e7\u00e3o ao sistema americano.\"}]},{\"title\":\"Lei 6.938/81 da PNMA\",\"children\":[{\"title\":\"Prev\u00ea a Responsabilidade Civil p/ agentes poluidores\"},{\"title\":\"Atribui legitimidade ao MP para ajuizar a\u00e7\u00f5es por Danos ao Meio Ambiente\"}]}]},{\"title\":\"Fases Evolutivas -  Doutrina traz  3 momentos\",\"children\":[{\"title\":\"Primeira Fase - Fase da Absoluta predominancia individualista da tutela jur\u00eddica\",\"children\":[{\"title\":\"\u00c9 inaugurada com o CC/16\"},{\"title\":\"Determinou o fim das a\u00e7\u00f5es populares, como a\u00e7\u00f5es coletivas\"},{\"title\":\"Relegou o direito de a\u00e7\u00e3o apenas aqueles q tinham interesse pr\u00f3prio ou de familia\"}]},{\"title\":\"Segunda Fase - Fase da Prote\u00e7\u00e3o Fragment\u00e1ria dos Direitos Transindividuais  ou Fase da prote\u00e7\u00e3o TAXATIVA dos direitos massificados\",\"children\":[{\"title\":\"Algumas especies de direitos coletivos passaram a ser tutelados, predominando a dimens\u00e3o individualista dos direitos\"},{\"title\":\"A\u00e7\u00e3o popular para tutela do pat. p\u00fablico\"},{\"title\":\"A responsabilidade ambiental de agentes poluidores\"},{\"title\":\"Na epoca vetou-se um inciso que ampliava as causas para qlq interesse difuso, por isso era taxativa a epoca\"}]},{\"title\":\"Terceira Fase - Fase da tutela juridica integral,  irrestrita e ampla  ou Tutela Coletiva Holistica\",\"children\":[{\"title\":\"Iniciada com a CF/88 e o reconhecimento dos direitos fundamentais\"},{\"title\":\"Garantui o acesso e a inafsetabilidade da tutela coletiva\"},{\"title\":\"Ampliou a tutela para outros interesses coletivos e difusos\"},{\"title\":\"Supetou a taxatividade material\"},{\"title\":\"Garente o principio da legitimac\u00e3o adequada com reconhecimento da Legitimidade Concorrente e Pluralista\"},{\"title\":\"Conquistas Processuais\",\"children\":[{\"title\":\"Reconheceu a ACP\"},{\"title\":\"Legitima\u00e7\u00e3o do MP\"},{\"title\":\"MS coletivo\"},{\"title\":\"Amplia\u00e7\u00e3o do objeto da a\u00e7\u00e3o popular\"},{\"title\":\"Representa\u00e7\u00e3o processual para entidades associativas\"},{\"title\":\"Substitui\u00e7\u00e3o processual apra sindicatos\"},{\"title\":\"Legitima\u00e7\u00e3o processual dos indios, suas comunidades e organiza\u00e7\u00f5es com interven\u00e7\u00e3o obrigatoria do MP\"}]},{\"title\":\"Houveram conquistas materiais tamb\u00e9m\",\"children\":[{\"title\":\"exemplo: Tutela do direito fundamental dos consumidores\"}]}]}]},{\"title\":\"Difus\u00e3o e Importancia do Direito Coletivo\",\"children\":[{\"title\":\"Foi dada com a ACP - Lei 7.347/85\"},{\"title\":\"Incorporou a tutela coletiva ao Direito e amplou o rol de legitimados\"},{\"title\":\"Trouxe a possiblidade de INQUERITO CIVIL por parte do MP\"},{\"title\":\"Porem, \u00e9 restrita a defesa do MA, do consumidor, dos bens e direitos de valor artistico, estetico, historico, turistico e paisagistico\"},{\"title\":\"Foi ampliada com a CF/88 que a previa p/ outros interessses difusos e coletivos\"},{\"title\":\"Trouxe a possibilidade de MI, MS coletivo e A\u00e7\u00e3o popular\"}]},{\"title\":\"CDC em 90\",\"children\":[{\"title\":\"Trouxe regras especificas e inovadoras p/ tramita\u00e7\u00e3o de processos coletivos\"},{\"title\":\"Estabeleceu conceitos dos direitos difusos, coletivos e IDH\"},{\"title\":\"Alterou a ACP, prevendo a hipotese de TAC e litisconsorcios entre MP\"},{\"title\":\"Inova\u00e7\u00f5es\",\"children\":[{\"title\":\"Competencia pelo Domicilio do Consumidor\"},{\"title\":\"Veda\u00e7\u00e3o a Denunciac\u00e3o a Lide e um novo tipo de chamamento ao processo\"},{\"title\":\"Consumidor poder se valer de qlq a\u00e7\u00e3o cabivel\"},{\"title\":\"Extens\u00e3o subjetiva da coisa julgada\"},{\"title\":\"regras de legitima\u00e7\u00e3o e dispensa de honorarios especificos para a\u00e7\u00f5es coletivas\"},{\"title\":\"regulamenta\u00e7\u00e3o da litispendencia entre a\u00e7\u00e3o coletiva e individual\"},{\"title\":\"Criou o microssistema processual coletivo\"}]}]}]},\"cap1\":{\"title\":\"1. Microssistema Processual Coletivo\",\"children\":[{\"title\":\"Introduc\u00e3o\",\"children\":[{\"title\":\"A tutela coletiva \u00e9 uma especie de tut jurisdicional voltada a certos direitos materiais\"},{\"title\":\"A defini\u00e7\u00e3o de quais sejam esses direitos \u00e9 tarefa pro legislador\"},{\"title\":\"ACP e o CDC criaram um microssistema processual, pois seus sistemas s\u00e3o interligados\"},{\"title\":\"As leis q tratam de d. coletivos passam a integrar esse microssistema\"},{\"title\":\"STJ adota e inclue o ECA e o estatuto do idoso no microssistema juridico da tutela coletiva\"},{\"title\":\"\u00c9 a intercambiariedade entre os diplmas\"},{\"title\":\"S\u00e3o normas ligadas por principios e logicas comuns\"},{\"title\":\"Inclue-se inclusive a Lei de Improbidade nesse sistema\"},{\"title\":\"O CDC se tornou um Codigo Processual Coletivo, como ordenamento processual geral\"},{\"title\":\"A (Lei da A\u00e7\u00e3o Popular), n\u00e3o obstante o seu modelo de legitima\u00e7\u00e3o individual, integra o microssistema de tutela coletiva do direito brasileiro\"}]},{\"title\":\"Residualidade do CPC\",\"children\":[{\"title\":\"\u00c9 uma quest\u00e3o afirmada pela doutrina\"},{\"title\":\"O CPC aplica-se a outras leis de tutela coletiva naquilo que elas forem omissas\"},{\"title\":\"Afirmam que o CPC \u00e9 residual e n\u00e3o subsidiario\"},{\"title\":\"O aplicador antes de buscar a solu\u00e7\u00e3o no CPC deve consutar outras leis do microssistema\"},{\"title\":\"Ex:\",\"children\":[{\"title\":\"Aplica\u00e7\u00e3o prazo em dobro p/ litis com diferentes prespostos na a\u00e7\u00e3o de improbidade\"},{\"title\":\"Remessa Necessaria\",\"children\":[{\"title\":\"N\u00e3o aplica\u00e7\u00e3o do CPC em rela\u00e7\u00e3o a remessa necess\u00e1ria,\"},{\"title\":\"pois normas constantes do microssistema coletivo a preveem.\"},{\"title\":\"Aplica-se analogicamente a Lei da A\u00e7\u00e3o Popular Art. 19. A senten\u00e7a que concluir pela car\u00eancia ou pela improced\u00eancia da a\u00e7\u00e3o est\u00e1 sujeita ao duplo grau de jurisdi\u00e7\u00e3o, n\u00e3o produzindo efeito sen\u00e3o depois de confirmada pelo tribunal; da que julgar a a\u00e7\u00e3o procedente caber\u00e1 apela\u00e7\u00e3o, com efeito suspensivo.  A ACP diz que haver\u00e1 sempre remessa necessaria em caso de senten\u00e7a que concluir pela carencia ou improcedencia da a\u00e7\u00e3o\"}]}]}]},{\"title\":\"Intercambiariedade entre os Diplomas - Freddy Didier Jr.\",\"children\":[{\"title\":\"Traz 3 situa\u00e7\u00f5es em que se vislumbra a intercambieariedade/Unidade de Tratamento\",\"children\":[{\"title\":\"Efeitos em que a apela\u00e7\u00e3o \u00e9 recebida\"},{\"title\":\"Conceito de direitos Coletivos Lato Senso\"},{\"title\":\"Possibilidade de execu\u00e7\u00e3o por desconto em folha de pagamento\"}]}]}]},\"cap2\":{\"title\":\"2. Princ\u00edpios e Microssistema Processual Coletivo\",\"children\":[{\"title\":\"Introduc\u00e3o\",\"children\":[{\"title\":\"A tutela coletiva \u00e9 uma especie de tut jurisdicional voltada a certos direitos materiais\"},{\"title\":\"A defini\u00e7\u00e3o de quais sejam esses direitos \u00e9 tarefa pro legislador\"},{\"title\":\"ACP e o CDC criaram um microssistema processual, pois seus sistemas s\u00e3o interligados\"},{\"title\":\"As leis q tratam de d. coletivos passam a integrar esse microssistema\"},{\"title\":\"STJ adota e inclue o ECA e o estatuto do idoso no microssistema juridico da tutela coletiva\"},{\"title\":\"\u00c9 a intercambiariedade entre os diplmas\"},{\"title\":\"S\u00e3o normas ligadas por principios e logicas comuns\"},{\"title\":\"Inclue-se inclusive a Lei de Improbidade nesse sistema\"},{\"title\":\"O CDC se tornou um Codigo Processual Coletivo, como ordenamento processual geral\"},{\"title\":\"A (Lei da A\u00e7\u00e3o Popular), n\u00e3o obstante o seu modelo de legitima\u00e7\u00e3o individual, integra o microssistema de tutela coletiva do direito brasileiro\"}]},{\"title\":\"Residualidade do CPC\",\"children\":[{\"title\":\"\u00c9 uma quest\u00e3o afirmada pela doutrina\"},{\"title\":\"O CPC aplica-se a outras leis de tutela coletiva naquilo que elas forem omissas\"},{\"title\":\"Afirmam que o CPC \u00e9 residual e n\u00e3o subsidiario\"},{\"title\":\"O aplicador antes de buscar a solu\u00e7\u00e3o no CPC deve consutar outras leis do microssistema\"},{\"title\":\"Remessa Necessaria\",\"children\":[{\"title\":\"N\u00e3o aplica\u00e7\u00e3o do CPC em rela\u00e7\u00e3o a remessa necess\u00e1ria pq as normas coletiva preveem\"},{\"title\":\"Vale destacar que o MS tem regras proprias de reexame, previstas na Lei\"},{\"title\":\"Aplica-se analogicamente a Lei da A\u00e7\u00e3o Popular Art. 19. A senten\u00e7a que concluir pela car\u00eancia ou pela improced\u00eancia da a\u00e7\u00e3o est\u00e1 sujeita ao duplo grau de jurisdi\u00e7\u00e3o, n\u00e3o produzindo efeito sen\u00e3o depois de confirmada pelo tribunal; da que julgar a a\u00e7\u00e3o procedente caber\u00e1 apela\u00e7\u00e3o, com efeito suspensivo.  A ACP diz que haver\u00e1 sempre remessa necessaria em caso de senten\u00e7a que concluir pela carencia ou improcedencia da a\u00e7\u00e3o\"},{\"title\":\"obs\",\"children\":[{\"title\":\"Reexame necess\u00e1rio \u201cINVERTIDO\u201d previsto na Lei de A\u00e7\u00e3o Popular A Lei n\u00ba 4.717/65 prev\u00ea que se o juiz concluir pela car\u00eancia ou pela improced\u00eancia da a\u00e7\u00e3o popular, essa senten\u00e7a estar\u00e1 sujeita ao reexame necess\u00e1rio. Veja: Art. 19. A senten\u00e7a que concluir pela car\u00eancia ou pela improced\u00eancia da a\u00e7\u00e3o est\u00e1 sujeita ao duplo grau de jurisdi\u00e7\u00e3o, n\u00e3o produzindo efeito sen\u00e3o depois de confirmada pelo tribunal; da que julgar a a\u00e7\u00e3o procedente caber\u00e1 apela\u00e7\u00e3o, com efeito suspensivo.   Assim, quando a senten\u00e7a da a\u00e7\u00e3o popular for procedente, n\u00e3o haver\u00e1 reexame necess\u00e1rio. Perceba, portanto, que o art. 19 inverte a l\u00f3gica da remessa necess\u00e1ria do CPC. Pelo CPC, se a Fazenda \u201cperde\u201d, haver\u00e1 reexame. Na a\u00e7\u00e3o popular, o reexame necess\u00e1rio ocorre se o cidad\u00e3o perde. Em virtude disso, podemos dizer que esse art. 19 traz uma hip\u00f3tese de duplo grau de jurisdi\u00e7\u00e3o invertido, ou seja, um duplo grau que ocorre em favor do cidad\u00e3o (e n\u00e3o necessariamente da Fazenda P\u00fablica). \u00c9 poss\u00edvel aplicar esse art. 19 da Lei n\u00ba 4.717/65 para as A\u00c7\u00d5ES CIVIS P\u00daBLICAS? Em regra, sim. O STJ entende que \u00e9 poss\u00edvel aplicar, por analogia, a primeira parte do art. 19 da Lei n\u00ba 4.717/65 paras as senten\u00e7as de improced\u00eancia de a\u00e7\u00e3o civil p\u00fablica. Nesse sentido: STJ. 2\u00aa Turma. AgInt no REsp 1596028/MG, Rel. Min.Og Fernandes, julgado em 26/09/2017. Existe, contudo, uma exce\u00e7\u00e3o: N\u00e3o se admite o cabimento da remessa necess\u00e1ria, tal como prevista no art. 19 da Lei n\u00ba 4.717/65, nas a\u00e7\u00f5es coletivas que versem sobre direitos individuais homog\u00eaneos. STJ. 3\u00aa Turma. REsp 1.374.232-ES, Rel. Min. Nancy Andrighi, julgado em 26/09/2017 (Info 612).\"}]}]},{\"title\":\"Escolha do polo pelo demandando na ACP.\",\"children\":[{\"title\":\"A lei de a\u00e7\u00e3o popular estabelece que a a\u00e7\u00e3o popular dever\u00e1 ser interposta contra diversas pessoas, inclusive contra a Fazenda. Esta, contudo, \u00e9 v\u00edtima. Desta forma, poder\u00e1 escolher o polo que ir\u00e1 figurar, tornando-se autora ou continuando como r\u00e9u. Como na ACP n\u00e3o h\u00e1 previs\u00e3o acercado assunto, o STJ entende que o polo passivo demandado poder\u00e1 escolher o polo, nos termos no art. 6\u00ba, \u00a73\u00ba da LAP. \u201cArt. 6\u00ba, \u00a7 3\u00ba A pessoas jur\u00eddica de direito p\u00fablico ou de direito privado, cujo ato seja objeto de impugna\u00e7\u00e3o, poder\u00e1 abster-se de contestar o pedido, ou poder\u00e1 atuar ao lado do autor, desde que isso se afigure \u00fatil ao interesse p\u00fablico, a ju\u00edzo do respectivo representante legal ou dirigente.\u201d\"}]},{\"title\":\"Legitimidade ativa nas a\u00e7\u00f5es coletivas do ECA (art. 210)\",\"children\":[{\"title\":\"N\u00e3o h\u00e1 refer\u00eancia \u00e0 Defensoria e \u00e0 Administra\u00e7\u00e3o Indireta, mas s\u00e3o legitimados, aplica-se o microssistema\"}]}]},{\"title\":\"Intercambiariedade entre os Diplomas - Freddy Didier Jr. Traz 3 situa\u00e7\u00f5es em que se vislumbra a intercambieariedade/Unidade de Tratamento\",\"children\":[{\"title\":\"Efeitos em que a apela\u00e7\u00e3o \u00e9 recebida\"},{\"title\":\"Conceito de direitos Coletivos Lato Senso\"},{\"title\":\"Possibilidade de execu\u00e7\u00e3o por desconto em folha de pagamento\"}]},{\"title\":\"Cap. 3 - Princ\u00edpios do Processo Coletivo\",\"children\":[{\"title\":\"Principio do Interesse Juris. no Conhecimento do M\u00e9rito do  Processo Coletivo\",\"children\":[{\"title\":\"Juiz deve faciliar a busca pelo acesso a justi\u00e7a. superando vicios, pq as a\u00e7\u00f5es s\u00e3o de nat. social\"},{\"title\":\"O judiciario deve flexibilizar requisitos de admissibilidade\"},{\"title\":\"Ex: Juiz ao inves de de extingur a a\u00e7\u00e3o por ilegitimidade, publica edital convocando os demais legitimados\"}]},{\"title\":\"Princ\u00edpio da M\u00e1xima Prioridade  da Tutela Jurisdicional Coletiva\",\"children\":[{\"title\":\"Reconhece que sempre existira interesse social na tutela coletiva\"},{\"title\":\"Determina a prioridade no julgamento dessas a\u00e7\u00f5es\"},{\"title\":\"Decorre da regra de que o interesse p\u00fablico prevalece ao privado\"},{\"title\":\"Permite dirimir em um unico processo e em unica decis\u00e3o, uma serie de litigios repetitivos grandes conflitos coletivos ou varios conflitos individuais entrela\u00e7ados\"},{\"title\":\"Isso n\u00e3o prejudica o direito individual\"},{\"title\":\"Exemplo\",\"children\":[{\"title\":\"A\u00e7\u00e3o coletiva julgada improcedente, nao prejudica o interesse individual\"},{\"title\":\"O individuo pode optar pela tutela individual\"},{\"title\":\"Entre execu\u00e7\u00f5es individuais e coletivas, prepondera a primeira\"}]}]},{\"title\":\"Princ\u00edpio da Disponibilidade Motivada da A\u00e7\u00e3o Coletiva (LAP, art. 16; LACP, art. 15);\",\"children\":[{\"title\":\"Havendo interesse em desistir, os motivos devem estar presentes e motivados\"},{\"title\":\"O principio determina analise dos motivos que fundamentam a dessistencia\"},{\"title\":\"Sendo infundada, o MP OU outro legitimado deve assumir a legitimidade\"},{\"title\":\"Se o proprio MP desistir?\",\"children\":[{\"title\":\"Doutrina 1\",\"children\":[{\"title\":\"Cabe ao juiz aplicar a regra do art. 28 do CPP\"}]},{\"title\":\"Doutrina 2\",\"children\":[{\"title\":\"Diz que o MP deve proceder o arquivamento\"},{\"title\":\"Nesse caso os autos do inquerito ou pe\u00e7as devem ser encaminhados ao CSMP\"},{\"title\":\"Fundamento est\u00e1 na aplica\u00e7\u00e3o integrada das normas, sendo a regra do art. 9 aplicavel\"}]},{\"title\":\"Doutrina 3\",\"children\":[{\"title\":\"Extin\u00e7\u00e3o do processo sem resolu\u00e7\u00e3o do m\u00e9rito\"},{\"title\":\"Evita a forma\u00e7\u00e3o da coisa julgada material\"},{\"title\":\"\u00c9 corrente minorit\u00e1ria\"}]}]}]},{\"title\":\"Princ\u00edpio da Presun\u00e7\u00e3o da Leg. Ad  Causam Ativa pela Afirma\u00e7\u00e3o de  D. Coletivo\",\"children\":[{\"title\":\"Basta a Afirma\u00e7\u00e3o do direito coletivo para a Legitimidade Ad Causam\"},{\"title\":\"O Pj ao analisar a legitimidade nao deve analisar a titularidade do direito ou interesse coletivo\"},{\"title\":\"Com rela\u00e7\u00e3o ao MP a legitimidade decorre da propria CF, basta ser direito indisponivel ou social\"},{\"title\":\"A Legitimidade e interesse na a\u00e7\u00e3o decorre da Lei\"}]},{\"title\":\"P. da N\u00e3o taxatividade da A\u00e7\u00e3o Coletiva\",\"children\":[{\"title\":\"N\u00e3o se pode limitar as hipoteses de cabimento da a\u00e7\u00e3o coletiva\"},{\"title\":\"Qlq direito coletivo pode ser objeto de a\u00e7\u00e3o coletiva\"}]},{\"title\":\"P. do Maximo Benef\u00edcio (art. 103, \u00a7\u00a73\u00ba e 4\u00ba do CDC);\",\"children\":[{\"title\":\"Busca-se o aproveitamento max. da presta\u00e7\u00e3o, p/ evitar novas demandas sobre o msm assunto\"},{\"title\":\"Devem ser extraidos todos os resultados positivos possivel\"},{\"title\":\"Transporte In utilibus\",\"children\":[{\"title\":\"Permite ao individual usar da senten\u00e7a cloetiva em seu processo individual\"}]}]},{\"title\":\"P. do Ativismo Judicial ou Maxima Efetividade\",\"children\":[{\"title\":\"O PJ possui poderes probatorios amplos e deve atuar independente da iniciativa das partes\"},{\"title\":\"Impoe-se que sejam realizadas todas atividaddes para o alcance da verdade\"},{\"title\":\"Autoriza o Julgador a\",\"children\":[{\"title\":\"Determinar ex officio a produ\u00e7\u00e3o de toda prova necess\u00e1ria\"},{\"title\":\"Conceder liminar com ou sem justifica\u00e7\u00e3o pr\u00e9via\"},{\"title\":\"Conceder antecipa\u00e7\u00e3o de tutela com ou sem requerimento da parte\"},{\"title\":\"Conceder medidas de apoio, para assegurar o resultado pratico\"}]},{\"title\":\"Nas a\u00e7\u00f5es coletivas o papel do magistrado se alterou\"},{\"title\":\"Exemplo\",\"children\":[{\"title\":\"Relativiza\u00e7\u00e3o do principio da congruencia entre pedido e senten\u00e7a\"}]}]},{\"title\":\"P. da M\u00e1xima Amplitude ou Atipicidade\",\"children\":[{\"title\":\"S\u00e3o cabiveis todos os tipos de tutela do processo coletivo\"},{\"title\":\"Podem ser usados todos os ritos e medidas\"},{\"title\":\"O nome da a\u00e7\u00e3o n\u00e3o \u00e9 relevante\"}]},{\"title\":\"P. da Obrigatoriedade da A\u00e7\u00e3o Coletiva\",\"children\":[{\"title\":\"Em havendo desidia dos outros legitimados, cabe ao parquet a promo\u00e7\u00e3o e execu\u00e7\u00e3o coletiva\"},{\"title\":\"O autor tem 60 dias para executar a a\u00e7\u00e3o, caso n\u00e3o fa\u00e7a o MP \u00e9 obrigado a fazer\"}]},{\"title\":\"Princ\u00edpio da integratividade do microssistema processual coletivo  (aplica\u00e7\u00e3o integrada das leis processuais coletivas);\",\"children\":[{\"title\":\"PRINC\u00cdPIO DA INTEGRATIVIDADE DO MICROSSISTEMA PROCESSUAL COLETIVO (APLICA\u00c7\u00c3O INTEGRADA DAS LEIS PROCESSUAIS COLETIVAS). O processo coletivo brasileiro adota a teoria do di\u00e1logo das fontes normativas (Cl\u00e1udia Lima Marques). Atualmente, existem cerca de 15 leis que tratam do processo coletivo. No entanto, tudo que trata de processo coletivo parte de dois diplomas centrais: CDC e LACP. O CDC (art. 90) fala: Aplica-se a mim tudo que tem na LACP. \u201cCDC Art. 90. Aplicam-se \u00e0s a\u00e7\u00f5es previstas neste t\u00edtulo as normas do C\u00f3digo de Processo Civil e da Lei n\u00b0 7.347, de 24 de julho de 1985 (LACP), inclusive no que respeita ao inqu\u00e9rito civil, naquilo que n\u00e3o contrariar suas disposi\u00e7\u00f5es.\u201d A LACP (art. 21), por sua vez: Aplica-se a mim tudo o que tem no CDC. \u201cLACP Art. 21. Aplicam-se \u00e0 defesa dos direitos e interesses difusos, coletivos e individuais, no que for cab\u00edvel, os dispositivos do T\u00edtulo III da lei que instituiu o C\u00f3digo de Defesa do Consumidor.\u201d Esse fen\u00f4meno de integratividade \u00e9 denominado de NORMA DE REENVIO (uma lei manda aplicar a outra reciprocamente), quando h\u00e1 compatibiliza\u00e7\u00e3o entre as normas. Exemplo: Posso aplicar a invers\u00e3o do \u00f4nus da prova (regra do CDC) em uma ACP sobre dano ambiental. Entretanto, al\u00e9m do n\u00facleo central, cada um dos outros temas \u00e9 tratado por Lei Espec\u00edfica (LIA, Estatuto da Cidade, Idoso, Deficiente, A\u00e7\u00e3o popular, ECA, 6938/81 \u2013 meio ambiente\u2013, etc.).\"}]},{\"title\":\"Princ\u00edpio da compet\u00eancia adequada;\"},{\"title\":\"Princ\u00edpio da ampla divulga\u00e7\u00e3o da demanda coletiva (CDC, art. 94);\"}]},{\"title\":\"4)Direitos essencialmente coletivos  x Direitos acidentalmente coletivos.\"}]},\"cap3\":{\"title\":\"3. Princ\u00edpios do Processo Coletivo\",\"children\":[{\"title\":\"Principio do Interesse Juris. no Conhecimento do M\u00e9rito do  Processo Coletivo\",\"children\":[{\"title\":\"Juiz deve faciliar a busca pelo acesso a justi\u00e7a. superando vicios, pq as a\u00e7\u00f5es s\u00e3o de nat. social\"},{\"title\":\"O judiciario deve flexibilizar requisitos de admissibilidade\"},{\"title\":\"Ex: Juiz ao inves de de extingur a a\u00e7\u00e3o por ilegitimidade, publica edital convocando os demais legitimados\"}]},{\"title\":\"Princ\u00edpio da M\u00e1xima Prioridade  da Tutela Jurisdicional Coletiva\",\"children\":[{\"title\":\"Reconhece que sempre existira interesse social na tutela coletiva\"},{\"title\":\"Determina a prioridade no julgamento dessas a\u00e7\u00f5es\"},{\"title\":\"Decorre da regra de que o interesse p\u00fablico prevalece ao privado\"},{\"title\":\"Permite dirimir em um unico processo e em unica decis\u00e3o, uma serie de litigios repetitivos grandes conflitos coletivos ou varios conflitos individuais entrela\u00e7ados\"},{\"title\":\"Isso n\u00e3o prejudica o direito individual\"},{\"title\":\"Exemplo\",\"children\":[{\"title\":\"A\u00e7\u00e3o coletiva julgada improcedente, nao prejudica o interesse individual\"},{\"title\":\"O individuo pode optar pela tutela individual\"},{\"title\":\"Entre execu\u00e7\u00f5es individuais e coletivas, prepondera a primeira\"}]}]},{\"title\":\"Princ\u00edpio da Disponibilidade Motivada da A\u00e7\u00e3o Coletiva\",\"children\":[{\"title\":\"Havendo interesse em desistir, os motivos devem estar presentes e motivados\"},{\"title\":\"O principio determina analise dos motivos que fundamentam a dessistencia\"},{\"title\":\"Sendo infundada, o MP OU outro legitimado deve assumir a legitimidade\"},{\"title\":\"Se o proprio MP desistir?\",\"children\":[{\"title\":\"Doutrina 1\",\"children\":[{\"title\":\"Cabe ao juiz aplicar a regra do art. 28 do CPP\"}]},{\"title\":\"Doutrina 2\",\"children\":[{\"title\":\"Diz que o MP deve proceder o arquivamento\"},{\"title\":\"Nesse caso os autos do inquerito ou pe\u00e7as devem ser encaminhados ao CSMP\"},{\"title\":\"Fundamento est\u00e1 na aplica\u00e7\u00e3o integrada das normas, sendo a regra do art. 9 aplicavel\"}]},{\"title\":\"Doutrina 3\",\"children\":[{\"title\":\"Extin\u00e7\u00e3o do processo sem resolu\u00e7\u00e3o do m\u00e9rito\"},{\"title\":\"Evita a forma\u00e7\u00e3o da coisa julgada material\"},{\"title\":\"\u00c9 corrente minorit\u00e1ria\"}]}]}]},{\"title\":\"Princ\u00edpio da Presun\u00e7\u00e3o da Leg. Ad  Causam Ativa pela Afirma\u00e7\u00e3o de  D. Coletivo\",\"children\":[{\"title\":\"Basta a Afirma\u00e7\u00e3o do direito coletivo para a Legitimidade Ad Causam\"},{\"title\":\"O Pj ao analisar a legitimidade nao deve analisar a titularidade do direito ou interesse coletivo\"},{\"title\":\"Com rela\u00e7\u00e3o ao MP a legitimidade decorre da propria CF, basta ser direito indisponivel ou social\"},{\"title\":\"A Legitimidade e interesse na a\u00e7\u00e3o decorre da Lei\"}]},{\"title\":\"P. da N\u00e3o taxatividade da A\u00e7\u00e3o Coletiva\",\"children\":[{\"title\":\"N\u00e3o se pode limitar as hipoteses de cabimento da a\u00e7\u00e3o coletiva\"},{\"title\":\"Qlq direito coletivo pode ser objeto de a\u00e7\u00e3o coletiva\"}]},{\"title\":\"P. do Maximo Benef\u00edcio\",\"children\":[{\"title\":\"Busca-se o aproveitamento max. da presta\u00e7\u00e3o, p/ evitar novas demandas sobre o msm assunto\"},{\"title\":\"Devem ser extraidos todos os resultados positivos possivel\"},{\"title\":\"Transporte In utilibus\",\"children\":[{\"title\":\"Permite ao individual usar da senten\u00e7a cloetiva em seu processo individual\"}]}]},{\"title\":\"P. do Ativismo Judicial ou Maxima Efetividade\",\"children\":[{\"title\":\"O PJ possui poderes probatorios amplos e deve atuar independente da iniciativa das partes\"},{\"title\":\"Impoe-se que sejam realizadas todas atividaddes para o alcance da verdade\"},{\"title\":\"Autoriza o Julgador a\",\"children\":[{\"title\":\"Determinar ex officio a produ\u00e7\u00e3o de toda prova necess\u00e1ria\"},{\"title\":\"Conceder liminar com ou sem justifica\u00e7\u00e3o pr\u00e9via\"},{\"title\":\"Conceder antecipa\u00e7\u00e3o de tutela com ou sem requerimento da parte\"},{\"title\":\"Conceder medidas de apoio, para assegurar o resultado pratico\"}]},{\"title\":\"Nas a\u00e7\u00f5es coletivas o papel do magistrado se alterou\"},{\"title\":\"Exemplo\",\"children\":[{\"title\":\"Relativiza\u00e7\u00e3o do principio da congruencia entre pedido e senten\u00e7a\"}]}]},{\"title\":\"P. da M\u00e1xima Amplitude ou Atipicidade\",\"children\":[{\"title\":\"S\u00e3o cabiveis todos os tipos de tutela do processo coletivo\"},{\"title\":\"Podem ser usados todos os ritos e medidas\"},{\"title\":\"O nome da a\u00e7\u00e3o n\u00e3o \u00e9 relevante\"}]},{\"title\":\"P. da Obrigatoriedade da A\u00e7\u00e3o Coletiva\",\"children\":[{\"title\":\"Em havendo desidia dos outros legitimados, cabe ao parquet a promo\u00e7\u00e3o e execu\u00e7\u00e3o coletiva\"},{\"title\":\"O autor tem 60 dias para executar a a\u00e7\u00e3o, caso n\u00e3o fa\u00e7a o MP \u00e9 obrigado a fazer\"}]}]},\"cap4\":{\"title\":\"4. Lei de A\u00e7\u00e3o Civil P\u00fablica\",\"children\":[{\"title\":\"Cabimento - Regem por essa Lei Compet\u00eancia (saiba bemmmmm, julgados bons!) Legitimidade para propositura. Como se d\u00e1 o litiscons\u00f3rcio e a interven\u00e7\u00e3o de terceiros na ACP\",\"children\":[{\"title\":\"Sem prejuizo da Lei de A. Popular, as A\u00e7\u00f5es de responsa. por danos morais e patrimoniais ao\"},{\"title\":\"N\u00e3o \u00e9 Cabivel ACP para(4) Ano: 2009 Banca: CESPE / CEBRASPE \u00d3rg\u00e3o: DPE-AL\",\"children\":[{\"title\":\"A\u00e7\u00f5es de FGTS\"},{\"title\":\"Tributos\"},{\"title\":\"Contribui\u00e7\u00f5es previdenciarias\"},{\"title\":\"Fundos de natz institucional se os beneficiarios forem individualmente identificaveis\"}]},{\"title\":\"Rela\u00e7\u00f5es com a A\u00e7\u00e3o Popular\",\"children\":[{\"title\":\"Litisp\u00eandencia e Coisa Julgada\",\"children\":[{\"title\":\"ACP n\u00e3o afasta a possibilidade do ajuizamento da A\u00e7\u00e3o Popular\"},{\"title\":\"Eventualmente pode ocorrer uma litispendencia\"},{\"title\":\"N\u00e3o \u00e9 vedado ajuizar as duas a\u00e7\u00f5es ao mesmo tempo\"}]},{\"title\":\"A\u00e7\u00e3o Popular Multilegitim\u00e1ria\",\"children\":[{\"title\":\"STJ reconhece a possibilidade de uma a\u00e7\u00e3o multilegitimaria p/ anular atos ilegais e lesivos ao PATRIMONIO PUBLICO. A Identidade com a a\u00e7\u00e3o popular \u00e9 tanta que se vislumbra a hipotese de uma ACP ser recebida como a\u00e7\u00e3o popular multilegitimaria\"}]},{\"title\":\"Ajuizamento simultaneo de ACP ou AP p/ improbidade?\",\"children\":[{\"title\":\"Uma n\u00e3o obsta o ajuizamento da outra, mesmo tendo o mesmo tema Embora o mesmo fato possa ensejar o ajuizamento simult\u00e2neo de A\u00e7\u00e3o Popular e A\u00e7\u00e3o Civil P\u00fablica por Improbidade Administrativa, as finalidades de ambas as demandas n\u00e3o se confundem, de tal sorte que uma A\u00e7\u00e3o n\u00e3o se presta para substituir a outra, pois, enquanto a primeira \u00e9 predominantemente desconstitutiva, e subsidiariamente condenat\u00f3ria em perdas e danos, a segunda \u00e9 precipuamente condenat\u00f3ria, em dinheiro ou em obriga\u00e7\u00e3o de fazer ou n\u00e3o fazer, nos termos da doutrina e normas de reg\u00eancia.\"}]}]},{\"title\":\"Prazo Prescricional\",\"children\":[{\"title\":\"O prazo para o ajuizamento da a\u00e7\u00e3o civil p\u00fablica \u00e9 de 5 anos, aplicando-se, por analogia, o prazo da a\u00e7\u00e3o popular (art.21daLein\u00ba4.717/65), considerando que as duas a\u00e7\u00f5es fazem parte do mesmo microssistema de tutela dos direitos difusos (REsp1070896/SC). Exce\u00e7\u00f5es: a)    a ACP para exigir o ressarcimento ao er\u00e1rio fundada na pr\u00e1tica de ato doloso tipificado na Lei de Improbidade Administrativa \u00e9 imprescrit\u00edvel (art. 37, \u00a7 5\u00ba, CF/88). b)      a ACP em caso de danos ambientais tamb\u00e9m \u00e9 imprescrit\u00edvel (Resp 1120117/AC). Execu\u00e7\u00e3o individual de senten\u00e7a proferida em a\u00e7\u00e3o coletiva: O prazo tamb\u00e9m \u00e9 de 5 anos, contados do tr\u00e2nsito em julgado da senten\u00e7a coletiva. Isso porque a execu\u00e7\u00e3o prescreve no mesmo prazo de prescri\u00e7\u00e3o da a\u00e7\u00e3o (S\u00famula 150-STF). Neste julgado do STJ, reiterou-se o entendimento acima explicado. No caso concreto, contudo, havia uma peculiaridade: na fase de conhecimento, o juiz, com base no CC-1916, reconheceu que o prazo para ajuizamento da a\u00e7\u00e3o era vinten\u00e1rio (20 anos). Em raz\u00e3o desta decis\u00e3o, qual ser\u00e1 o prazo da execu\u00e7\u00e3o individual desta senten\u00e7a coletiva? Continua sendo de 5 anos. O prazo prescricional para o ajuizamento da execu\u00e7\u00e3o individual em cumprimento de senten\u00e7a proferida em ACP \u00e9 de 5 anos, mesmo na hip\u00f3tese em que, na a\u00e7\u00e3o de conhecimento, j\u00e1 transitada em julgado, tenha sido reconhecida a prescri\u00e7\u00e3o vinten\u00e1ria. Em outras palavras, n\u00e3o importa que o juiz tenha adotado um outro prazo prescricional para a a\u00e7\u00e3o de conhecimento. Isso n\u00e3o ir\u00e1 obrigar que o prazo da a\u00e7\u00e3o de execu\u00e7\u00e3o seja alterado, devendo ser adotado o prazo consagrado pela jurisprud\u00eancia.  ATEN\u00c7\u00c3O. CUIDADO COM O SEGUINTE JULGADO DO STJ: O prazo de 5 (cinco) anos para o ajuizamento da a\u00e7\u00e3o popular n\u00e3o se aplica \u00e0s a\u00e7\u00f5es coletivas de consumo. STJ. 3\u00aa Turma. REsp 1.736.091-PE, Rel. Min. Nancy Andrighi, julgado em 14/05/2019 (Info 648). A cita\u00e7\u00e3o v\u00e1lida em a\u00e7\u00e3o coletiva por danos ambientais interrompe o prazo prescricional da a\u00e7\u00e3o indenizat\u00f3ria individual se coincidente a causa de pedir das demandas. STJ. 4\u00aa Turma. AgInt no AREsp 2.036.247-RS, Rel. Min. Jo\u00e3o Ot\u00e1vio de Noronha, julgado em 14/11/2022 (Info Especial 9).\"}]},{\"title\":\"Callout\",\"children\":[{\"title\":\"EMENDA EM A\u00c7AO COLETIVA AT\u00c9 DEPOIS DA CONTESTA\u00c7\u00c3O?\",\"children\":[{\"title\":\"Admite-se emenda \u00e0 inicial de a\u00e7\u00e3o civil p\u00fablica, em face da exist\u00eancia de pedido gen\u00e9rico, ainda que j\u00e1 tenha sido apresentada a contesta\u00e7\u00e3o. STJ. 4\u00aa Turma.REsp 1279586-PR, Rel. Min. Luis Felipe Salom\u00e3o, julgado em 03/10/2017 (Info 615).\"}]},{\"title\":\"MP E FGTS\",\"children\":[{\"title\":\"O Minist\u00e9rio P\u00fablico tem legitimidade para a propositura de a\u00e7\u00e3o civil p\u00fablica em defesa de D I R E I T O S  S O C I A I S  relacionados ao Fundo de Garantia do Tempo de Servi\u00e7o (FGTS). STF. Plen\u00e1rio. RE 643978/SE, Rel. Min. Alexandre de Moraes, julgado em 9/10/2019 (repercuss\u00e3o geral \u2013 Tema 850) (Info 955). Em provas, tenha cuidado com a reda\u00e7\u00e3o do art. 1\u00ba, par\u00e1grafo \u00fanico, da Lei n\u00ba 7.347/85: Art. 1\u00ba (...) Par\u00e1grafo \u00fanico. N\u00e3o ser\u00e1 cab\u00edvel a\u00e7\u00e3o civil p\u00fablica para veicular pretens\u00f5es que envolvam tributos, contribui\u00e7\u00f5es previdenci\u00e1rias, o Fundo de Garantia do Tempo de Servi\u00e7o - FGTS ou outros fundos de natureza institucional cujos benefici\u00e1rios podem ser individualmente determinados. (Inclu\u00eddo pela Medida provis\u00f3ria n\u00ba 2.180-35/2001) Se for cobrada a mera transcri\u00e7\u00e3o literal deste dispositivo em uma prova objetiva, provavelmente, esta ser\u00e1 a alternativa correta.\"}]},{\"title\":\"LITIS MULTITUDIN\u00c1RIO\",\"children\":[{\"title\":\"Nas a\u00e7\u00f5es coletivas \u00e9 poss\u00edvel a limita\u00e7\u00e3o do n\u00famero de substitu\u00eddos em cada cumprimento de senten\u00e7a, por aplica\u00e7\u00e3o extensiva do art. 113, \u00a7 1\u00ba, do C\u00f3digo de Processo Civil. STJ. 2\u00aa Turma.REsp 1947661-RS, Rel. Min. Og Fernandes, julgado em 23/09/2021 (Info 712).\"}]},{\"title\":\"Migra\u00e7\u00e3o de Polo Passivo\",\"children\":[{\"title\":\"[...] a jurisprud\u00eancia desta Corte \u00e9 firme de que n\u00e3o se opera a preclus\u00e3o, devendo se levar em conta, todavia, o interesse p\u00fablico a fundamentar a postura prevista no art. 6o., \u00a7 3o. da Lei 4.717/65. (AgRg no REsp n. 1.162.049/SP, relator Ministro Napole\u00e3o Nunes Maia Filho, Primeira Turma, julgado em 1/3/2016, DJe de 11/3/2016.)\"}]},{\"title\":\"Tarifa b\u00e1sica indevida gera Dano Moral?\",\"children\":[{\"title\":\"A exig\u00eancia de uma tarifa banc\u00e1ria considerada indevida n\u00e3o agride, de modo totalmente injusto e intoler\u00e1vel, o ordenamento jur\u00eddico e os valores \u00e9ticos fundamentais da sociedade em si considerada, tampouco provoca repulsa e indigna\u00e7\u00e3o na consci\u00eancia coletiva, n\u00e3o dando ensejo a danos morais coletivos. STJ. 3\u00aa Turma. AgInt no AREsp 1.754.555-RN, Rel. Min. Ricardo Villas B\u00f4as Cueva, julgado em 28/8/2023 (Info 786).\"}]}]},{\"title\":\"OBS\",\"children\":[{\"title\":\"CESPE / CEBRASPE - 2021 - MPE-AP - Promotor de Justi\u00e7a Substituto  II As ondas renovat\u00f3rias do acesso \u00e0 justi\u00e7a s\u00e3o consideradas, pela doutrina processual, um marco de transi\u00e7\u00e3o da denominada fase imanentista para a subsequente fase aut\u00f4noma da ci\u00eancia processual.(e) Fases Primeira fase: Sincretismo processual / Imanentismo / Praxismo   Vigorou at\u00e9 1869  Processo era visto como direito entrela\u00e7ado ao direito material.   Processo seria o direito material em movimento.  Autor dessa corrente: Carl Savigny.    Segunda fase: autonomismo cient\u00edfico   Inaugurado por Oskar von B\u00fclow   Obra: Teoria dos pressupostos e das exce\u00e7\u00f5es.   Com sua obra, deu vida ao direito civil, dizendo que processo \u00e9 distinto da rela\u00e7\u00e3o jur\u00eddica de direito material.   Separa\u00e7\u00e3o entre direito processual e direito material.    Terceira fase: instrumentalismo / acesso \u00e0 justi\u00e7a  1940/1950: come\u00e7ou a ocorrer essa mudan\u00e7a.  Obras fundamentais:   Mauro Cappelletti e Bryant Garth - Criaram as 3 ondas de acesso \u00e0 justi\u00e7a:  Acesso \u00e0 justi\u00e7a aos pobres  Coletiviza\u00e7\u00e3o de demandas (No Brasil, ocorreu por meio da cria\u00e7\u00e3o de v\u00e1rios instrumentos de tutela coletiva, ex: lei de a\u00e7\u00e3o civil p\u00fablica / CDC / ECA)   Efetividade do processo: simplifica\u00e7\u00e3o do processo (No Brasil: cria\u00e7\u00e3o dos juizados especiais em 1995)\"}]}]},{\"title\":\"Legitimidade p/ A\u00e7\u00e3o Principal  e Cautelar - Art. 5\u02da\",\"children\":[{\"title\":\"Rol(6)\",\"children\":[{\"title\":\"MP\",\"children\":[{\"title\":\"Se n\u00e3o for parte \u00e9 OBRIGATORIAMENTE fiscal da Lei\"},{\"title\":\"Ausencia de Intima\u00e7\u00e3o do MP para atuar como fiscal da Lei gera nulidade?\",\"children\":[{\"title\":\"N\u00e3o, somente no caso de prejuizo comprovado\"}]},{\"title\":\"obs\",\"children\":[{\"title\":\"SUM 329 STJ - MP tem legitimidade p propor ACP em defesa do patrim\u00f4nio p\u00fablico.\"},{\"title\":\"IDH DIREITO SOCIAIS\",\"children\":[{\"title\":\"O Minist\u00e9rio P\u00fablico tem legitimidade para promover a\u00e7\u00e3o civil p\u00fablica sobre direitos individuais homog\u00eaneos quando presente o interesse social. STF. 2\u00aa Turma. RE 216443/MG, rel. orig. Min. Menezes Direito, red. p/ o ac\u00f3rd\u00e3o Min. Marco Aur\u00e9lio, julgado em 28/8/2012 (Info 677).\"}]},{\"title\":\"CONCESSIONARIA DE ENERGIA ELETRICA\",\"children\":[{\"title\":\"O Minist\u00e9rio P\u00fablico tem legitimidade para ajuizar ACP contra a concession\u00e1ria de energia el\u00e9trica com a finalidade de evitar a interrup\u00e7\u00e3o do fornecimento do servi\u00e7o \u00e0 pessoa carente de recursos financeiros diagnosticada com enfermidade grave e que dependa, para sobreviver, da utiliza\u00e7\u00e3o dom\u00e9stica de equipamento m\u00e9dico com alto consumo de energia. Conforme entendimento do STJ, o MP det\u00e9m legitimidade para propor ACP que objetive a prote\u00e7\u00e3o do direito \u00e0 sa\u00fade de pessoa hipossuficiente, porquanto se trata de direito fundamental e indispon\u00edvel, cuja relev\u00e2ncia interessa \u00e0 sociedade. STJ. 1\u00aa Turma. AgRg no REsp 1162946-MG, Rel. Ministro S\u00e9rgio Kukina, julgado em 4/6/2013 (Info 523).\"}]}]},{\"title\":\"OBS\",\"children\":[{\"title\":\"FGV - 2022 - MPE-GO - Promotor de Justi\u00e7a Substituto Sobre a evolu\u00e7\u00e3o hist\u00f3rica do processo coletivo e o modelo de tutela jurisdicional das class actions, \u00e9 correto afirmar que:  Alternativas a Lei n\u00ba 7.347/1985 previu pela primeira vez a a\u00e7\u00e3o civil p\u00fablica, estabelecendo que o Minist\u00e9rio P\u00fablico, se n\u00e3o intervier no processo como parte, dada a sua legitimidade coletiva, atuar\u00e1 obrigatoriamente como fiscal da lei;(E) segundo Jo\u00e3o Paulo Lordelo, \\\"A a\u00e7\u00e3o civil p\u00fablica foi criada pela lei 6.938/81, regulamentada pela lei 7.347/85, consolidada pela Constitui\u00e7\u00e3o Federal e potencializada pelo C\u00f3digo de Defesa do Consumidor.\\\" Em 1981, foi criada a Lei 6.938/81 (que trata da Pol\u00edtica Nacional do Meio-ambiente). O art. 14, \u00a71\u00ba deste diploma dispunha que, quando houvesse dano ao meio ambiente, o MP poderia ajuizar uma a\u00e7\u00e3o coletiva, mas essa norma era incompleta. Assim, em origem, a ideia da ACP nasceu voltada \u00e0 prote\u00e7\u00e3o do meio-ambiente, tendo como legitimado o Minist\u00e9rio P\u00fablico.  Posteriormente, foi elaborado um projeto de lei, fruto do trabalho de dois grupos de juristas: um grupo do MP/SP (NELSON NERY, EDIS MILAR\u00c9, entre outros) e outro grupo da USP (DINAMARCO, ADA PELLEGRINI e KAZUO WATANABE). A Lei 7.347/85 (atual LACP) \u00e9 o resultado deste projeto de lei, que ampliou o objeto da a\u00e7\u00e3o civil p\u00fablica.  A consolida\u00e7\u00e3o da a\u00e7\u00e3o civil p\u00fablica ocorreu com a Constitui\u00e7\u00e3o de 1988 (art. 129, III).  Por fim, a a\u00e7\u00e3o civil p\u00fablica foi potencializada pelo C\u00f3digo de Defesa do Consumidor, lei 8.078/90. Hoje, a ACP tem previs\u00e3o em diversos diplomas: ECA, estatuto do deficiente (status de emenda constitucional), estatuto do idoso etc.).\"}]}]},{\"title\":\"Defensoria P\u00fablica\",\"children\":[{\"title\":\"OBS - N\u00e3o \u00e9 s\u00f3 para PF ou PJ reconhecidamente pobres\"},{\"title\":\"Trata-se de legitimidade propriamente dita\"},{\"title\":\"Tem legitimidade sempre que envolver interesse de necessitados\"},{\"title\":\"A presen\u00e7a de pessoas n\u00e3o necessitadas no grupo n\u00f5a torna a DP ilegitma\"},{\"title\":\"\u00c9 prevista no CDC?\",\"children\":[{\"title\":\"N\u00e3o! e nem no estatuto do idoso e nem na CF. A previs\u00e3o est\u00e1 somente na LACP\"}]},{\"title\":\"Deve necessariamente ter a presen\u00e7a de hipossuficientes ECONOMICOS ou JURIDICOS\"},{\"title\":\"Fundamento da previs\u00e3o \u00e9 amplia\u00e7\u00e3o do acesso a justi\u00e7a\"},{\"title\":\"obs\",\"children\":[{\"title\":\"A Defensoria P\u00fablica possui legitimidade ativa para propor a\u00e7\u00e3o civil p\u00fablica com vista a impor ao Estado o cumprimento de obriga\u00e7\u00f5es legais na tutela de pequenos agricultores familiares, sendo prescind\u00edvel a comprova\u00e7\u00e3o pr\u00e9via e concreta da car\u00eancia dos assistidos. STJ. 2\u00aa Turma. REsp 1847991-RS, Rel. Min. Og Fernandes, julgado em 16/08/22 (Info 748).\"}]},{\"title\":\"Callout\",\"children\":[{\"title\":\"Considerando que, no processo coletivo, vigoram os princ\u00edpios do m\u00e1ximo benef\u00edcio, da m\u00e1xima efetividade e da m\u00e1xima amplitude. Dessa feita, podendo haver hipossuficientes beneficiados pelo resultado da demanda deve-se admitir a legitimidade da DP.  \u00c9 o caso, por exemplo, de consumidores de energia el\u00e9trica, que tanto podem abranger pessoas com alto poder aquisitivo como hipossuficientes. (DIZER O DIREITO). As pessoas q nao sao hipossuficientes podem ser aproveitar\"}]}]},{\"title\":\"Uni\u00e3o, Estados, DF e Municipios\",\"children\":[{\"title\":\"Dependem da comprova\u00e7\u00e3o do interesse direto\"}]},{\"title\":\"Autarquia, Funda\u00e7\u00e3o, Empresa Publica e SEM\",\"children\":[{\"title\":\"obs\",\"children\":[{\"title\":\"Se formos analisar apenas o texto literal, o art. 5\u00ba da Lei n\u00ba 7.347/85 apenas exige expressamente da associa\u00e7\u00e3o a comprova\u00e7\u00e3o de pertin\u00eancia tem\u00e1tica para propositura de a\u00e7\u00e3o civil p\u00fablica. Assim, em uma interpreta\u00e7\u00e3o literal, as autarquias, empresas p\u00fablicas, funda\u00e7\u00f5es p\u00fablicas e sociedades de economia mista n\u00e3o precisariam comprovar a pertin\u00eancia tem\u00e1tica para ajuizarem a\u00e7\u00f5es coletivas. Ocorre que o STJ n\u00e3o adota essa interpreta\u00e7\u00e3o literal. Isso porque n\u00e3o se pode esquecer que as autarquias, empresas p\u00fablicas, funda\u00e7\u00f5es p\u00fablicas e sociedades de economia mista possuem compet\u00eancias legais e estatut\u00e1rias, as quais delimitam o seu campo de atua\u00e7\u00e3o. Justamente por isso, a doutrina defende e o STJ encampou a tese de que as entidades da administra\u00e7\u00e3o p\u00fablica indireta somente poder\u00e3o ingressar com ACP se demonstrarem a pertin\u00eancia tem\u00e1tica. STJ. 4\u00aa Turma. REsp 1978138-SP, Rel. Min. Antonio Carlos Ferreira, julgado em 22/03/2022 (Info 731).\"}]}]},{\"title\":\"Associa\u00e7\u00e3o, desde que: constituida a pelo menos 1 ano + pertinencia tematica (materia incluida em suas finalidades institucionais)\",\"children\":[{\"title\":\"Dispensa de pr\u00e9-constitui\u00e7\u00e3o -  Hipoteses(2)\",\"children\":[{\"title\":\"Manifesto interesse social evidenciado pela dimens\u00e3o ou caracteristica do dano\"},{\"title\":\"Relevancia do bem jur\u00eddico a ser protegido\"}]},{\"title\":\"OBS IMPORTANTE\",\"children\":[{\"title\":\"A pertinencia tematica n\u00e3o \u00e9 dispensada, e sim a PRE-CONSTITUI\u00c7AO\"},{\"title\":\"Nao precisa de anuencia do MP\"}]},{\"title\":\"N\u00e3o precisa ter uma finalidade ESPECIFICA, basta nexo compativel entre seus fins e objeto da ACP\"},{\"title\":\"A representa\u00e7\u00e3o \u00e9 OPE LEGIS, mas o controle \u00e9 ope judics\"},{\"title\":\"Desistencia Infundada ou Abandono da Causa\",\"children\":[{\"title\":\"Se a associa\u00e7\u00e3o formular pedido de desistencia fundada o MP PODE entrar na a\u00e7\u00e3o\"},{\"title\":\"MP n\u00e3o possui disponibildiade da ACP. Se a desistencia \u00e9 infundada o MP deve entrar\"},{\"title\":\"A Lei diz sobre abandono e tbm que outro legitimado pode assumir a a\u00e7\u00e3o\"},{\"title\":\"Essa regra tambem aplica-se para recursos\"},{\"title\":\"obs\",\"children\":[{\"title\":\"art. 5. \u00a7 3\u00b0 Em caso de desist\u00eancia infundada ou abandono da a\u00e7\u00e3o por associa\u00e7\u00e3o legitimada, o Minist\u00e9rio P\u00fablico ou outro legitimado assumir\u00e1 a titularidade ativa obs. Art. 5. \u00a7 1\u00ba O Minist\u00e9rio P\u00fablico, se n\u00e3o intervier no processo como parte, atuar\u00e1 obrigatoriamente como fiscal da lei.\"}]}]},{\"title\":\"obs\",\"children\":[{\"title\":\"VICIO NA REPRESENTA\u00c7\u00c3O\",\"children\":[{\"title\":\"Na a\u00e7\u00e3o civil p\u00fablica, reconhecido o v\u00edcio na representa\u00e7\u00e3o processual da associa\u00e7\u00e3o autora, deve-se, antes de proceder \u00e0 extin\u00e7\u00e3o do processo, conferir oportunidade ao Minist\u00e9rio P\u00fablico para que assuma a titularidade ativa da demanda. STJ. 2\u00aa Turma. REsp 1372593-SP, Rel. Min. Humberto Martins, julgado em 7/5/2013 (Info 524).\"}]},{\"title\":\"AUTORIZA\u00c7\u00c3O ESTATUT\u00c1RIA GENERICA ASSOCIA\u00c7\u00c3O\",\"children\":[{\"title\":\"A autoriza\u00e7\u00e3o estatut\u00e1ria gen\u00e9rica conferida \u00e0 associa\u00e7\u00e3o N \u00c3O  \u00e9 suficiente para legitimar a sua atua\u00e7\u00e3o em ju\u00edzo na defesa de direitos de seus filiados. Para cada a\u00e7\u00e3o, \u00e9 indispens\u00e1vel que os filiados autorizem de forma expressa e espec\u00edfica a demanda. Teses firmadas pelo STF neste julgado: \\\"O disposto no artigo 5\u00ba, inciso XXI, da Carta da Rep\u00fablica encerra representa\u00e7\u00e3o espec\u00edfica, n\u00e3o alcan\u00e7ando previs\u00e3o gen\u00e9rica do estatuto da associa\u00e7\u00e3o a revelar a defesa dos interesses dos associados.\\\" \\\"As balizas subjetivas do t\u00edtulo judicial, formalizado em a\u00e7\u00e3o proposta por associa\u00e7\u00e3o, \u00e9 definida pela representa\u00e7\u00e3o no processo de conhecimento, presente a autoriza\u00e7\u00e3o expressa dos associados e a lista destes juntada \u00e0 inicial.\\\" Exce\u00e7\u00e3o: no caso de impetra\u00e7\u00e3o de MS COLETIVO, a associa\u00e7\u00e3o  N \u00c3 O  precisa de autoriza\u00e7\u00e3o espec\u00edfica dos filiados. STF. Plen\u00e1rio. RE 573232/SC, rel. orig. Min. Ricardo Lewandowski, red. p/ o ac\u00f3rd\u00e3o Min. Marco Aur\u00e9lio, julgado em 14/5/2014 (repercuss\u00e3o geral) (Info 746).\"}]},{\"title\":\"SINDICATOS E AUTORIZA\u00c7\u00c3O\",\"children\":[{\"title\":\"Os sindicatos possuem ampla legitimidade extraordin\u00e1ria para defender em ju\u00edzo os direitos e interesses coletivos ou individuais dos integrantes da categoria que representam, inclusive nas liquida\u00e7\u00f5es e execu\u00e7\u00f5es de senten\u00e7a, independentemente de autoriza\u00e7\u00e3o dos substitu\u00eddos. STF. Plen\u00e1rio. RE 883.642/AL, Rel. Ministro Presidente, julgado em 18/06/2015 (Repercuss\u00e3o Geral - Tema 823) (Info 791 clipping)\"}]},{\"title\":\"INIDONEIDADE DA ASSOCIA\u00c7\u00c3O DE OFICIO\",\"children\":[{\"title\":\"\u00c9 poss\u00edvel ao ju\u00edzo, de of\u00edcio, reconhecer a inidoneidade de associa\u00e7\u00e3o regularmente constitu\u00edda para propositura de a\u00e7\u00e3o coletiva? SIM. Quando houver sintomas de que a legitima\u00e7\u00e3o coletiva vem sendo utilizada de forma indevida ou abusiva, o magistrado poder\u00e1, de of\u00edcio, afastar a presun\u00e7\u00e3o legal de legitima\u00e7\u00e3o de associa\u00e7\u00e3o regularmente constitu\u00edda para propositura de a\u00e7\u00e3o coletiva. A legitimidade de uma associa\u00e7\u00e3o para a propositura de ACP pode ser afastada pelo fato de o estatuto da associa\u00e7\u00e3o ser exageradamente gen\u00e9rico? SIM. O argumento de que o estatuto da associa\u00e7\u00e3o \u00e9 desmesuradamente gen\u00e9rico tem respaldo na jurisprud\u00eancia do STJ. Embora a finalidade da associa\u00e7\u00e3o, prevista no estatuto, possa ser razoavelmente gen\u00e9rica, n\u00e3o pode ser, entretanto, desarrazoada, sob pena de admitirmos a cria\u00e7\u00e3o de uma associa\u00e7\u00e3o civil para a defesa de qualquer interesse, o que desnaturaria a exig\u00eancia de representatividade adequada do grupo lesado. STJ. 4\u00aa Turma. REsp 1213614-RJ, Rel. Min. Luis Felipe Salom\u00e3o, julgado em 1\u00ba/10/2015 (Info 572).\"}]},{\"title\":\"EFICACIA SUBJETIVA DA CJ E ASSOCIA\u00c7\u00c3O TERRITORIAL\",\"children\":[{\"title\":\"A efic\u00e1cia subjetiva da coisa julgada formada a partir de a\u00e7\u00e3o coletiva, de rito ordin\u00e1rio, ajuizada por associa\u00e7\u00e3o civil na defesa de interesses dos associados, somente alcan\u00e7a os filiados, residentes no \u00e2mbito da jurisdi\u00e7\u00e3o do \u00f3rg\u00e3o julgador, que o fossem em momento anterior ou at\u00e9 a data da propositura da demanda, constantes da rela\u00e7\u00e3o jur\u00eddica juntada \u00e0 inicial do processo de conhecimento. STF. Plen\u00e1rio. RE 612043/PR, Rel. Min. Marco Aur\u00e9lio, julgado em 10/5/2017 (repercuss\u00e3o geral) (Info 864). Sobre o mesmo tema, veja tamb\u00e9m: STF. Plen\u00e1rio. RE 573232/SC, rel. orig. Min. Ricardo Lewandowski, red. p/ o ac\u00f3rd\u00e3o Min. Marco Aur\u00e9lio, julgado em 14/5/2014 (repercuss\u00e3o geral) (Info 746).\"}]},{\"title\":\"ASSOCIA\u00c7\u00c3O COMO REPRESENTANTE E FILIA\u00c7\u00c3O\",\"children\":[{\"title\":\"Em a\u00e7\u00e3o civil p\u00fablica proposta por associa\u00e7\u00e3o, na condi\u00e7\u00e3o de substituta processual, possuem legitimidade para a liquida\u00e7\u00e3o e execu\u00e7\u00e3o da senten\u00e7a todos os beneficiados pela proced\u00eancia do pedido, independentemente de serem filiados \u00e0 associa\u00e7\u00e3o promovente. STJ. 2\u00aa Se\u00e7\u00e3o. REsp 1438263/SP, Rel. Min. Luis Felipe Salom\u00e3o, julgado em 24/03/2021 (Recurso Repetitivo \u2013 Tema 948) (Info 694).\"}]},{\"title\":\"MSC aprovados em concurso?\",\"children\":[{\"title\":\"O sindicato de servidores e a associa\u00e7\u00e3o de servidores n\u00e3o t\u00eam legitimidade para a impetra\u00e7\u00e3o de a\u00e7\u00e3o de mandado de seguran\u00e7a coletivo no interesse de direitos de candidatos aprovados em concurso p\u00fablico. (RMS n. 66.687/PB, relator Ministro Mauro Campbell Marques, Segunda Turma, julgado em 10/5/2022, DJe de 19/5/2022.)\"}]}]},{\"title\":\"REPRESENTA\u00c7\u00c3O OU SUBSTITUI\u00c7\u00c3O ASSOCIA\u00c7\u00c3O\",\"children\":[{\"title\":\"1) em caso de a\u00e7\u00e3o coletiva de rito ordin\u00e1rio proposta pela associa\u00e7\u00e3o na defesa dos interesses de seus associados: SIM A associa\u00e7\u00e3o, quando aju\u00edza a\u00e7\u00e3o na defesa dos interesses de seus associados, atua como REPRESENTANTE PROCESSUAL e, por isso, \u00e9 obrigat\u00f3ria a autoriza\u00e7\u00e3o individual ou assemblear dos associados. Exce\u00e7\u00e3o: no caso de impetra\u00e7\u00e3o de MS COLETIVO, a associa\u00e7\u00e3o  N \u00c3 O  precisa de autoriza\u00e7\u00e3o espec\u00edfica dos filiados. STF. Plen\u00e1rio. RE 573232/SC, rel. orig. Min. Ricardo Lewandowski, red. p/ o ac\u00f3rd\u00e3o Min. Marco Aur\u00e9lio, julgado em 14/5/2014 (repercuss\u00e3o geral) (Info 746). 2) em caso de a\u00e7\u00e3o civil p\u00fablica (a\u00e7\u00e3o coletiva proposta na defesa de direitos difusos, coletivos ou individuais homog\u00eaneos): N\u00c3O A associa\u00e7\u00e3o, quando aju\u00edza a\u00e7\u00e3o na defesa de direitos difusos, coletivos ou individuais homog\u00eaneos, atua como SUBSTITUTA PROCESSUAL e n\u00e3o precisa dessa autoriza\u00e7\u00e3o.\"},{\"title\":\"ASSOCIA\u00c7\u00c3O E NECESSIDADE DE SER ASSOCIADO\",\"children\":[{\"title\":\"A associa\u00e7\u00e3o dos servidores p\u00fablicos federais do \u00f3rg\u00e3o \\\"XX\\\" ajuizou a\u00e7\u00e3o coletiva pedindo que fosse reconhecida e paga determinada gratifica\u00e7\u00e3o devida \u00e0 classe. A a\u00e7\u00e3o foi julgada procedente, tendo transitado em julgado. Jo\u00e3o \u00e9 servidor p\u00fablico federal do \u00f3rg\u00e3o \\\"XX\\\", mas n\u00e3o \u00e9 nem nunca foi filiado \u00e0 referida associa\u00e7\u00e3o. Mesmo S E M  ser associado, Jo\u00e3o poder\u00e1 pegar a senten\u00e7a proferida na a\u00e7\u00e3o coletiva e ajuizar execu\u00e7\u00e3o individual cobrando o pagamento das verbas relacionadas com a aludida gratifica\u00e7\u00e3o? N\u00c3O. As associa\u00e7\u00f5es, quando prop\u00f5em a\u00e7\u00f5es coletivas, agem como REPRESENTANTES de seus associados (e n\u00e3o como substitutas processuais). Diante dessa mudan\u00e7a de perspectiva, tem-se o seguinte cen\u00e1rio: \u2022 Regra: a pessoa N \u00c3 O  filiada N A O det\u00e9m legitimidade para executar individualmente a senten\u00e7a de proced\u00eancia oriunda de a\u00e7\u00e3o coletiva proposta pela associa\u00e7\u00e3o. \u2022 Exce\u00e7\u00e3o: ser\u00e1 poss\u00edvel executar individualmente, mesmo se n\u00e3o for associado, se a senten\u00e7a coletiva que estiver sendo executada for mandado de seguran\u00e7a coletivo. STJ. 4\u00aa Turma. REsp 1374678-RJ, Rel. Min. Luis Felipe Salom\u00e3o, julgado em 23/6/2015 (Info 565).\"}]}]}]},{\"title\":\"Entes despersonalizados\",\"children\":[{\"title\":\"Previs\u00e3o est\u00e1 no CDC. Devem ser org\u00e3os de prote\u00e7\u00e3o ao consumidor\"},{\"title\":\"S\u00e3o legitimados, mesmo sem personalidade juridica. \u00c9 o caso do Procon\"},{\"title\":\"\u00c9 o caso da procuradoria de assistencia judiciaria e de org\u00e3o especifico da DPRJ\"},{\"title\":\"\u00c9 o caso da comiss\u00e3o de defesa do consumidor de assembleia legislativa\"}]}]},{\"title\":\"Natureza juridica da Legitimidade\",\"children\":[{\"title\":\"Para os autores que adotaram a categoria da legitima\u00e7\u00e3o aut\u00f4noma para condu\u00e7\u00e3o do processo, trata-se de uma terceira esp\u00e9cie (tertium genus) de legitima\u00e7\u00e3o ad causam, aplic\u00e1vel \u00e0s tutelas coletivas, que n\u00e3o se confunde com a dicotomia legitima\u00e7\u00e3o ordin\u00e1ria-legitima\u00e7\u00e3o extraordin\u00e1ria. A proposta justifica-se da seguinte maneira: o legitimado n\u00e3o vai a ju\u00edzo na defesa do pr\u00f3prio interesse, portanto, n\u00e3o \u00e9 legitimado ordin\u00e1rio, nem vai a ju\u00edzo na defesa de interesse alheio, pois n\u00e3o \u00e9 poss\u00edvel identificar o titular do direito discutido.\"}]},{\"title\":\"A\u00e7\u00e3o Coletiva Passiva\",\"children\":[{\"title\":\"\u201ca) A admissibilidade da denominada a\u00e7\u00e3o coletiva passiva \u00e9 um tema controvertido em sede doutrin\u00e1ria, mas a jurisprud\u00eancia admite sua propositura em face de grupos ou associa\u00e7\u00f5es de fato, desde que demonstrados o interesse e a representatividade adequada. Nesse caso, deve-se discutir se a coisa julgada coletiva vincular\u00e1 ou n\u00e3o os membros do grupo, no caso de proced\u00eancia, que poder\u00e3o rediscuti-la em a\u00e7\u00f5es individuais, se a decis\u00e3o lhes for desfavor\u00e1vel. H\u00e1 quem defenda na doutrina, entretanto, a efic\u00e1cia erga ormnes, a fim de garantir a utilidade da a\u00e7\u00e3o coletiva passiva. b) Em tese, quaisquer dos legitimados para a tutela coletiva poder\u00e3o tamb\u00e9m figurar como r\u00e9us. No caso do MP, entretanto, al\u00e9m das outras situa\u00e7\u00f5es legitimantes, h\u00e1 que se aferir o interesse de seu ingresso no polo passivo, no caso concreto, tendo em vista sua interven\u00e7\u00e3o obrigat\u00f3ria como fiscal da ordem jur\u00eddica.\"}]},{\"title\":\"Representatividade Adequada:  Controle Ope Legis e Ope Judicis\",\"children\":[{\"title\":\"Representatividade Adequada\",\"children\":[{\"title\":\"\u00c9 saber se o legitimado pode tutelar adequadamente os direitos postos na causa\"}]},{\"title\":\"Dois sistemas\",\"children\":[{\"title\":\"Ope Legis (preponderante no Brasil)\",\"children\":[{\"title\":\"A adequa\u00e7\u00e3o deve ser previamente determinada na Lei(men\u00e7\u00e3o deve ser expressa)\"},{\"title\":\"Somente o legislador pode prover esses requisitos, nunca o juiz\"},{\"title\":\"Requisitos s\u00e3o previstos de forma taxativa. Determina o criterio objetivo de pertinencia tematica\"}]},{\"title\":\"Ope Judicis\",\"children\":[{\"title\":\"Preponderante no USA. Juiz tem o poder-dever de analisar a representac\u00e3o\"},{\"title\":\"O controle \u00e9 in concreto por meio de decis\u00e3o fundamentada\"}]}]}]},{\"title\":\"Litiscons\u00f3rcio Concorrente ou Disjuntiva\",\"children\":[{\"title\":\"Outras associa\u00e7\u00e3o ou melhor, PODER PUBLICO, pode entrar como litisconsortes de qlq das partes\"},{\"title\":\"Trata-se de litisconsorcio assistencial\"},{\"title\":\"O poder publico ou outras entidades podem ser habilitar como litisconsortes\"},{\"title\":\"Admite-se litisconsorcio facultativo\",\"children\":[{\"title\":\"Entre MPU, do MPDFT e MPE\"}]},{\"title\":\"obs\",\"children\":[{\"title\":\"MPF E MPE\",\"children\":[{\"title\":\"Em a\u00e7\u00e3o civil p\u00fablica, a forma\u00e7\u00e3o de litiscons\u00f3rcio ativo facultativo entre o Minist\u00e9rio P\u00fablico Estadual e o Federal depende da demonstra\u00e7\u00e3o de alguma raz\u00e3o espec\u00edfica que justifique a presen\u00e7a de ambos na lide. STJ. 3\u00aa Turma. REsp 1254428-MG, Rel. Min. Jo\u00e3o Ot\u00e1vio de Noronha, julgado em 2/6/2016 (Info 585). Art. 5\u00ba, \u00a7 5, LACP: \\\"\u00a7 5. Admitir-se-\u00e1 o litiscons\u00f3rcio facultativo entre os Minist\u00e9rios P\u00fablicos da Uni\u00e3o, do Distrito Federal e dos Estados na defesa dos interesses e direitos de que cuida esta lei.\\\" Obs: Esse litiscons\u00f3rcio entre os Minist\u00e9rios P\u00fablicos deve ser sempre permitido? N\u00c3O, nem sempre. O litiscons\u00f3rcio ativo facultativo entre os ramos do MPU e os MPs dos Estados, em tese, \u00e9 poss\u00edvel, mas desde que as circunst\u00e2ncias do caso recomendem. Assim decidiu o STJ: \\\"Em a\u00e7\u00e3o civil p\u00fablica, a forma\u00e7\u00e3o de litiscons\u00f3rcio ativo facultativo entre o Minist\u00e9rio P\u00fablico Estadual e o Federal depende da demonstra\u00e7\u00e3o de alguma raz\u00e3o espec\u00edfica que justifique a presen\u00e7a de ambos na lide. STJ. 3\u00aa Turma. REsp 1.254.428-MG, Rel. Min. Jo\u00e3o Ot\u00e1vio de Noronha, julgado em 2/6/2016 (Info 585).\\\" \u2192 Logo, apesar da compet\u00eancia ser do MPF, o fato de o dano ter sido causado no Estado do Amazonas torna razo\u00e1vel a interpreta\u00e7\u00e3o de que existe motivo plaus\u00edvel para atua\u00e7\u00e3o em conjunto do MP Amazonas e o MPF.\"}]}]}]},{\"title\":\"Partidos Politicos  TEM LEGITIMIDADE?\",\"children\":[{\"title\":\"OBS - PP nao tem legitimidade p/ ACP, mas pode impetrar MS coletivo\"}]},{\"title\":\"Cidad\u00e3o\",\"children\":[{\"title\":\"NAO PODE PROPOR ACP\"}]},{\"title\":\"Ilegitimidade ativa ou Irregularidade de Representa\u00e7\u00e3o Processual\",\"children\":[{\"title\":\"N\u00e3o implica extin\u00e7\u00e3o do processo coletivo, compete ao magistrado\"},{\"title\":\"Abrir oportunidade p/ ingresso de outro legitimado ativo na demanda\"}]}]},{\"title\":\"Sujeito Passivo\",\"children\":[{\"title\":\"Quem s\u00e3o os legitimados passivos da ACP? Enquanto a a\u00e7\u00e3o popular permite apenas que a administra\u00e7\u00e3o p\u00fablica configure o polo passivo, a lei 7.347/85 permite que qualquer pessoa f\u00edsica ou jur\u00eddica que cause danos aos bens por ela tutelados, possa configurar\"}]},{\"title\":\"TAC\",\"children\":[{\"title\":\"Origem no D. Bras\u00edleiro\",\"children\":[{\"title\":\"Introduzino no ordenamento pelo art. 211 do ECA\"}]},{\"title\":\"Conceitos e  Nat. Juridica e Tipos\",\"children\":[{\"title\":\"Intro\",\"children\":[{\"title\":\"\u00c8 possivel mesmo que os dirietos sejam indisponiveis\"},{\"title\":\"NAO \u00e9 necessario IC antes de TAC! E n\u00e3o \u00e9 obrigatorio antes de ajuizar ACP\"},{\"title\":\"Celebra\u00e7\u00e3o do TAC n\u00e3o impede ACP\"},{\"title\":\"Nulidade do TAC se os termos s\u00e3o proibidos pela Legisla\u00e7\u00e3o\"},{\"title\":\"\u00c9 nulo titulo subjacente ao TAC cujas obriga\u00e7\u00f5es n\u00e3o forem livremente pactuadas\"},{\"title\":\"Assinatura de TAC n\u00e3o obsta A\u00e7\u00e3o Penal\"}]},{\"title\":\"Conceito\",\"children\":[{\"title\":\"\u00e9 um acordo que celebrado com o violador de determinado direito coletivo\"},{\"title\":\"finalidade de impedir a continuidade da situa\u00e7\u00e3o de ilegalidade\"},{\"title\":\"reparar o dano ao direito coletivo e evitar a a\u00e7\u00e3o judicial.\"}]},{\"title\":\"Natureza jur\u00eddica do TAC H\u00e1 divergencia, s\u00e3o  2 entendimentos\",\"children\":[{\"title\":\"Modalidade espec\u00edfica de transa\u00e7\u00e3o\"},{\"title\":\"Neg\u00f3cio jur\u00eddico bilateral sui generis\"},{\"title\":\"Transa\u00e7\u00e3o formal  e Transa\u00e7\u00e3o Substancial\",\"children\":[{\"title\":\"Diferencia\u00e7\u00e3o doutrinaria\"},{\"title\":\"\u00e9 possivel a transa\u00e7\u00e3o formal, q n\u00e3o significa renuncia ao direito coletivo em questao\"}]}]},{\"title\":\"Tipos\",\"children\":[{\"title\":\"TAC PARCIAL\",\"children\":[{\"title\":\"Os TAC`s podem ser parciais ou impaciais\"},{\"title\":\"Parciais e promovidos pelo MP\",\"children\":[{\"title\":\"Nada obsta a continu\u00e7\u00e3o do inquerito at\u00e9 ajuizamento da ACP ou...\"},{\"title\":\"arquivamento com rela\u00e7\u00e3o a materia remanescente. \u00c9 desnecessario remeter a CSMP\"}]},{\"title\":\"TAC integral com participa\u00e7\u00e3o do MP\",\"children\":[{\"title\":\"Os autos devem ser remetidos ao CSMP para verifica\u00e7\u00e3o de arquivamento implicito\"}]}]},{\"title\":\"TAC sucessivo\",\"children\":[{\"title\":\"\u00e9 a celebra\u00e7\u00e3o de novo TAC p adequar a conduta as novas circunstancias\"}]},{\"title\":\"TAC JUDICIAL E EXTRAJUDICIAL\",\"children\":[{\"title\":\"TAC Judicial pode ser feito\",\"children\":[{\"title\":\"A\u00e7\u00e3o coletiva com o TAC\"},{\"title\":\"Requerer homologa\u00e7\u00e3o judicial do TAC\"}]},{\"title\":\"No judicial o juiz n\u00e3o faz apenas juizo de deliba\u00e7\u00e3o, mas verdadeira analise do m\u00e9rito\"},{\"title\":\"Acordo judicial prescinde de aprova\u00e7\u00e3o pelo CSMP\"},{\"title\":\"At\u00e9 as partes n\u00e3o publicas podem requerer a homologa\u00e7\u00e3o do acordo\"},{\"title\":\"Se o MP n\u00e3o for autor DEVE ser ouvido\"},{\"title\":\"Distin\u00e7\u00f5es\",\"children\":[{\"title\":\"TAc Judicial\",\"children\":[{\"title\":\"Formulado por todos co-legitimado SEM ATUA\u00c7\u00c3O DO CSMP\"},{\"title\":\"Faz coisa Julgada material\"},{\"title\":\"MP atua como custos juris, se n\u00e3o for autor\"},{\"title\":\"Suspens\u00e3o do processo at\u00e9 cumprimento do TAC\"},{\"title\":\"A impugna\u00e7\u00e3o pode se dar por recurso de terceiro ou co-legitimados, recurso do MP, A\u00e7\u00e3o anulat\u00f3ria, inclusive popular, a\u00e7\u00e3o coletiva ordinaria em caso de provas novas\"}]},{\"title\":\"TAC Extrajudicial\",\"children\":[{\"title\":\"Apenas org\u00e3os p\u00fablicos legitimados\"},{\"title\":\"N\u00e3o faz coisa julgada material\",\"children\":[{\"title\":\"N\u00e3o atinge titulares, co-legitimados, e n\u00e3o impede ajuizamento de ACP\"}]},{\"title\":\"Verifica\u00e7\u00e3o do arquivamento implicito do inquerito civil\"},{\"title\":\"Havendo presen\u00e7a de co-legitimado o MP n\u00e3o precisa participar\"},{\"title\":\"N\u00e3o gera efeito processual\"},{\"title\":\"A impugna\u00e7\u00e3o pode se dar por A\u00e7\u00e3o coletiva sendo o MP co-legitimado, recurso perante o CSMP\"}]}]}]}]}]},{\"title\":\"Legitimidade\",\"children\":[{\"title\":\"Podem ser feitos pelos org\u00e3os p\u00fablicos legitimados.\",\"children\":[{\"title\":\"3 conclus\u00f5es b\u00e1sicas\",\"children\":[{\"title\":\"MP n\u00e3o \u00e9 unico que pode firmar TAC\"},{\"title\":\"N\u00e3o h\u00e1 disponibilidade sobre o objeto, o TAC ser estritamente vinculados as exigencias legais\"},{\"title\":\"Associa\u00e7\u00f5es Privadas?\"}]}]},{\"title\":\"Tem eficacia de titulo extrajudicial\"}]},{\"title\":\"Execu\u00e7\u00e3o do TAC\",\"children\":[{\"title\":\"O TAC \u00e9 titulo executivo extrajudicial\"},{\"title\":\"\u00c9 desnecessario presen\u00e7a de testemunhas, basta o org\u00e3o e o compromissario\"},{\"title\":\"\u00c9 necess\u00e1rio q tenha comina\u00e7\u00f5es q podem ser de carater pecunicario ou obriga\u00e7\u00f5es de fazer\"},{\"title\":\"\u00c9 cabivel contra o TAC a exce\u00e7\u00e3o de pr\u00e9-executividade\"},{\"title\":\"Prazo prescricional da execu\u00e7\u00e3o de TAC\",\"children\":[{\"title\":\"\u00e0 data em que o cr\u00e9dito se torna exig\u00edvel(momento que finda o processo admin.)\"}]}]},{\"title\":\"Conteudo minimo do TAC\",\"children\":[{\"title\":\"\u00c9 um acordo com finalidade conciliat\u00f3ria, porem seu objeto \u00e9 indisponivel\"},{\"title\":\"Deve constar obrigatoriamente as comina\u00e7\u00f5es. Aconselha-se o uso de clausula penal in pecunia\"},{\"title\":\"Juiz pode fixar astreintes. OBS: Nao podem ser aumentadas, mas podem diminuir\"},{\"title\":\"Clausula Penal Cominat\u00f3ria e Clausula Penal Compensat\u00f3ria\",\"children\":[{\"title\":\"Como o direito \u00e9 indisponivel a clausula penal no TAC \u00e9 sempre cominat\u00f3ria\"}]},{\"title\":\"Falta de Assinatura do TAC pelo  membro do MP impossibilita execu\u00e7\u00e3o  - Entendimento do STJ\",\"children\":[{\"title\":\"O TAC foi celebrado pelo MP e faltou assinatura, sendo nesse caso, requisito formal essencial\"}]}]},{\"title\":\"Recomenda\u00e7\u00f5es e TAC\",\"children\":[{\"title\":\"\u00c9 vedado que recomenda\u00e7\u00f5es ensejem dispensa do TAC\"}]},{\"title\":\"TAC celebrado ap\u00f3s sentenca n\u00e3o implica perda do Interesse de Agir\",\"children\":[{\"title\":\"A senten\u00e7a s\u00f3 deixa de existir se o houver desistencia ou acordo for homologado judicalmente\"}]},{\"title\":\"obs\",\"children\":[{\"title\":\"PRESCRI\u00c7\u00c3O\",\"children\":[{\"title\":\"A pretens\u00e3o execut\u00f3ria de obriga\u00e7\u00f5es de fazer previstas em Termo de ajustamento de conduta (TAC) firmado para repara\u00e7\u00e3o de danos ambientais decorrentes de empreendimento imobili\u00e1rio, quando relacionadas a quest\u00f5es meramente patrimoniais, n\u00e3o visando a restaura\u00e7\u00e3o de bens de natureza ambiental, sujeita-se \u00e0 prescri\u00e7\u00e3o quinquenal. STJ. 1\u00aa Turma. AREsp 1941907-RJ, Rel. Min. Benedito Gon\u00e7alves, julgado em 09/08/2022 (Info 744).\"}]},{\"title\":\"EXECU\u00c7\u00c3O INDIVIDUAL DE TAC. IDH\",\"children\":[{\"title\":\"As v\u00edtimas de evento danoso possuem legitimidade para executar individualmente o Termo de Ajustamento de Conduta firmado por ente p\u00fablico que verse sobre direitos individuais homog\u00eaneos. STJ. 3\u00aa Turma. REsp 2.059.781-RJ, Rel. Min. Nancy Andrighi, julgado em 12/12/2023 (Info 15 \u2013 Edi\u00e7\u00e3o Extraordin\u00e1ria).\"}]}]}]},{\"title\":\"A\u00e7\u00e3o Civil P\u00fablica ou A\u00e7\u00e3o Coletiva\"},{\"title\":\"Conceitos de Direito  Coletivo Latu Sensu\",\"children\":[{\"title\":\"A ACP pode ser manejada para qlq especie de direito coletivo lato sensu\"},{\"title\":\"Interesses ou Direitos DIFUSOS - IDD\",\"children\":[{\"title\":\"Os transindividuais de natureza indivisivel\"},{\"title\":\"Sejam titulares pessoas indeterminadas e ligadas por circunstancias de fato\"}]},{\"title\":\"Interesses ou Direitos COLETIVOS - IDC Ih, desci no cristo(RJ)\",\"children\":[{\"title\":\"Transindividuais de natureza indivisivel\"},{\"title\":\"Sejam titularar grupo, categoria ou classe de pessoas ligadas entre si ou com parte contraria\"},{\"title\":\"Tem uma rela\u00e7\u00e3o juridica como base\"}]},{\"title\":\"Interesses ou Direitos INDIVIDUAIS HOMOGENEOS - IDCH horigem chomum\",\"children\":[{\"title\":\"Decorrentes de origem comum\"}]},{\"title\":\"obs\",\"children\":[{\"title\":\"I \u2014 Em uma mesma a\u00e7\u00e3o coletiva, o autor pode formular pedidos relacionados com direitos individuais homog\u00eaneos, direitos coletivos em sentido estrito e direitos difusos. As tutelas pleiteadas em a\u00e7\u00f5es civis p\u00fablicas n\u00e3o s\u00e3o necessariamente puras e estanques. N\u00e3o \u00e9 preciso que se pe\u00e7a, de cada vez, uma tutela referente a direito individual homog\u00eaneo, em outra a\u00e7\u00e3o uma de direitos coletivos em sentido estrito e, em outra, uma de direitos difusos, especialmente em se tratando de a\u00e7\u00e3o manejada pelo Minist\u00e9rio P\u00fablico, que det\u00e9m legitimidade ampla no processo coletivo. II \u2014 Havendo viola\u00e7\u00e3o a direitos transindividuais, \u00e9 cab\u00edvel, em tese, a condena\u00e7\u00e3o por dano moral coletivo que se caracteriza como uma categoria aut\u00f4noma de dano e que n\u00e3o est\u00e1 relacionado necessariamente com os tradicionais atributos da pessoa humana (dor, sofrimento ou abalo ps\u00edquico). III \u2014 No caso concreto julgado, o STJ entendeu que n\u00e3o cabia condena\u00e7\u00e3o por dano moral coletivo. Os usu\u00e1rios do Plano de Sa\u00fade \u201cZZZ\u201d que precisassem de pr\u00f3teses para cirurgias de angioplastia precisavam pagar um valor extra, considerando que determinada cl\u00e1usula exclu\u00eda da cobertura o implante de pr\u00f3teses card\u00edacas. Essa cl\u00e1usula \u00e9 abusiva e ilegal, entretanto, ela n\u00e3o gerou danos difusos ou coletivos, mas apenas individuais homog\u00eaneos. STJ. 4\u00aa Turma. REsp 1293606-MG, Rel. Min. Luis Felipe Salom\u00e3o, julgado em 2/9/2014 (Info 547).\"}]}]},{\"title\":\"Onus da Prova - Teoria Est\u00e1tica(Regra de Julgamento)  e Teoria Dinamica(Regra de Atividade)\",\"children\":[{\"title\":\"Conceitos\",\"children\":[{\"title\":\"Com base no art. 6\u02da do CDC o microssistema deve aceitar a invers\u00e3o do onus da prova\"},{\"title\":\"Tbm aplica ao processo coletivo a Teoria das Cargas ou Onus Dinamico das Provas\"},{\"title\":\"A prova \u00e9 atribuida a quem tem melhores condi\u00e7\u00f5es de faze-lo\"},{\"title\":\"Est\u00e1 prevista na LACP a invers\u00e3o do onus da prova?\",\"children\":[{\"title\":\"N\u00e3o\"}]},{\"title\":\"Qual momento processual?\",\"children\":[{\"title\":\"\u00c9 aplicavel a qlq momento\"},{\"title\":\"Em especial na audiencia preliminar na fixa\u00e7\u00e3o dos pts controvertidos\"}]}]},{\"title\":\"Momento da Invers\u00e3o\",\"children\":[{\"title\":\"N\u00e3o h\u00e1 regra unanime, nem no STJ nem na doutrina\"},{\"title\":\"Onus da Prova subjetivo\",\"children\":[{\"title\":\"Regra da atividade ou procedimento, antes da senten\u00e7a\"},{\"title\":\"Em ultima decis\u00e3o o STJ adotou esse entendimento como sendo o melhor\"}]},{\"title\":\"Onus da Prova Objetivo\",\"children\":[{\"title\":\"Regra do julgamento, aplicado na senten\u00e7a\"}]},{\"title\":\"Explicando\",\"children\":[{\"title\":\"A invers\u00e3o \u00e9 analisada nesses momentos\"}]}]},{\"title\":\"obs\",\"children\":[{\"title\":\"S\u00famula 618 - A invers\u00e3o do \u00f4nus da prova aplica-se \u00e0s a\u00e7\u00f5es de degrada\u00e7\u00e3o ambiental\"}]}]},{\"title\":\"Crit\u00e9rios de Competencia\",\"children\":[{\"title\":\"Intro\",\"children\":[{\"title\":\"2 Criterios\",\"children\":[{\"title\":\"Prmeiro(ACP/CDC) Local do Dano\",\"children\":[{\"title\":\"Foro do local do Dano\"}]},{\"title\":\"Segundo(CDC) Ambito de extens\u00e3o do dano\",\"children\":[{\"title\":\"Ambito de extens\u00e3o do dano\"},{\"title\":\"ACP n\u00e3o trata das situa\u00e7\u00f5es em que o dano \u00e9 nacional ou regional\"},{\"title\":\"No foro da Capital do Estado ou no do DF, para danos de ambito nacional\"},{\"title\":\"Aplicam-se as regras do CPC quanto a competencia concorrente\"},{\"title\":\"Entende o STJ que esse art. se aplica a todas a\u00e7\u00f5es coletivas\"},{\"title\":\"Callout\",\"children\":[{\"title\":\"Art. 93. Ressalvada a compet\u00eancia da Justi\u00e7a Federal, \u00e9 competente para a causa a justi\u00e7a local: I - no foro do lugar onde ocorreu ou deva ocorrer o dano, quando de \u00e2mbito local; II - no foro da Capital do Estado ou no do Distrito Federal, para os danos de \u00e2mbito nacional ou regional, aplicando-se as regras do C\u00f3digo de Processo Civil aos casos de compet\u00eancia concorrente.\"}]}]},{\"title\":\"Detalhe importante que vem antes dos criterios acima\",\"children\":[{\"title\":\"Ressalva-se a competencia da JF\"}]}]},{\"title\":\"A competencia \u00e9 funcional segundo a Lei\",\"children\":[{\"title\":\"O legislador, na verdade, queria que a competencia fosse absoluta\"},{\"title\":\"A competencia \u00e9 territorial, mas ABSOLUTA em raz\u00e3o do interesse p\u00fablico\"},{\"title\":\"Improrrogavel e indelegavel\"}]},{\"title\":\"Preven\u00e7\u00e3o\",\"children\":[{\"title\":\"A propositura da a\u00e7\u00e3o prevenir\u00e1 a jurisdi\u00e7\u00e3o p/ todas a\u00e7\u00f5es posteriores\"},{\"title\":\"que possuam mesma causa de pedir ou mesmo objeto\"},{\"title\":\"N\u00e3o se exige identidade das partes\"},{\"title\":\"A simples propositura da a\u00e7\u00e3o ocasiona a preven\u00e7\u00e3o\"},{\"title\":\"A preven\u00e7\u00e3o nao instituiu um juizo universal p/ a\u00e7\u00f5es individuais\"},{\"title\":\"N\u00e3o tem nada haver com o despacho inicial de cita\u00e7\u00e3o. a simples propositura previne o juizo\"}]}]},{\"title\":\"Competencia da JF ou JE\",\"children\":[{\"title\":\"Quando atingir bens federais. N\u00e3o importa se a sede \u00e9 no local do dano\"},{\"title\":\"A competencia \u00e9 da JF se houver interesse da Uniao\"},{\"title\":\"Nunca pode ser julgado por Juiz Estadual\"},{\"title\":\"A competencia \u00e9 da JF mesmo que n\u00e3o tenha vara federal no local do dano\"}]},{\"title\":\"Competencia de 1\u02da Grau\",\"children\":[{\"title\":\"Na ACP o juiz natural \u00e9 o juiz de 1\u02da Grau msm qqnd em face de PR, Min de Est e outras\"}]},{\"title\":\"Competencia para execu\u00e7\u00e3o de Demandas individuais  - Condena\u00e7\u00e3o gen\u00e9rica em ACP\",\"children\":[{\"title\":\"Seu domicilio, domicilio do r\u00e9u ou no juizo da a\u00e7\u00e3o ordinaria\"}]},{\"title\":\"ACP p/ desfazer degrada\u00e7\u00e3o ambiental causada  por PP em propaganda eleitoral\",\"children\":[{\"title\":\"Competencia nao \u00e9 da JEeleitoral e sim da Jest\"}]},{\"title\":\"obs\",\"children\":[{\"title\":\"COMPETENCIA TERRITORIAL DISTINTA MESMO R\u00c9U E MESMA CAUSA DE PEDIR ASSOCIA\u00c7\u00d5ES DISTINTAS\",\"children\":[{\"title\":\"No caso em que duas a\u00e7\u00f5es coletivas tenham sido propostas perante ju\u00edzos de compet\u00eancia territorial distinta contra o mesmo r\u00e9u e com a mesma causa de pedir e, al\u00e9m disso, o objeto de uma, por ser mais amplo, abranja o da outra, competir\u00e1 ao ju\u00edzo da a\u00e7\u00e3o de objeto mais amplo o processamento e julgamento das duas demandas, ainda que ambas tenham sido propostas por entidades associativas distintas. STJ. 4\u00aa Turma. REsp 1318917-BA, Rel. Min. Antonio Carlos Ferreira, julgado em 12/3/2013 (Info 520).\"}]},{\"title\":\"Litis onde um dos demandados \u00e9 sujeito a competencia da JF\",\"children\":[{\"title\":\"Em a\u00e7\u00e3o civil p\u00fablica ajuizada na Justi\u00e7a Federal, N \u00c3 O \u00e9 cab\u00edvel a cumula\u00e7\u00e3o subjetiva de demandas com o objetivo de formar um litiscons\u00f3rcio passivo facultativo comum, quando apenas um dos demandados estiver submetido, em raz\u00e3o de regra de compet\u00eancia ratione personae, \u00e0 jurisdi\u00e7\u00e3o da Justi\u00e7a Federal, ao passo que a Justi\u00e7a Estadual seja a competente para apreciar os pedidos relacionados aos demais demandados. STJ. 4\u00aa Turma. REsp 1120169-RJ, Rel. Min. Luis Felipe Salom\u00e3o, julgado em 20/8/2013 (Info 530).\"}]},{\"title\":\"Zona de Amortecimento. MPF\",\"children\":[{\"title\":\"\\\"O MPF possui legitimidade para propor, na Justi\u00e7a Federal, a\u00e7\u00e3o civil p\u00fablica que vise \u00e0 prote\u00e7\u00e3o de zona de amortecimento de parque nacional, ainda que a referida \u00e1rea n\u00e3o seja de dom\u00ednio da Uni\u00e3o. STJ. 2\u00aa Turma. AgRg no REsp 1373302-CE, Rel. Min. Humberto Martins, julgado em 11/6/2013 (Info 526).\\\"\"}]},{\"title\":\"Selo de Responsabilidade Social\",\"children\":[{\"title\":\"Compete \u00e0 Justi\u00e7a do Trabalho processar e julgar a a\u00e7\u00e3o civil p\u00fablica fundamentada na n\u00e3o concess\u00e3o pela Uni\u00e3o de Selo de Responsabilidade Social a empresa pela falta de verifica\u00e7\u00e3o adequada do cumprimento de normas que regem as condi\u00e7\u00f5es de trabalho. STJ. 1\u00aa Se\u00e7\u00e3o. AgInt no CC 155994/SP, Rel. Min. Benedito Gon\u00e7alves, julgado em 12/05/2021 (Info 696).\"}]}]}]},{\"title\":\"TUTELA da ACP Objeto da ACP MPE-SP - 2017 - MPE-SP - Promotor\",\"children\":[{\"title\":\"A ACP pode ter por OBJETO ACP \u00e9 condenat\u00f3ria. A\u00e7\u00e3o Popular \u00e9 desconstitutiva acidentalmente condenat\u00f3ria\",\"children\":[{\"title\":\"Condena\u00e7\u00e3o em dinheiro\"},{\"title\":\"Obriga\u00e7\u00e3o de fazer ou n\u00e3o fazer\"}]},{\"title\":\"Possibilidade de requerer qlq tutela\",\"children\":[{\"title\":\"Embora a LACP preveja somente a Condena\u00e7\u00e3o, o CDC prev\u00ea outras tutelas.\"},{\"title\":\"Em raz\u00e3o da intercambiariedade, pode ser usado o CDC\"}]},{\"title\":\"Quest\u00e3o(VUNESP - Juiz)\",\"children\":[{\"title\":\"N\u00e3o tem por objeto declara\u00e7\u00e3o de exist. ou inexistencia da rel. juridica\"}]}]},{\"title\":\"Art. 6\u02da e 7\u02da da LACP -  Provoca\u00e7\u00e3o do MP\",\"children\":[{\"title\":\"Qlq pessoa PODE e o servidor DEVE provocar a iniciativa do MP\"},{\"title\":\"Deve ministrar informa\u00e7\u00f5es e indicar os elementos de convic\u00e7\u00e3o\"},{\"title\":\"Em suas fun\u00e7\u00f5es, os juizes e tribunais tiverem conhecimento de fato que ensejem ACP\"},{\"title\":\"Devem remeter as pe\u00e7as ao MP para providencias cabiveis\"},{\"title\":\"A norma do art. 6\u02da impoe uma faculdade da pessoa e um DEVER do servidor p\u00fablico\"},{\"title\":\"A norma do art. 7\u02da \u00e9 dirigida especificamente para os membros do PJ\"}]},{\"title\":\"Art. 8\u02da da LACP -  Instru\u00e7\u00e3o da Inicial  e Inqu\u00e9rito Civil\",\"children\":[{\"title\":\"Previs\u00f5es\",\"children\":[{\"title\":\"Caput - Req. de Infos e Prazo de cumprimento\",\"children\":[{\"title\":\"Para instruir a inicial, o interessado pode requerer as autoridades competentes\"},{\"title\":\"Certid\u00f5es e informa\u00e7\u00f5es necessarias q devem ser fornecidas em 15d\"}]},{\"title\":\"\u00a7 1 - Inq. Civil(MP)\",\"children\":[{\"title\":\"MP pode instaurar, sob sua presidencia, INQUERITO CIVIL\"},{\"title\":\"Ou requisitar de qlq organimsmo, informa\u00e7\u00f5es, exames ou pericias\"},{\"title\":\"No prazo que assinalar, que NAO PODE SER INFERIOR A 10 DIAS UTEIS\"}]},{\"title\":\"Caput - Arq do IC\",\"children\":[{\"title\":\"Esgotadas as diligencias, o MP se convencer da inexistencia de fundamento p/ ACP\"},{\"title\":\"Promover\u00e1 arquivamento dos autor do IC ou pe\u00e7as informativas(fundamentado)\"}]},{\"title\":\"\u00a71 - CSMP\",\"children\":[{\"title\":\"Os autor do IC ou pe\u00e7as informativas arquivadas\"},{\"title\":\"Ser\u00e3o remetidas ao CSMP, sob pena de falta grave no prazo de 3 DIAS\"}]},{\"title\":\"\u00a72 - Atua\u00e7\u00e3o CSMP\",\"children\":[{\"title\":\"At\u00e9 que, em sess\u00e3o do CSMP,\"},{\"title\":\"Seja homologada ou reiterada a promo\u00e7\u00e3o do arquivamento\"},{\"title\":\"Poder\u00e3os as associa\u00e7\u00f5es legitimadas apresentar\"},{\"title\":\"Razoes escritas ou documentos\"},{\"title\":\"Que ser\u00e3o juntados aos autos ou a pe\u00e7a\"}]},{\"title\":\"\u00a73 - Atua\u00e7\u00e3o CSMP\",\"children\":[{\"title\":\"O arquivamento ser\u00e1 submetido a exame e delibera\u00e7\u00e3o do CSMP\"}]},{\"title\":\"\u00a74 - Art. 28 CPP\",\"children\":[{\"title\":\"Deixando o CSMP de homologar a promo\u00e7\u00e3o de arquivamento\"},{\"title\":\"designar\u00e1 desde logo Outro org\u00e3o do MP para ajuizamento da A\u00e7\u00e3o\"},{\"title\":\"Na realidade \u00e9 o PGJ que far\u00e1 isso\"},{\"title\":\"Se \u00e9 o MPF\",\"children\":[{\"title\":\"A atribui\u00e7\u00e3o \u00e9 das Camaras de Coordena\u00e7\u00e3o e Revis\u00e3o\"}]},{\"title\":\"Se \u00e9 o MPT\",\"children\":[{\"title\":\"Cabe ao CSMP do Trabalho\"}]}]},{\"title\":\"\u00a7 2 - Sigilo\",\"children\":[{\"title\":\"Casos que impuser sigilo. Pode ser negada a informa\u00e7\u00e3o\"},{\"title\":\"Nessa hip. a a\u00e7\u00e3o pode ser proposta sem esses doc., cabendo ao JUIZ requsita-los\"}]}]},{\"title\":\"Inquerito Civil\",\"children\":[{\"title\":\"Conceito\",\"children\":[{\"title\":\"Especie de procedimento administrativo de natureza inquisitiva\",\"children\":[{\"title\":\"N\u00e3o tem contraditorio, ampla defesa...\"}]},{\"title\":\"Pode ser arquivado se o MP entender que n\u00e3o h\u00e1 fundamento para a\u00e7\u00e3o\"},{\"title\":\"Busca-se elementos para a\u00e7\u00e3o ou para o TAC\"},{\"title\":\"\u00c9 pre-processual e realizado extrajudicialmente\"},{\"title\":\"Regulamenta\u00e7\u00e3o - Res. 23 do CNMP\"},{\"title\":\"Inquerito civil respeitara o que dispuser o CPC no que n\u00e3o lhe for contrario\"}]},{\"title\":\"Titularidade\",\"children\":[{\"title\":\"Restrita ao MP\",\"children\":[{\"title\":\"Defensoria?\",\"children\":[{\"title\":\"Cresce na doutrina a hipotese de IC pela defensoria\"},{\"title\":\"Por\u00e9m o tema nao \u00e9 pacifico na doutrina nao prevalecendo\"}]}]}]},{\"title\":\"Obrigatoriedade\",\"children\":[{\"title\":\"N\u00e3o \u00e9 obrigatorio, \u00e9 facultativo\"}]},{\"title\":\"Efeitos da instaura\u00e7\u00e3o\",\"children\":[{\"title\":\"Interrup\u00e7\u00e3o da Decadencia\"},{\"title\":\"Possibilita expedi\u00e7\u00e3o de requisi\u00e7\u00f5es e notifica\u00e7\u00f5es, e condu\u00e7\u00e3o coercitiva\"},{\"title\":\"Requisi\u00e7\u00e3o de pericias e info, a serem prestadas no prazo nao inferior a 10 dias UTEIS\"},{\"title\":\"Possibilidade de surgimento da Resp. Civil do Estado em caso de IC temer\u00e1rio\"}]},{\"title\":\"Fases do IC\",\"children\":[{\"title\":\"instaura\u00e7\u00e3o\"},{\"title\":\"Produ\u00e7\u00e3o de provas\"},{\"title\":\"Arquivamento do IC,  Celebra\u00e7\u00e3o do TAC ou Ajuizamento da a\u00e7\u00e3o\"}]},{\"title\":\"Contraditorio no IC\",\"children\":[{\"title\":\"A doutrina mitiga, exatamente por ser procedimento administrativo e n\u00e3o processo adm.\"},{\"title\":\"No IC n\u00e3o existem litigantes e nem acusados pois o MP limita-se a apurar fatos\"},{\"title\":\"STJ\",\"children\":[{\"title\":\"Diz que o procedimento \u00e9 meramente informativo\"},{\"title\":\"Assim, o contraditorio e ampla defesa n\u00e3o s\u00e3o imprescindiveis\"},{\"title\":\"Salvo se\",\"children\":[{\"title\":\"Houver restri\u00e7\u00e3o de direitos e aplica\u00e7\u00f5es de san\u00e7\u00e3o de qlq natureza\"}]}]}]},{\"title\":\"Instaura\u00e7\u00e3o\",\"children\":[{\"title\":\"Portaria ou despacho fundamentado no requerimento, oficio ou representa\u00e7\u00e3o endere\u00e7ada ao MP\"}]},{\"title\":\"Valor probat\u00f3rio Relativo\",\"children\":[{\"title\":\"\u00c9 o valor dado as provas no IC, pois s\u00e3o colhidas sem contraditorio, mas s\u00f3 devem ser afastadas quando h\u00e1 contraprova de hierarquia superior produzidas sob vigilancia do contraditorio\"}]},{\"title\":\"Fundamenta\u00e7\u00e3o do ato de instaura\u00e7\u00e3o \u00e9 imprescindivel\",\"children\":[{\"title\":\"\u00c9 preciso que haja identifa\u00e7\u00e3o dos fatos com fundamenta\u00e7\u00e3o juridica, mesmo que sucinta\"},{\"title\":\"A fundamenta\u00e7\u00e3o \u00e9 indispensavel para o controle de legalidade/legitimidade\"}]},{\"title\":\"N\u00e3o h\u00e1 m\u00e1-f\u00e9 quando o MP n\u00e3o leva a A\u00e7\u00e3o Civil todos docs. constantes do IC\"},{\"title\":\"Sigilo Banc\u00e1rio\",\"children\":[{\"title\":\"MP tem legitimidade para requerer ao PJ a quebra do sigilo bancario\"}]},{\"title\":\"Excesso de Prazo p/ processamento do IC\",\"children\":[{\"title\":\"N\u00e3o prejudica o investigado\"},{\"title\":\"Cabe ao investigado provar que as dila\u00e7\u00f5es o prejudicam\"},{\"title\":\"Prazo previsto em regulamenta\u00e7\u00e3o do CNMP\",\"children\":[{\"title\":\"1 Ano prorrogavel pelo mesmo prazo diversas vezes se necess\u00e1rio\"}]}]},{\"title\":\"Direito do Advogado ter acesso aos autos do IC\",\"children\":[{\"title\":\"N\u00e3o \u00e9 licito negar esse direito ao advogado, em especial aos docs. ja documentados\"},{\"title\":\"Deve ser analisada a natureza e finalidade do acesso\"}]},{\"title\":\"HC \u00e9 meio h\u00e1bil para questionar aspectos ligados ao IC??\",\"children\":[{\"title\":\"HC visa preservar a liberdade de ir e vir\"},{\"title\":\"Com isso, n\u00e3o \u00e9 meio habil para tanto\"}]},{\"title\":\"A\u00e7\u00e3o de Improbidade com base no IC\",\"children\":[{\"title\":\"N\u00e3o h\u00e1 viola\u00e7\u00e3o legal\"}]}]},{\"title\":\"Art. 9\u02da da LACP - Inexistencia de fundamento da ACP - Arquivamento\",\"children\":[{\"title\":\"Fundamenta\u00e7\u00e3o\",\"children\":[{\"title\":\"Todo arquivamento deve ser EXPRESSO e fundamentado\"}]},{\"title\":\"Tbm se aplica p/ pe\u00e7as informativas?\",\"children\":[{\"title\":\"Sim!\"}]},{\"title\":\"Arquivamento Impl\u00edcito\",\"children\":[{\"title\":\"Pode ocorrer com a superveniencia de TAC, que teria cond\u00e3o de encerrar IC\"},{\"title\":\"Recomenda-se  que o TAC seja submetido ao CSMP\"}]},{\"title\":\"Arquivamento Liminar\",\"children\":[{\"title\":\"\u00c9 possivel pela propria Promotoria de Justi\u00e7a\"},{\"title\":\"\u00c9 denominada Indeferimento do pedido de instaura\u00e7\u00e3o do IC\"},{\"title\":\"Ocorre nos casos de manifesta impropriedade na instaurac\u00e3o\"},{\"title\":\"exemplos\",\"children\":[{\"title\":\"Fatos ja foram objeto de IC\"},{\"title\":\"Fatos ja est\u00e3o solucionados\"}]},{\"title\":\"Ausencia de formalidades n\u00e3o ocasiona arquivamento por si s\u00f3\"}]},{\"title\":\"Apresenta\u00e7\u00e3o de raz\u00f5es escritas pelo co-legitimados\",\"children\":[{\"title\":\"Podem apresentar arrazoados ao CSMP, demonstrando equivoco do arquivamento promovido. N\u00e3o \u00e9 somente pelas associa\u00e7\u00f5es\"}]},{\"title\":\"Competencia p/ promover arquivamento\",\"children\":[{\"title\":\"\u00c9 de quem tem competencia para propo-lo\"}]}]}]},{\"title\":\"Art. 10\u02da da LACP - Crime. Retardamento\",\"children\":[{\"title\":\"Norma especial em rela\u00e7\u00e3o ao crime de desob\u00eadiencia\"},{\"title\":\"Atipicidade da Conduta ocorre qnd a inform\u00e7ao requisitada nao \u00e9 indispensavel\"},{\"title\":\"Requisi\u00e7\u00e3o de docs que impliquem Quebra do sigilo Banc\u00e1rio\",\"children\":[{\"title\":\"Mp n\u00e3o possui essa legitimidade\"}]},{\"title\":\"Ignorar requisi\u00e7\u00f5es do MP pode se tornar Improbidade\"},{\"title\":\"obs\",\"children\":[{\"title\":\"\u00c9 crime, punido com reclus\u00e3o de 1 a 3 anos e multa de 10 a 1000 ORTN\"},{\"title\":\"A recusa ou retardamento ou omiss\u00e3o de dados tecnicos indispensaveis\"},{\"title\":\"A propositura da a\u00e7\u00e3o, quando requisitados pelo MP\"}]}]},{\"title\":\"Art. 11\u02da da LACP - Obriga\u00e7\u00e3o de Fazer ou n\u00e3o fazer MPE-SP - 2017 - MPE-SP - Promotor de Justi\u00e7a Substituto\",\"children\":[{\"title\":\"Na a\u00e7\u00e3o que tenha por objeto obrig. de fazer ou n\u00e3o fazer\"},{\"title\":\"O juiz determinar\u00e1 o cumprimento da presta\u00e7\u00e3o\"},{\"title\":\"Sob pena de execu\u00e7\u00e3o especifica, ou de comina\u00e7\u00e3o de multa di\u00e1ria,\"},{\"title\":\"se for suficiente ou compativel\"},{\"title\":\"INDEPENDENTE de requerimento do autor\"},{\"title\":\"Comina\u00e7\u00e3o pode ser de of\u00edcio ou a requerimento do autor\"},{\"title\":\"obs\",\"children\":[{\"title\":\"O in\u00edcio da execu\u00e7\u00e3o de senten\u00e7a proferida em a\u00e7\u00e3o coletiva referente \u00e0 obriga\u00e7\u00e3o de fazer, em regra, n\u00e3o influi no prazo prescricional da execu\u00e7\u00e3o da obriga\u00e7\u00e3o de pagar, salvo se reconhecida a depend\u00eancia na decis\u00e3o transitada em julgado ou no ju\u00edzo da execu\u00e7\u00e3o. Deixando mais claro: \u2022 Em regra: o ajuizamento de execu\u00e7\u00e3o da obriga\u00e7\u00e3o de fazer n\u00e3o interrompe o prazo prescricional para a propositura da execu\u00e7\u00e3o que visa o cumprimento da obriga\u00e7\u00e3o de pagar. \u2022 Exce\u00e7\u00e3o: excepciona-se a regra nas hip\u00f3teses em que a pr\u00f3pria decis\u00e3o transitada em julgado ou o ju\u00edzo da execu\u00e7\u00e3o, reconhe\u00e7a que a execu\u00e7\u00e3o de um tipo de obriga\u00e7\u00e3o dependa necessariamente da pr\u00e9via execu\u00e7\u00e3o de outra esp\u00e9cie de obriga\u00e7\u00e3o. No caso concreto, o STJ decidiu que a situa\u00e7\u00e3o n\u00e3o se amoldava na exce\u00e7\u00e3o. Isso porque n\u00e3o havia raz\u00e3o para que se aguardasse a execu\u00e7\u00e3o de fazer para s\u00f3 ent\u00e3o ajuizar a execu\u00e7\u00e3o de pagar. Diante disso, a situa\u00e7\u00e3o se enquadrava na regra geral. STJ. 1\u00aa Turma. REsp 1687306-PB, Rel. Min. Benedito Gon\u00e7alves, Rel. Acd. Min. Gurgel de Faria, julgado em 08/03/2022 (Info 736).\"}]}]},{\"title\":\"Art. 12\u02da da LACP - Mandado Liminar. Justifica\u00e7\u00e3o pr\u00e9via\",\"children\":[{\"title\":\"Previs\u00f5es\",\"children\":[{\"title\":\"Caput\",\"children\":[{\"title\":\"O juiz pde conceder mandado liminar. Com ou sem justifica\u00e7\u00e3o previa\"},{\"title\":\"Em decis\u00e3o sujeita a AGRAVO\"}]},{\"title\":\"\u00a71\",\"children\":[{\"title\":\"A requerimento de PJ de direito p\u00fablico interessada e para evitar grave les\u00e3o\"},{\"title\":\"Pode o PRESIDENTE DO TRIBUNAL a que competir o conhecimento do recurso\"},{\"title\":\"Suspender a execu\u00e7\u00e3o da Liminar em decis\u00e3o fundamentada\"},{\"title\":\"Da qual cabe Agravo para Turmas\"},{\"title\":\"No PRAZO DE 5 DIAS, a partir da publica\u00e7\u00e3o do ato\"}]},{\"title\":\"\u00a72\",\"children\":[{\"title\":\"Multa cominada liminarmente, S\u00f3 ser\u00e1 exigivel\"},{\"title\":\"Apos transito em julgado da decis\u00e3o favor\u00e1vel ao autor\"},{\"title\":\"Mas ser\u00e1 devida, desde o dia em que se houver configurado o descumprimento\"}]}]},{\"title\":\"Presssupostos da liminar s\u00e3o os mesmos do CPC\"},{\"title\":\"tutela de urgencia na cautelar ou na propria ACP\",\"children\":[{\"title\":\"Pode ser pleiteada na ACP ou em a\u00e7\u00e3o cautelar(antes do procedimento)\"}]},{\"title\":\"Decis\u00e3o final de improcedencia da ACP, implica revoga\u00e7\u00e3o automatica(independe de expressa alega\u00e7\u00e3o) da medida liminar, com eficacia EX TUNK. Funciona nos moldes do NCPC\"},{\"title\":\"Execu\u00e7\u00e3o Provis\u00f3ria em ACP.  Nulidade de Cau\u00e7\u00e3o e  Dispensa de Cau\u00e7\u00e3o\",\"children\":[{\"title\":\"Admite-se execu\u00e7\u00e3o provisoria de tutela coletiva\"},{\"title\":\"Quanto a cau\u00e7\u00e3o aplica-se subsidiarimanete o CPC, diante da ausencia da legisla\u00e7\u00e3o\"},{\"title\":\"Para o levantamento de quantias, em regra \u00e9 necessario prestar cau\u00e7\u00e3o\"}]}]},{\"title\":\"Art. 13\u02da da LACP - Conden\u00e7\u00e3o em  Dinheiro. Fundo gerido\",\"children\":[{\"title\":\"Previs\u00e3o\",\"children\":[{\"title\":\"Caput\",\"children\":[{\"title\":\"Havendo conde\u00e7\u00e3o em diheiro. A indeniza\u00e7\u00e3o pelo dano causado\"},{\"title\":\"Ser\u00e1 revertido a um fundo, gerido por um Conselho federal ou Estadual\"},{\"title\":\"Devem participar necessariamente o MP e repersentantes da comunidade\"},{\"title\":\"Os recursos s\u00e3o destinados a reconstitui\u00e7\u00e3o dos bens lesados\"},{\"title\":\"Enquanto o fundo n\u00e3o for regulamentado\"},{\"title\":\"O dinheiro fica depositado em estabelecimento oficial de cr\u00e9dito\"},{\"title\":\"Em conta com corre\u00e7\u00e3o monet\u00e1ria\"}]},{\"title\":\"\u00a72\",\"children\":[{\"title\":\"Havnedo acordo ou condenac\u00e3o com fundamento em dano por ato de discrimina\u00e7\u00e3o etnica\"},{\"title\":\"A presta\u00e7\u00e3o em dinheiro reverter\u00e1 diretamente ao fundo de que trata o caput\"},{\"title\":\"e ser\u00e1 utilizada nas a\u00e7\u00f5es de promo\u00e7\u00e3o de igualdade,\"},{\"title\":\"conforme defini\u00e7\u00e3o do Conselho NAcional de promo\u00e7\u00e3o da Igualdade Racial, na hipotesse de extens\u00e3o nacional\"}]}]},{\"title\":\"O fundo tambem recebe recursos advindos de multas e doa\u00e7oes\"},{\"title\":\"O fundo tambem \u00e9 destinado ao fluid recovery\"},{\"title\":\"Trata da regra de repara\u00e7\u00e3o integral do dano causado, toda vez que\"},{\"title\":\"as habilita\u00e7\u00f5es individuais nao apresentem numero suficiente para recompor a gravidade do dano\"},{\"title\":\"Aplica\u00e7\u00e3o deve ter rela\u00e7\u00e3o com a natureza do dano\"},{\"title\":\"Tambem \u00e9 usado na moderniza\u00e7\u00e3o dos org\u00e3os responsaveis pelas politicas da area do dano\"},{\"title\":\"Entrega de bem movel a titulo de indeniza\u00e7\u00e3o\",\"children\":[{\"title\":\"STJ entende que n\u00e3o \u00e9 possivel a entrega de bem movel para uso de org\u00e3o da adm.\"}]}]},{\"title\":\"Art. 14\u02da- Efeito Suspensivo em regra nao tem ef.\",\"children\":[{\"title\":\"O juiz pode conferir efeito suspensivo aos recursos, para evitar dano irreparavel\"},{\"title\":\"Apelac\u00f5es ser\u00e3o recebidas apenas no devolutivo\"},{\"title\":\"Efeitos suspensivo que deve ser requerido\"}]},{\"title\":\"Art. 15\u02da da LACP  Execu\u00e7\u00e3o MPE-SP - 2017 - MPE-SP - Promotor\",\"children\":[{\"title\":\"Decorridos 60 DIAS do transito em julgado, se a associa\u00e7\u00e3o nao iniciar a execu\u00e7\u00e3o\"},{\"title\":\"O MP deve fazer(obrigatoriedade). Faculta-se a iniciativa aos demais legitimados\"},{\"title\":\"Execuc\u00e3o coletiva pode ser proposta por qlq legitimado, ainda q nao tenha participado da a\u00e7ao\"},{\"title\":\"obs\",\"children\":[{\"title\":\"Os sindicatos possuem ampla legitimidade extraordin\u00e1ria para defender em ju\u00edzo os direitos e interesses coletivos ou individuais dos integrantes da categoria que representam, inclusive nas liquida\u00e7\u00f5es e execu\u00e7\u00f5es de senten\u00e7a, independentemente de autoriza\u00e7\u00e3o dos substitu\u00eddos. STF. Plen\u00e1rio. RE 883.642/AL, Rel. Ministro Presidente, julgado em 18/06/2015 (Repercuss\u00e3o Geral - Tema 823) (Info 791 clipping)\"},{\"title\":\"No \u00e2mbito do direito privado, \u00e9 de cinco anos o prazo prescricional para ajuizamento da execu\u00e7\u00e3o individual em pedido de cumprimento de senten\u00e7a proferida em a\u00e7\u00e3o civil p\u00fablica (Tema 515). STJ. 4\u00aa Turma. EDcl no REsp 1569684-SP, Rel. Min. Raul Ara\u00fajo, julgado em 25/10/2022 (Info 756).\"},{\"title\":\"STF, Tema RG 82 - Possibilidade de execu\u00e7\u00e3o de t\u00edtulo judicial, decorrente de a\u00e7\u00e3o ordin\u00e1ria coletiva ajuizada por entidade associativa, por aqueles que n\u00e3o conferiram autoriza\u00e7\u00e3o individual \u00e0 associa\u00e7\u00e3o, n\u00e3o obstante haja previs\u00e3o gen\u00e9rica de representa\u00e7\u00e3o dos associados em cl\u00e1usula do estatuto. Tese: I \u2013 A previs\u00e3o estatut\u00e1ria gen\u00e9rica n\u00e3o \u00e9 suficiente para legitimar a atua\u00e7\u00e3o, em Ju\u00edzo, de associa\u00e7\u00f5es na defesa de direitos dos filiados, sendo indispens\u00e1vel autoriza\u00e7\u00e3o expressa, ainda que deliberada em assembleia, nos termos do artigo 5\u00ba, inciso XXI, da Constitui\u00e7\u00e3o Federal; II \u2013 As balizas subjetivas do t\u00edtulo judicial, formalizado em a\u00e7\u00e3o proposta por associa\u00e7\u00e3o, s\u00e3o definidas pela representa\u00e7\u00e3o no processo de conhecimento, limitada a execu\u00e7\u00e3o aos associados apontados na inicial.\"},{\"title\":\"Subt\u00f3pico 4\"}]},{\"title\":\"obs\",\"children\":[{\"title\":\"Lei 7.347 - Art. 15. Decorridos sessenta dias do tr\u00e2nsito em julgado da senten\u00e7a condenat\u00f3ria, sem que a associa\u00e7\u00e3o autora lhe promova a execu\u00e7\u00e3o, dever\u00e1 faz\u00ea-lo o Minist\u00e9rio P\u00fablico, facultada igual iniciativa aos demais legitimados.  CESPE / CEBRASPE - 2023 - PGE-PA - Procurador do Estado do Par\u00e1 O Minist\u00e9rio P\u00fablico tem legitimidade exclusiva para a liquida\u00e7\u00e3o e execu\u00e7\u00e3o da senten\u00e7a coletiva quando decorrido o prazo de um ano sem habilita\u00e7\u00e3o de interessados em n\u00famero compat\u00edvel com a gravidade do dano.(e)\"}]}]},{\"title\":\"Art. 16\u02da da LACP Efeitos da Senten\u00e7a\",\"children\":[{\"title\":\"A senten\u00e7a civil far\u00e1 coisa julgada erga omnes NOS LIMITES DA COMPETENCIA TERRITORIAL\",\"children\":[{\"title\":\"Entendendo\",\"children\":[{\"title\":\"Em outras palavras, o que o art. 16 quis dizer foi o seguinte: a decis\u00e3o do juiz na a\u00e7\u00e3o civil p\u00fablica n\u00e3o produz efeitos no Brasil todo. Ela ir\u00e1 produzir efeitos apenas na comarca (se for Justi\u00e7a Estadual) ou na se\u00e7\u00e3o ou subse\u00e7\u00e3o judici\u00e1ria (se for Justi\u00e7a Federal) do juiz prolator. A doutrina criticou bastante essa altera\u00e7\u00e3o promovida no art. 16 e afirmou que a regra ali prevista n\u00e3o deveria ser aplicada por ser inconstitucional, impertinente e ineficaz. Resumo das principais cr\u00edticas ao dispositivo (DIDIER, Fredie; ZANETI, Hermes): \u2022 Gera preju\u00edzo \u00e0 economia processual e pode ocasionar decis\u00f5es contradit\u00f3rias entre julgados proferidos em Munic\u00edpios ou Estados diferentes; \u2022 Viola o princ\u00edpio da igualdade por tratar de forma diversa os brasileiros (para uns ir\u00e1 \\\"valer\\\" a decis\u00e3o, para outros n\u00e3o); \u2022 Os direitos coletivos \u201clato sensu\u201d s\u00e3o indivis\u00edveis, de forma que n\u00e3o h\u00e1 sentido que a decis\u00e3o que os define seja separada por territ\u00f3rio; \u2022 A reda\u00e7\u00e3o do dispositivo mistura \u201ccompet\u00eancia\u201d com \u201cefic\u00e1cia da decis\u00e3o\u201d, que s\u00e3o conceitos diferentes. O legislador confundiu, ainda, \u201ccoisa julgada\u201d e \u201cefic\u00e1cia da senten\u00e7a\u201d. Sobre esse ponto, vale a pena citar Hugo Nigro Mazzilli:\"},{\"title\":\"STJ A efic\u00e1cia das decis\u00f5es proferidas em a\u00e7\u00f5es civis p\u00fablicas coletivas N\u00c3O deve ficar limitada ao territ\u00f3rio da compet\u00eancia do \u00f3rg\u00e3o jurisdicional que prolatou a decis\u00e3o. STJ. Corte Especial. EREsp 1134957/SP, Rel. Min. Laurita Vaz, julgado em 24/10/2016.\"}]}]},{\"title\":\"Exceto\",\"children\":[{\"title\":\"Pedido julgado improcedente por insuficiencia de provas\"}]},{\"title\":\"Na exce\u00e7\u00e3o qlq legitimado por intentar outra a\u00e7\u00e3o com identico fundamento\"},{\"title\":\"VALENDO-SE DE NOVA PROVA\"},{\"title\":\"obs\",\"children\":[{\"title\":\"O art. 16 da Lei de A\u00e7\u00e3o Civil P\u00fablica (Lei n\u00ba 7.347/85) estabelece o seguinte: O que o art. 16 quis dizer foi o seguinte: a decis\u00e3o do juiz na a\u00e7\u00e3o civil p\u00fablica n\u00e3o produz efeitos no Brasil todo. Ela ir\u00e1 produzir efeitos apenas na comarca (se for Justi\u00e7a Estadual) ou na se\u00e7\u00e3o ou subse\u00e7\u00e3o judici\u00e1ria (se for Justi\u00e7a Federal) do juiz prolator. Para a jurisprud\u00eancia, o art. 16 da LACP \u00e9 v\u00e1lido? A decis\u00e3o do juiz na a\u00e7\u00e3o civil p\u00fablica fica restrita apenas \u00e0 comarca ou \u00e0 se\u00e7\u00e3o (ou subse\u00e7\u00e3o) judici\u00e1ria do juiz prolator? N\u00c3O. A posi\u00e7\u00e3o que prevalece atualmente \u00e9 a seguinte: A efic\u00e1cia das decis\u00f5es proferidas em a\u00e7\u00f5es civis p\u00fablicas coletivas N\u00c3O deve ficar limitada ao territ\u00f3rio da compet\u00eancia do \u00f3rg\u00e3o jurisdicional que prolatou a decis\u00e3o. STJ. Corte Especial. EREsp 1134957/SP, Rel. Min. Laurita Vaz, julgado em 24/10/2016. Os efeitos da senten\u00e7a proferida em a\u00e7\u00e3o civil p\u00fablica versando direitos individuais homog\u00eaneos em rela\u00e7\u00e3o consumerista operam-se erga omnes para al\u00e9m dos limites da compet\u00eancia territorial do \u00f3rg\u00e3o julgador, isto \u00e9, abrangem todo o territ\u00f3rio nacional, beneficiando todas as v\u00edtimas e seus sucessores, j\u00e1 que o art. 16 da Lei n\u00ba 7.347/85 deve ser interpretado de forma harm\u00f4nica com as demais normas que regem a tutela coletiva de direitos. STJ. 3\u00aa Turma. REsp 1594024/SP, Rel. Min. Ricardo Villas B\u00f4as Cueva, julgado em 27/11/2018. \u00c9 inconstitucional a delimita\u00e7\u00e3o dos efeitos da senten\u00e7a proferida em sede de a\u00e7\u00e3o civil p\u00fablica aos limites da compet\u00eancia territorial de seu \u00f3rg\u00e3o prolator I - \u00c9 inconstitucional o art. 16 da Lei n\u00ba 7.347/85, alterada pela Lei n\u00ba 9.494/97. II - Em se tratando de a\u00e7\u00e3o civil p\u00fablica de efeitos nacionais ou regionais, a compet\u00eancia deve observar o art. 93, II, da Lei n\u00ba 8.078/90 (CDC). III - Ajuizadas m\u00faltiplas a\u00e7\u00f5es civis p\u00fablicas de \u00e2mbito nacional ou regional, firma-se a preven\u00e7\u00e3o do ju\u00edzo que primeiro conheceu de uma delas, para o julgamento de todas as demandas conexas. STF. Plen\u00e1rio. RE 1101937/SP, Rel. Min. Alexandre de Moraes, julgado em 7/4/2021 (Repercuss\u00e3o Geral \u2013 Tema 1075) (Info 1012). Juiz Federal TRF2 2018 CESPE / CEBRASPE - 2023 - MPE-AM - Promotor de Justi\u00e7a Substituto\"},{\"title\":\"Jurisprud\u00eancia em Teses do STJ, Ed. 25, Processo Coletivo III, Tema 10): \\\"10) Os efeitos e a efic\u00e1cia da senten\u00e7a no processo coletivo n\u00e3o est\u00e3o circunscritos a lindes geogr\u00e1ficos, mas aos limites objetivos e subjetivos do que foi decidido.\\\"\"},{\"title\":\"No julgamento de uma a\u00e7\u00e3o civil p\u00fablica, o juiz considerou insuficiente o conjunto probat\u00f3rio produzido pela parte autora e julgou improcedente o pedido. Irresignado com o conte\u00fado da senten\u00e7a, apenas o r\u00e9u recorreu e sustentou que a improced\u00eancia deveria se pautar na inexist\u00eancia do direito afirmado na peti\u00e7\u00e3o inicial, e n\u00e3o pela quest\u00e3o probat\u00f3ria. Nesse sentido, \u00e9 correto afirmar que: Art. 16 da Lei n\u00ba7.347/85 A senten\u00e7a civil far\u00e1 coisa julgada erga omnes, nos limites da compet\u00eancia territorial do \u00f3rg\u00e3o prolator, exceto se o pedido for julgado improcedente por insufici\u00eancia de provas, hip\u00f3tese em que qualquer legitimado poder\u00e1 intentar outra a\u00e7\u00e3o com id\u00eantico fundamento, valendo-se de nova prova O julgamento por aus\u00eancia de provas faz coisa julgada formal, raz\u00e3o pela qual h\u00e1 interese recursal por parte da recorrente, que almeja na \\\"inexist\u00eancia do direito afirmado na peti\u00e7\u00e3o inicial\\\" uma coisa julgada material. FGV - 2023 - TCE-ES - Auditor de Controle Externo - Direito\"},{\"title\":\"A senten\u00e7a proferida em a\u00e7\u00e3o coletiva somente surte efeito nos limites da compet\u00eancia territorial do \u00f3rg\u00e3o que a proferiu e exclusivamente em rela\u00e7\u00e3o aos substitu\u00eddos processuais que ali eram domiciliados \u00e0 \u00e9poca da propositura da demanda. Aplica\u00e7\u00e3o do disposto no art. 2\u00ba-A da Lei n. 9.494/97. A efic\u00e1cia subjetiva da senten\u00e7a coletiva pode abranger os substitu\u00eddos domiciliados em todo o territ\u00f3rio nacional desde que: 1) proposta por entidade associativa de \u00e2mbito nacional; 2) contra a Uni\u00e3o; e 3) no Distrito Federal. Essa \u00e9 a interpreta\u00e7\u00e3o do art. 2\u00ba-A da Lei n. 9.494/97 \u00e0 luz do disposto no \u00a7 2\u00ba do art. 109, \u00a7 1\u00ba do art. 18 e inciso XXI do art. 5\u00ba, todos da CF/88. STJ. 1\u00aa Turma. AgInt no AREsp 2.122.178-SP, Rel. Min. Gurgel de Faria, julgado em 21/8/2023 (Info 785).\"}]}]},{\"title\":\"Art. 17 da LACP -  Litig\u00e2ncia de M\u00e1-F\u00e9 e  Custas e Emolumentos VUNESP - 2022 - Prefeitura de SJC - SP - Analista Direito\",\"children\":[{\"title\":\"Em caso de litig\u00e2ncia de m\u00e1-f\u00e9, a associa\u00e7\u00e3o autora e os diretores RESPONSAVEIS pela a\u00e7\u00e3o\"},{\"title\":\"Somente os diretores responsaveis pela a\u00e7\u00e3o ser\u00e3o responsaveis, e n\u00e3o todos os diretores\"},{\"title\":\"SERAO SOLIDARIAMENTE CONDENADOS em HONORARIOS E NO DECUPLO DAS CUSTAS\"},{\"title\":\"Sem prejuizo da responsabilidade por perdas e danos\"},{\"title\":\"STJ - M\u00e1-f\u00e9 do MP\",\"children\":[{\"title\":\"MP pode ser condenado em caso de m\u00e1-f\u00e9\"}]},{\"title\":\"Honorarios Periciais requeridos pelo MP Estadual? CESPE / CEBRASPE - 2023 - MPE-BA - Promotor de Justi\u00e7a Substituto\",\"children\":[{\"title\":\"Ser\u00e1 arcado pela Faz. Publica Estadual\"}]},{\"title\":\"Art. 18 da LACP - Previs\u00e3o\",\"children\":[{\"title\":\"Nas a\u00e7\u00f5es da Lei n\u00e3o haver\u00e1 ADIANTAMENTO DE CUSTAS, EMOLUMENTOS,\"},{\"title\":\"Honorarios periciais OU QLQ OUTRA DESPESA E NEM CONDENA\u00c7\u00c3O DA ASSOCIA\u00c7AO AUTORA\"},{\"title\":\"Nem condena\u00e7\u00e3o da associa\u00e7\u00e3o autora em HONORARIOS DE ADV., CUSTAS E DESPESAS PROC.\"},{\"title\":\"Salvo\",\"children\":[{\"title\":\"M\u00e1-f\u00e9\"}]},{\"title\":\"obs\",\"children\":[{\"title\":\"APLICA-SE A SINDICATOS EM DIH\",\"children\":[{\"title\":\"O art. 18 da Lei 7.347/85 prev\u00ea que o autor da ACP, antes de ajuizar a a\u00e7\u00e3o, n\u00e3o ter\u00e1 que adiantar custas, emolumentos, honor\u00e1rios periciais e quaisquer outras despesas, nem ser\u00e1 condenado em honor\u00e1rios advocat\u00edcios, custas e despesas processuais, salvo comprovada m\u00e1-f\u00e9. O STJ decidiu que esse art. 18 da Lei 7.347/85 \u00e9 aplic\u00e1vel tamb\u00e9m para a a\u00e7\u00e3o civil p\u00fablica movida por SINDICATO na defesa de direitos individuais homog\u00eaneos da categoria que representa. STJ. Corte Especial. EREsp 1322166-PR, Rel. Min. Mauro Campbell Marques, julgado em 4/3/2015 (Info 558).\"}]},{\"title\":\"APLICABILIDADE DA ISEN\u00c7\u00c3O\",\"children\":[{\"title\":\"O art. 18 da LACP e o art. 87 do CDC preveem que, nas a\u00e7\u00f5es de que tratam estas leis, n\u00e3o haver\u00e1 adiantamento de custas, emolumentos, honor\u00e1rios periciais e quaisquer outras despesas, nem condena\u00e7\u00e3o da associa\u00e7\u00e3o autora, salvo comprovada m\u00e1-f\u00e9, em honor\u00e1rios de advogado, custas e despesas processuais. O STJ decidiu que essas regras de isen\u00e7\u00e3o s\u00f3 se aplicam para as custas judiciais em: \u2022 a\u00e7\u00f5es civis p\u00fablicas (qualquer que seja a mat\u00e9ria); \u2022 a\u00e7\u00f5es coletivas que tenham por objeto rela\u00e7\u00e3o de consumo; e \u2022 na a\u00e7\u00e3o cautelar prevista no art. 4\u00ba da LACP (qualquer que seja a mat\u00e9ria). N\u00e3o \u00e9 poss\u00edvel estender, por analogia ou interpreta\u00e7\u00e3o extensiva, essa isen\u00e7\u00e3o para outros tipos de a\u00e7\u00e3o (como a rescis\u00f3ria) ou para incidentes processuais (como a impugna\u00e7\u00e3o ao valor da causa), mesmo que tratem sobre direito do consumidor. STJ. 2\u00aa Se\u00e7\u00e3o. PET 9892-SP, Rel. Min. Luis Felipe Salom\u00e3o, julgado em 11/2/2015 (Info 556).\"}]},{\"title\":\"TRANSA\u00c7\u00c3O EM A\u00c7AO COLETIVA E HONORARIOS\",\"children\":[{\"title\":\"Caso concreto: poupador ingressou, em fevereiro de 2018, com execu\u00e7\u00e3o individual provis\u00f3ria contra o Ita\u00fa cobrando expurgos inflacion\u00e1rios decorrentes do Plano Ver\u00e3o. Esse poupador estava executando uma senten\u00e7a coletiva condenat\u00f3ria que se encontrava, contudo, pendente de aprecia\u00e7\u00e3o pelo STJ em um recurso especial (Resp 253.589/SP). Ocorre que, em 20/04/2018, o STJ homologou acordo coletivo no Resp envolvendo o IDEC e o Ita\u00fa e, com isso, o t\u00edtulo executivo do poupador deixou de existir. Diante desse cen\u00e1rio, o ju\u00edzo extinguiu a execu\u00e7\u00e3o, mas n\u00e3o condenou o exequente a pagar honor\u00e1rios advocat\u00edcios de sucumb\u00eancia. A extin\u00e7\u00e3o do cumprimento provis\u00f3rio de senten\u00e7a por conta de transa\u00e7\u00e3o celebrada em a\u00e7\u00e3o coletiva entre o pr\u00f3prio devedor e o legitimado extraordin\u00e1rio, em preju\u00edzo do exequente, n\u00e3o afasta o princ\u00edpio da causalidade em desfavor da parte executada, nem atrai a sucumb\u00eancia para a parte exequente. A situa\u00e7\u00e3o pode assim ser resumida: 1) se o cumprimento individual e provis\u00f3rio de senten\u00e7a extinto foi ajuizado antes da publica\u00e7\u00e3o de homologa\u00e7\u00e3o do Acordo Coletivo no REsp 253.589/SP, ou seja, at\u00e9 o dia 20/4/2018, deve ser aplicado o princ\u00edpio da causalidade em favor do poupador; e 2) se o cumprimento individual e provis\u00f3rio de senten\u00e7a extinto foi ajuizado no dia 20/4/2018 ou posteriormente a essa data, deve ser aplicado o princ\u00edpio da sucumb\u00eancia, arbitrando-se honor\u00e1rios sucumbenciais em favor dos patronos da institui\u00e7\u00e3o financeira, pela proposi\u00e7\u00e3o de execu\u00e7\u00e3o carente de t\u00edtulo executivo judicial, mesmo que provis\u00f3rio. STJ. 3\u00aa Turma. REsp 2.053.653-SP, Rel. Min. Ricardo Villas B\u00f4as Cueva, julgamento em 16/5/2023 (Info 775).\"}]}]}]}]},{\"title\":\"Art. 20 da LACP - Prazo de regulamenta\u00e7\u00e3o do Fundo\",\"children\":[{\"title\":\"O fundo de que trata o art. 13 ser\u00e1 regulamentado em 90 dias\"}]}]}}";const DATA = JSON.parse(RAW);
+
+const CHAPTERS = ["cap0","cap1","cap2","cap3","cap4"];
+const LABELS = {"cap0": "0. Histórico Legislativo das Ações Coletivas", "cap1": "1. Microssistema Processual Coletivo", "cap2": "2. Princípios e Microssistema Processual Coletivo", "cap3": "3. Princípios do Processo Coletivo", "cap4": "4. Lei de Ação Civil Pública"};
+
+let cur = CHAPTERS[0];
+let expanded = new Set();
+let term = "";
+let hits = 0;
+
+function detectType(t){
+  const s=(t||"").toLowerCase();
+  if(/cespe|cebraspe|fgv|vunesp|fundatec|ibfc|prova/.test(s)) return "cespe";
+  if(/stj|stf|resp|adi|adpf|adc|\bre\b|rms|agrg|info \d|súmula|sumula|julgado/.test(s)) return "stj";
+  return "obs";
+}
+
+function extractText(n,d=0){
+  if(d>4) return n.title||"";
+  let p=[n.title||""];
+  (n.children||[]).forEach(c=>p.push(extractText(c,d+1)));
+  (n.callouts||[]).forEach(c=>p.push(extractText(c,d+1)));
+  return p.filter(Boolean).join(" • ");
+}
+
+function matches(n,t){
+  if(!t) return true;
+  if((n.title||"").toLowerCase().includes(t)) return true;
+  if((n.children||[]).some(c=>matches(c,t))) return true;
+  if((n.callouts||[]).some(c=>matches(c,t))) return true;
+  return false;
+}
+
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+
+function hilite(s,t){
+  if(!t) return esc(s);
+  const re=new RegExp(`(${t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")})`,"gi");
+  return esc(s).replace(re,"<mark>$1</mark>");
+}
+
+function renderCallout(node){
+  const tipo=detectType(node.title||"");
+  const label={cespe:"CESPE/CEBRASPE",stj:"STF/STJ",obs:"OBS"}[tipo];
+  const text=extractText(node);
+  const isTrivial=!node.title||/^(obs|callout|atenção)$/i.test((node.title||"").trim());
+  const titleHtml=isTrivial?"":(`<div class="callout-title">${hilite(node.title,term)}</div>`);
+  return `<div class="callout-box ${tipo}"><div class="callout-label">${label}</div>${titleHtml}<div class="callout-body">${esc(text)}</div></div>`;
+}
+
+function renderNode(n,depth,path){
+  const id=path;
+  const hasKids=(n.children&&n.children.length)||(n.callouts&&n.callouts.length);
+  const isExp=expanded.has(id)||(term&&matches(n,term));
+  const isHit=term&&(n.title||"").toLowerCase().includes(term);
+  if(isHit) hits++;
+
+  if(n.callout) return renderCallout(n);
+
+  const tog=hasKids?(isExp?"▾":"▸"):"·";
+  const dc=depth===0?"d0":depth===1?"d1":depth===2?"d2":"dn";
+  const rowCls=`row${isHit?" hit":""}`;
+  const titleHtml=`<span class="txt ${dc}">${hilite(n.title||"",term)}</span>`;
+
+  let childHtml="";
+  if(isExp&&hasKids){
+    childHtml='<div class="children">';
+    (n.children||[]).forEach((c,i)=>{if(!term||matches(c,term)) childHtml+=renderNode(c,depth+1,path+"_"+i);});
+    (n.callouts||[]).forEach((c,i)=>{if(!term||matches(c,term)) childHtml+=renderNode({...c,callout:true},depth+1,path+"_c"+i);});
+    childHtml+="</div>";
+  }
+  return `<div class="node" id="n${id}"><div class="${rowCls}" onclick="toggle('${id}')"><span class="tog">${tog}</span>${titleHtml}</div>${childHtml}</div>`;
+}
+
+function render(){
+  const tree=DATA[cur];
+  hits=0;
+  let html="";
+  if(tree.children){
+    tree.children.forEach((n,i)=>{
+      if(!term||matches(n,term)) html+=renderNode(n,0,"r"+i);
+    });
+  }
+  document.getElementById("content").innerHTML=html||`<p class="no-res">Nenhum resultado para "${esc(term)}"</p>`;const em=document.getElementById("empty-msg");if(em)em.remove();
+  const mb=document.getElementById("matchBar");
+  if(term){mb.style.display="block";mb.textContent=`${hits} ocorrência(s) para "${term}"`;}
+  else{mb.style.display="none";}
+}
+
+function renderTabs(){
+  document.getElementById("tabs").innerHTML=CHAPTERS.map((k,i)=>{
+    const cid='dcoletivo_'+i;
+    const isDone=_TRK&&_TRK.done&&_TRK.done[cid];
+    return `<div class="tab${k===cur?' active':''}" onclick="selChap('${k}')">
+      <input type="checkbox" class="_trk_chk" data-cid="${cid}" ${isDone?'checked':''} onclick="event.stopPropagation();_trkToggle('${cid}',this.checked,this)"/>
+      <span>${LABELS[k]||k}</span>
+    </div>`;
+  }).join("");
+}
+
+function selChap(k){cur=k;expanded.clear();document.getElementById("search").value="";term="";document.getElementById("matchBar").style.display="none";renderTabs();render();}
+function toggle(id){if(expanded.has(id))expanded.delete(id);else expanded.add(id);render();}
+function expandAll(){function add(n,p){expanded.add(p);(n.children||[]).forEach((c,i)=>add(c,p+"_"+i));(n.callouts||[]).forEach((c,i)=>add(c,p+"_c"+i));}const t=DATA[cur];(t.children||[]).forEach((n,i)=>add(n,"r"+i));render();}
+function collapseAll(){expanded.clear();render();}
+
+let deb;
+document.getElementById("search").addEventListener("input",function(){
+  clearTimeout(deb);
+  deb=setTimeout(()=>{term=this.value.toLowerCase().trim();render();},250);
+});
+
+renderTabs();
+render();
+</script>
+
+<button id="theme-toggle-btn" onclick="toggleMapTheme()">☀️ Claro</button>
+<script>
+(function(){
+  const saved = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+  window.addEventListener('DOMContentLoaded', function(){
+    const btn = document.getElementById('theme-toggle-btn');
+    if(btn) btn.textContent = saved === 'dark' ? '☀️ Claro' : '🌙 Escuro';
+  });
+})();
+function toggleMapTheme(){
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  const btn = document.getElementById('theme-toggle-btn');
+  if(btn) btn.textContent = next === 'dark' ? '☀️ Claro' : '🌙 Escuro';
+}
+</script>
+
+<!-- WORD-STYLE TOOLBAR -->
+<div id="_wtb">
+  <!-- Theme -->
+  <div class="_grp">
+    <button class="_tb-btn" id="_tb" onclick="_tT()" title="Alternar tema">☀️</button>
+  <a href="index.html" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;text-decoration:none;white-space:nowrap;">← Portal</a>
+  <a href="index.html" onclick="try{sessionStorage.setItem('_gotoTab','tracker')}catch(e){}" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;text-decoration:none;white-space:nowrap;">📊 Tracker</a>
+  <button class="_tb-btn" id="_mm_btn" onclick="window.__MM&&window.__MM.toggle(window.__MM_getData())" title="Mapa Mental" style="font-size:15px;padding:2px 8px;">🌐</button>
+  </div>
+  <div class="_sep"></div>
+
+  <!-- Highlight -->
+  <div class="_grp">
+    <span class="_grp-label">Destaque</span>
+    <span class="_sw" style="background:rgba(250,204,21,0.7)" onclick="_hl('yellow')" id="_sw_y" title="Amarelo"></span>
+    <span class="_sw" style="background:rgba(34,197,94,0.65)" onclick="_hl('green')"  id="_sw_g" title="Verde"></span>
+    <span class="_sw" style="background:rgba(59,130,246,0.65)" onclick="_hl('blue')"  id="_sw_b" title="Azul"></span>
+    <span class="_sw" style="background:rgba(239,68,68,0.65)"  onclick="_hl('red')"   id="_sw_r" title="Vermelho"></span>
+    <button class="_tb-btn" onclick="_hl(null)" title="Remover destaque">✕</button>
+  </div>
+  <div class="_sep"></div>
+
+  <!-- Font Color -->
+  <div class="_grp">
+    <span class="_grp-label">Cor</span>
+    <span class="_sw" style="background:#818cf8" onclick="_fc('#818cf8')" id="_fc_1" title="Amarelo"></span>
+    <span class="_sw" style="background:#34d399" onclick="_fc('#34d399')" id="_fc_2" title="Verde"></span>
+    <span class="_sw" style="background:#60a5fa" onclick="_fc('#60a5fa')" id="_fc_3" title="Azul"></span>
+    <span class="_sw" style="background:#f87171" onclick="_fc('#f87171')" id="_fc_4" title="Vermelho"></span>
+    <span class="_sw" style="background:#c084fc" onclick="_fc('#c084fc')" id="_fc_5" title="Roxo"></span>
+    <span class="_sw" style="background:#fb923c" onclick="_fc('#fb923c')" id="_fc_6" title="Laranja"></span>
+    <button class="_tb-btn" onclick="_fc(null)" title="Cor padrão">✕</button>
+  </div>
+  <div class="_sep"></div>
+
+  <!-- Font Size -->
+  <div class="_grp">
+    <span class="_grp-label">Tamanho</span>
+    <button class="_tb-btn" onclick="_fs(-1)" title="Diminuir">A−</button>
+    <input class="_fs-num" id="_fsv" type="text" value="—" readonly title="Tamanho atual">
+    <button class="_tb-btn" onclick="_fs(1)" title="Aumentar">A+</button>
+    <button class="_tb-btn" onclick="_fs(0)" title="Reset">↺</button>
+  </div>
+  <div class="_sep"></div>
+
+  <!-- Flags -->
+  <div class="_grp">
+    <span class="_grp-label">Flag</span>
+    <button class="_tb-btn" id="_f0" onclick="_fl('hard')"   title="Difícil">🔴</button>
+    <button class="_tb-btn" id="_f1" onclick="_fl('review')" title="Revisar">🟡</button>
+    <button class="_tb-btn" id="_f2" onclick="_fl('done')"   title="Dominado">🟢</button>
+    <button class="_tb-btn" onclick="_fl(null)" title="Remover flag">✕</button>
+  </div>
+  <div class="_sep"></div>
+
+  <!-- Note -->
+  <div class="_grp">
+    <button class="_tb-btn" id="_ntbtn" onclick="_on()" title="Adicionar nota">✏️ Nota</button>
+  </div>
+  <div class="_sep"></div>
+  <div class="_grp">
+    <button onclick="_doLogout()" style="font-size:12px;font-family:monospace;color:#ef4444;background:none;border:1px solid #ef4444;border-radius:6px;padding:3px 10px;cursor:pointer;white-space:nowrap;">Sair</button>
+  </div>
+
+  <!-- Selected node info -->
+  <div id="_sel-info">← Clique num nó para marcar</div>
+</div>
+
+<!-- NOTE MODAL -->
+<div id="_np">
+  <div class="_npb">
+    <div class="_nptitle" id="_npt">📝 Nota</div>
+    <textarea class="_npta" id="_npta" placeholder="Escreva sua anotação..."></textarea>
+    <div class="_npact">
+      <button class="_npcxl" onclick="_cn()">Cancelar</button>
+      <button class="_npsave" onclick="_sn()">Salvar nota</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ── THEME ──
+(function(){
+  var s=localStorage.getItem('theme')||'dark';
+  document.documentElement.setAttribute('data-theme',s);
+  window.addEventListener('DOMContentLoaded',function(){
+    var b=document.getElementById('_tb');
+    if(b)b.textContent=s==='dark'?'☀️':'🌙';
+  });
+})();
+function _tT(){
+  var h=document.documentElement;
+  var n=h.getAttribute('data-theme')==='dark'?'light':'dark';
+  h.setAttribute('data-theme',n);localStorage.setItem('theme',n);
+  var b=document.getElementById('_tb');if(b)b.textContent=n==='dark'?'☀️':'🌙';
+}
+
+// ── AUTH via URL hash token ──
+var _sb=supabase.createClient('https://qseismabfaonggrwzuiu.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzZWlzbWFiZmFvbmdncnd6dWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzU4MTMsImV4cCI6MjA5Mzc1MTgxM30.eYnWJo9NI_-wGJCd2HalmnCGMhMvlKZxmZKuTpx3xS0', {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: false,
+    storage: {
+      getItem: (k) => { try { return localStorage.getItem(k); } catch(e) { return null; } },
+      setItem: (k,v) => { try { localStorage.setItem(k,v); } catch(e) {} },
+      removeItem: (k) => { try { localStorage.removeItem(k); } catch(e) {} }
+    }
+  }
+});
+var _mid='dcoletivo';
+var _u=null,_m={},_sid=null,_sel=null;
+
+// Auth: read directly from Supabase localStorage (same domain, same storage)
+window.addEventListener('DOMContentLoaded',function(){
+  _sb.auth.getSession().then(function(r){
+    if(r.data&&r.data.session&&r.data.session.user){
+      _u=r.data.session.user;
+      _lm().then(_aa);
+    }
+  });
+});
+
+// ── LOAD MARKS ──
+async function _lm(){
+  if(!_u)return;
+  try{
+    var opts={headers:{'Authorization':'Bearer '+(_u._token||''),'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzZWlzbWFiZmFvbmdncnd6dWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzU4MTMsImV4cCI6MjA5Mzc1MTgxM30.eYnWJo9NI_-wGJCd2HalmnCGMhMvlKZxmZKuTpx3xS0'}};
+    var [a,b,c,d]=await Promise.all([
+      _sb.from('highlights').select('node_id,color').eq('user_id',_u.id).eq('map_id',_mid),
+      _sb.from('node_flags').select('node_id,flag').eq('user_id',_u.id).eq('map_id',_mid),
+      _sb.from('node_notes').select('node_id,content').eq('user_id',_u.id).eq('map_id',_mid),
+      _sb.from('node_style').select('node_id,font_color,font_size').eq('user_id',_u.id).eq('map_id',_mid),
+    ]);
+    _m={};
+    if(a.data)a.data.forEach(function(r){if(!_m[r.node_id])_m[r.node_id]={};_m[r.node_id].hl=r.color;});
+    if(b.data)b.data.forEach(function(r){if(!_m[r.node_id])_m[r.node_id]={};_m[r.node_id].fl=r.flag;});
+    if(c.data)c.data.forEach(function(r){if(!_m[r.node_id])_m[r.node_id]={};_m[r.node_id].nt=r.content;});
+    if(d.data)d.data.forEach(function(r){if(!_m[r.node_id])_m[r.node_id]={};_m[r.node_id].fc=r.font_color;_m[r.node_id].fs=r.font_size;});
+  }catch(e){console.warn('load err',e);}
+}
+
+// ── APPLY MARKS TO DOM ──
+function _aa(){Object.keys(_m).forEach(function(nid){var el=document.querySelector('[data-mnid="'+nid+'"]');if(el)_am(el,nid);});}
+
+function _txt(el){return el.querySelector('.node-text,.txt,.node-content>span')||el.querySelector('span')||el;}
+
+function _am(el,nid){
+  var mk=_m[nid]||{};
+  var t=_txt(el);
+  t.classList.remove('hl-yellow','hl-green','hl-blue','hl-red');
+  el.querySelectorAll('._fb2,._nb3').forEach(function(e){e.remove();});
+  if(mk.hl)t.classList.add('hl-'+mk.hl);
+  if(mk.fc)t.style.color=mk.fc; else t.style.removeProperty('color');
+  if(mk.fs)t.style.fontSize=mk.fs+'px'; else t.style.removeProperty('font-size');
+  if(mk.fl){var fb=document.createElement('span');fb.className='_fb2';fb.style.cssText='margin-left:5px;font-size:12px;';fb.textContent=mk.fl==='hard'?'🔴':mk.fl==='review'?'🟡':'🟢';t.after(fb);}
+  if(mk.nt&&mk.nt.trim()){var nb=document.createElement('span');nb.className='_nb3';nb.style.cssText='margin-left:4px;cursor:help;font-size:11px;';nb.title=mk.nt;nb.textContent='📝';t.after(nb);}
+}
+
+// ── NODE SELECTION ──
+function _mkid(el){
+  var t=_txt(el);
+  var lbl=(t?t.textContent:'').trim().slice(0,40);
+  return lbl.replace(/\s+/g,'_').replace(/[^a-z0-9_]/gi,'').toLowerCase()+'__'+_mid;
+}
+
+document.addEventListener('click',function(e){
+  if(e.target.closest('#_wtb,#_np'))return;
+  var row=e.target.closest('.node-row,.row,.node-content');
+  if(!row)return;
+  if(_sel)_sel.classList.remove('_sel');
+  var nid=row.getAttribute('data-mnid');
+  if(!nid){nid=_mkid(row);row.setAttribute('data-mnid',nid);}
+  _sid=nid;_sel=row;row.classList.add('_sel');
+  var t=_txt(row);
+  var lbl=(t?t.textContent:'').trim().slice(0,50);
+  var si=document.getElementById('_sel-info');if(si)si.textContent=lbl||'Nó selecionado';
+  // Update flag buttons
+  document.querySelectorAll('#_f0,#_f1,#_f2').forEach(function(b){b.classList.remove('_on');});
+  var mk=_m[nid]||{};
+  if(mk.fl){var fi={hard:'_f0',review:'_f1',done:'_f2'};var fb=document.getElementById(fi[mk.fl]);if(fb)fb.classList.add('_on');}
+  // Update font size display
+  var fv=document.getElementById('_fsv');if(fv)fv.value=mk.fs?(mk.fs+'px'):'—';
+  // Update color swatches
+  document.querySelectorAll('._sw').forEach(function(s){s.classList.remove('_on');});
+  if(mk.hl){var sw=document.getElementById('_sw_'+mk.hl[0]);if(sw)sw.classList.add('_on');}
+  if(mk.fc){var fcb=document.querySelector('._sw[onclick*="'+mk.fc+'"]');if(fcb)fcb.classList.add('_on');}
+});
+
+// ── ACTIONS ──
+function _uid(){return _u?_u.id:null;}
+
+async function _hl(color){
+  if(!_sid)return;if(!_u){alert('Faça login para usar marcações');return;}
+  if(!_m[_sid])_m[_sid]={};_m[_sid].hl=color;
+  if(_sel)_am(_sel,_sid);
+  document.querySelectorAll('._sw[id^="_sw_"]').forEach(function(s){s.classList.remove('_on');});
+  if(color){var sw=document.getElementById('_sw_'+color[0]);if(sw)sw.classList.add('_on');await _sb.from('highlights').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,color:color},{onConflict:'user_id,map_id,node_id'});}
+  else await _sb.from('highlights').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
+}
+
+async function _fc(color){
+  if(!_sid)return;if(!_u){alert('Faça login para usar marcações');return;}
+  if(!_m[_sid])_m[_sid]={};_m[_sid].fc=color;
+  if(_sel)_am(_sel,_sid);
+  document.querySelectorAll('._sw[id^="_fc_"]').forEach(function(s){s.classList.remove('_on');});
+  if(color){var fcb=document.querySelector('._sw[onclick*="'+color+'"]');if(fcb)fcb.classList.add('_on');}
+  var sz=(_m[_sid]&&_m[_sid].fs)||null;
+  if(color||sz)await _sb.from('node_style').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,font_color:color,font_size:sz},{onConflict:'user_id,map_id,node_id'});
+  else await _sb.from('node_style').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
+}
+
+async function _fs(delta){
+  if(!_sid)return;if(!_u){alert('Faça login para usar marcações');return;}
+  if(!_m[_sid])_m[_sid]={};
+  var t=_sel?_txt(_sel):null;
+  var cur=(_m[_sid].fs)||(t?parseInt(window.getComputedStyle(t).fontSize)||13:13);
+  var nv=delta===0?null:Math.max(8,Math.min(28,cur+delta));
+  _m[_sid].fs=nv;
+  if(_sel)_am(_sel,_sid);
+  var fv=document.getElementById('_fsv');if(fv)fv.value=nv?(nv+'px'):'—';
+  var fc=(_m[_sid]&&_m[_sid].fc)||null;
+  if(nv||fc)await _sb.from('node_style').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,font_color:fc,font_size:nv},{onConflict:'user_id,map_id,node_id'});
+  else await _sb.from('node_style').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
+}
+
+async function _fl(flag){
+  if(!_sid)return;if(!_u){alert('Faça login para usar marcações');return;}
+  if(!_m[_sid])_m[_sid]={};_m[_sid].fl=flag;
+  if(_sel)_am(_sel,_sid);
+  document.querySelectorAll('#_f0,#_f1,#_f2').forEach(function(b){b.classList.remove('_on');});
+  if(flag){var fi={hard:'_f0',review:'_f1',done:'_f2'};var fb=document.getElementById(fi[flag]);if(fb)fb.classList.add('_on');await _sb.from('node_flags').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,flag:flag},{onConflict:'user_id,map_id,node_id'});}
+  else await _sb.from('node_flags').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
+}
+
+function _on(){
+  if(!_sid)return;
+  var mk=_m[_sid]||{};
+  document.getElementById('_npta').value=mk.nt||'';
+  var si=document.getElementById('_sel-info');
+  document.getElementById('_npt').textContent='📝 Nota: '+(si?si.textContent:'');
+  document.getElementById('_np').classList.add('_o');
+}
+function _cn(){document.getElementById('_np').classList.remove('_o');}
+async function _sn(){
+  if(!_sid||!_u)return _cn();
+  var content=document.getElementById('_npta').value;
+  if(!_m[_sid])_m[_sid]={};_m[_sid].nt=content;
+  if(_sel)_am(_sel,_sid);
+  if(content.trim())await _sb.from('node_notes').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,content:content},{onConflict:'user_id,map_id,node_id'});
+  else await _sb.from('node_notes').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
+  _cn();
+}
+</script>
+
+<script>
+async function _doLogout(){
+  var sb2=supabase.createClient('https://qseismabfaonggrwzuiu.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzZWlzbWFiZmFvbmdncnd6dWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzU4MTMsImV4cCI6MjA5Mzc1MTgxM30.eYnWJo9NI_-wGJCd2HalmnCGMhMvlKZxmZKuTpx3xS0');
+  await sb2.auth.signOut();
+  window.location.href='index.html';
+}
+</script>
+
+<script>
+// ── TRACKER INTEGRATION ──
+var _TRK = {
+  mapId: 'dcoletivo',
+  total: 5,
+  done: {},  // chapter_id -> true
+  user: null,
+};
+
+// Auth
+window.addEventListener('DOMContentLoaded', function(){
+  _sb.auth.getSession().then(function(r){
+    if(r.data&&r.data.session&&r.data.session.user){
+      _TRK.user = r.data.session.user;
+      _trkLoad();
+    } else {
+      _trkRender();
+    }
+  });
+});
+
+async function _trkLoad(){
+  try{
+    var r = await _sb.from('progress')
+      .select('chapter_id,done')
+      .eq('user_id', _TRK.user.id);
+    _TRK.done = {};
+    if(r.data) r.data.forEach(function(row){
+      if(row.done && row.chapter_id.startsWith(_TRK.mapId+'_'))
+        _TRK.done[row.chapter_id] = true;
+    });
+    try{ Object.keys(_TRK.done).forEach(function(cid){ localStorage.setItem('_pgprog_'+cid,JSON.stringify({done:true,date:null})); }); }catch(_){}
+    _trkRender();
+  }catch(e){ console.warn('tracker load err', e); }
+}
+
+function _trkRender(){
+  var count = Object.keys(_TRK.done).length;
+  var pct = _TRK.total ? Math.round(count/_TRK.total*100) : 0;
+  // Update both injected header bar and sidebar bar
+  ['_trk_fill','trk-fill'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.width=pct+'%';});
+  ['_trk_pct','trk-pct'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=pct+'%';});
+  ['_trk_cnt','trk-cnt'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=count+'/'+_TRK.total;});
+  // Update checkboxes
+  document.querySelectorAll('._trk_chk').forEach(function(chk){
+    var cid = chk.getAttribute('data-cid');
+    chk.checked = !!_TRK.done[cid];
+    var w = chk.closest('._chk_wrap');
+    if(w) w.classList.toggle('_chk_done', !!_TRK.done[cid]);
+  });
+  renderTabs();
+}
+
+async function _trkToggle(chapterId, done, chk){
+  if(!_TRK.user){
+    // Try to recover session
+    try {
+      const r = await _sb.auth.getSession();
+      if(r.data && r.data.session && r.data.session.user){
+        _TRK.user = r.data.session.user;
+      } else {
+        console.warn('No session found, cannot save tracker');
+        return;
+      }
+    } catch(e) { console.error('getSession error:', e); return; }
+  }
+  var now = done ? new Date().toISOString() : null;
+  if(done) _TRK.done[chapterId] = true;
+  else delete _TRK.done[chapterId];
+  _trkRender();
+  try{
+    await _sb.from('progress').upsert({
+      user_id: _TRK.user.id,
+      chapter_id: chapterId,
+      done: done,
+      done_at: now
+    }, {onConflict: 'user_id,chapter_id'});
+  }catch(e){ console.warn('tracker save err', e); }
+  try{ localStorage.setItem('_pgprog_'+chapterId, JSON.stringify({done, date:now})); }catch(_){}
+}
+</script>
+
+<style id="_mm_css">
+#_mm_wrap{display:none;position:fixed;z-index:500;}
+#_mm_svg{width:100%;height:100%;display:block;}
+._mm_on{background:rgba(240,180,41,0.12)!important;color:var(--accent,#f0b429)!important;border-color:rgba(240,180,41,0.4)!important;}
+[data-theme="light"] #_mm_wrap{background:#f4f5f8;}
+</style>
+<script id="_mm_js">
+;(function(){
+var _P=['#3b82f6','#10b981','#ef4444','#f97316','#8b5cf6','#eab308','#14b8a6','#ec4899','#ea580c','#22c55e'];
+var _GX=30,_GY=8,_MXW=175,_MNW=90,_FS=11,_CW=6.2,_LH=15,_VP=10;
+var _col=new Set(),_nid=0,_cur=null,_tr={x:0,y:0,sc:1},_act=false;
+
+function _norm(n){
+  var t=(typeof n==='object'&&n)?(n.text||n.title||n.label||n.t||''):'';
+  var c=n.children||n.c||[];
+  return{text:t,children:c.map(_norm)};
+}
+function _wt(s,mw){
+  var mc=Math.floor(mw/_CW),ws=(s||'').split(/\s+/),ls=[],c='';
+  ws.forEach(function(w){var t=c?c+' '+w:w;if(t.length>mc&&c){ls.push(c);c=w;}else c=t;});
+  if(c)ls.push(c);
+
+  return ls.length?ls:[''];
+}
+function _di(s,d){
+  if(d===0){var t=(s||'').length>22?s.slice(0,21)+'…':s;return{lines:[t],w:Math.max(100,(t.length||5)*8+24),h:42};}
+  var mw=d===1?_MXW:Math.min(_MXW,155);
+  var ls=_wt(s,mw);
+  var w=Math.min(mw,Math.max(_MNW,Math.max.apply(null,ls.map(function(l){return l.length*_CW+24;}))));
+  return{lines:ls,w:w,h:ls.length*_LH+_VP};
+}
+function _meta(n,d){n._id=_nid++;n._depth=d;var di=_di(n.text,d);n._lines=di.lines;n._w=di.w;n._h=di.h;if(n.children)n.children.forEach(function(c){_meta(c,d+1);});}
+function _ac(n,ci){n._ci=ci;if(n.children)n.children.forEach(function(c){_ac(c,ci);});}
+function _ic(n){if(n._depth>=2&&n.children&&n.children.length)_col.add(n._id);if(n.children)n.children.forEach(_ic);}
+function _vc(n){return _col.has(n._id)?[]:(n.children||[]);}
+function _sh(n){var ch=_vc(n);if(!ch.length)return n._h+_GY;return ch.reduce(function(s,c){return s+_sh(c);},0);}
+function _td(n){if(!n.children||!n.children.length)return 0;return n.children.reduce(function(s,c){return s+1+_td(c);},0);}
+function _lay(n,y0,ex,sd){
+  var sh=_sh(n),cy=y0+sh/2;n._cy=cy;n._y=cy-n._h/2;n._side=sd;
+  if(sd===1)n._x=ex;else n._x=ex-n._w;
+  var ne=sd===1?n._x+n._w+_GX:n._x-_GX;
+  var cy2=y0;_vc(n).forEach(function(c){c._side=sd;_lay(c,cy2,ne,sd);cy2+=_sh(c);});
+}
+function _layR(r){
+  r._cy=0;r._y=-r._h/2;r._x=-r._w/2;r._side=0;
+  var ac=_vc(r),ul=ac.length>3,rn=ul?Math.ceil(ac.length/2):ac.length;
+  var rc=ac.slice(0,rn),lc=ac.slice(rn);
+  ac.forEach(function(c,i){_ac(c,i%_P.length);});
+  var ry=-rc.reduce(function(s,c){return s+_sh(c);},0)/2;
+  rc.forEach(function(c){c._side=1;_lay(c,ry,r._w/2+_GX,1);ry+=_sh(c);});
+  if(lc.length){var ly=-lc.reduce(function(s,c){return s+_sh(c);},0)/2;lc.forEach(function(c){c._side=-1;_lay(c,ly,-r._w/2-_GX,-1);ly+=_sh(c);});}
+}
+var NS='http://www.w3.org/2000/svg';
+function E(t,a){var e=document.createElementNS(NS,t);if(a)for(var k in a)e.setAttribute(k,a[k]);return e;}
+function _cl(n,a){a.push(n);_vc(n).forEach(function(c){_cl(c,a);});}
+function _rend(){
+  var iL=document.documentElement.getAttribute('data-theme')==='light';
+  var w=document.getElementById('_mm_world');while(w.firstChild)w.removeChild(w.firstChild);
+  if(!_cur)return;_layR(_cur);
+  var nodes=[];_cl(_cur,nodes);
+  document.getElementById('_mm_svg').style.background=iL?'#f4f5f8':'#0f1117';
+  var eg=E('g');
+  nodes.forEach(function(n){_vc(n).forEach(function(c){
+    var col=n._depth===0?_P[c._ci]:_P[n._ci];var x1,x2,y1=n._cy,y2=c._cy;
+    if(n._depth===0){x1=c._side===1?n._x+n._w:n._x;x2=c._side===1?c._x:c._x+c._w;}
+    else if(n._side===1){x1=n._x+n._w;x2=c._x;}else{x1=n._x;x2=c._x+c._w;}
+    var mx=(x1+x2)/2,sw=Math.max(1.2,3.8-c._depth*0.7);
+    eg.appendChild(E('path',{d:'M '+x1+' '+y1+' C '+mx+' '+y1+' '+mx+' '+y2+' '+x2+' '+y2,
+      stroke:col,'stroke-opacity':'0.75','stroke-width':sw,fill:'none','stroke-linecap':'round'}));
+  });});
+  w.appendChild(eg);
+  nodes.forEach(function(n){
+    var col=n._depth===0?(iL?'#1a1a2e':'#e2e4ec'):_P[n._ci];
+    var rv=parseInt(col.slice(1,3),16),gv=parseInt(col.slice(3,5),16),bv=parseInt(col.slice(5,7),16);
+    var rgb=rv+','+gv+','+bv;
+    var g=E('g',{style:'cursor:pointer'});
+    if(n._depth===0){
+      g.appendChild(E('ellipse',{cx:n._x+n._w/2,cy:n._cy,rx:n._w/2+6,ry:n._h/2+4,
+        fill:iL?'rgba(0,0,0,0.05)':'rgba(255,255,255,0.06)',stroke:iL?'#888':'#5a5f70','stroke-width':'2'}));
+    }else{
+      g.appendChild(E('rect',{x:n._x,y:n._y,width:n._w,height:n._h,rx:'5',ry:'5',
+        fill:'rgba('+rgb+','+(iL?(n._depth===1?'0.28':'0.16'):(n._depth===1?'0.42':'0.26'))+')',stroke:col,'stroke-width':n._depth===1?'2.2':'1.5'}));
+    }
+    var tx=E('text',{x:n._x+n._w/2,'text-anchor':'middle',fill:n._depth===0?col:(iL?'#111111':'#f0f0f0'),
+      'font-family':"'SF Mono','Fira Code','Courier New',monospace",
+      'font-size':n._depth===0?13:_FS,'font-weight':n._depth<=1?'600':'normal',
+      style:'pointer-events:none;user-select:none;'});
+    var tH=n._lines.length*_LH,sY=n._cy-tH/2+_LH*0.75;
+    n._lines.forEach(function(l,i){var ts=E('tspan',{x:n._x+n._w/2,y:sY+i*_LH});ts.textContent=l;tx.appendChild(ts);});
+    g.appendChild(tx);
+    if(n.children&&n.children.length&&_col.has(n._id)){
+      var d=_td(n),bx=n._side===-1?n._x-13:n._x+n._w+13,by=n._cy;
+      g.appendChild(E('circle',{cx:bx,cy:by,r:'10',fill:'rgba('+rgb+',0.18)',stroke:col,'stroke-width':'1.2'}));
+      var bt=E('text',{x:bx,y:by+0.5,'text-anchor':'middle','dominant-baseline':'middle',
+        fill:col,'font-size':'8.5','font-weight':'bold','font-family':'monospace',style:'pointer-events:none;user-select:none;'});
+      bt.textContent=String(d);g.appendChild(bt);
+    }
+    g.addEventListener('click',function(e){
+      e.stopPropagation();
+      if(n.children&&n.children.length){
+        var _px=n._x+n._w/2,_py=n._cy;
+        if(_col.has(n._id))_col.delete(n._id);else _col.add(n._id);
+        _rend();
+        _tr.x+=((_px-(n._x+n._w/2))*_tr.sc);
+        _tr.y+=(_py-n._cy)*_tr.sc;
+        _apT();
+      }
+    });
+    w.appendChild(g);
+  });
+  _apT();
+}
+function _apT(){document.getElementById('_mm_world').setAttribute('transform','translate('+_tr.x+','+_tr.y+') scale('+_tr.sc+')');}
+function _fit(){
+  if(!_cur)return;var nodes=[];_cl(_cur,nodes);
+  var mnX=1e9,mxX=-1e9,mnY=1e9,mxY=-1e9;
+  nodes.forEach(function(n){if(n._x<mnX)mnX=n._x;if(n._x+n._w>mxX)mxX=n._x+n._w;if(n._y<mnY)mnY=n._y;if(n._y+n._h>mxY)mxY=n._y+n._h;});
+  var W=mxX-mnX+80,H=mxY-mnY+60,sv=document.getElementById('_mm_svg'),cW=sv.clientWidth||900,cH=sv.clientHeight||600;
+  var s=Math.min(1.1,(cW-60)/W,(cH-60)/H);
+  _tr.sc=s;_tr.x=cW/2-(mnX+(mxX-mnX)/2)*s;_tr.y=cH/2-(mnY+(mxY-mnY)/2)*s;_apT();
+}
+window.__MM={
+  norm:_norm,
+  init:function(){
+    if(document.getElementById('_mm_wrap'))return;
+    var div=document.createElement('div');div.id='_mm_wrap';
+    div.style.cssText='display:none;position:fixed;z-index:500;';
+    div.innerHTML='<svg id="_mm_svg"><g id="_mm_world"></g></svg>';
+    document.body.appendChild(div);
+    var svg=document.getElementById('_mm_svg');
+    var isPan=false,pSt={x:0,y:0},pOr={x:0,y:0};
+    svg.style.cursor='grab';
+    svg.addEventListener('mousedown',function(e){
+      if(e.target===svg||e.target.id==='_mm_world'){
+        isPan=true;svg.style.cursor='grabbing';pSt={x:e.clientX,y:e.clientY};pOr={x:_tr.x,y:_tr.y};e.preventDefault();}});
+    window.addEventListener('mousemove',function(e){if(!isPan)return;_tr.x=pOr.x+(e.clientX-pSt.x);_tr.y=pOr.y+(e.clientY-pSt.y);_apT();});
+    window.addEventListener('mouseup',function(){isPan=false;svg.style.cursor='grab';});
+    svg.addEventListener('wheel',function(e){
+      e.preventDefault();var f=e.deltaY<0?1.12:0.89,r=svg.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;
+      _tr.x=mx-(mx-_tr.x)*f;_tr.y=my-(my-_tr.y)*f;_tr.sc=Math.max(0.05,Math.min(6,_tr.sc*f));_apT();},{passive:false});
+  },
+  show:function(rawData){
+    _nid=0;_col=new Set();_cur=_norm(rawData);_meta(_cur,0);_ic(_cur);
+    var wrap=document.getElementById('_mm_wrap');
+    var sb=document.getElementById('sidebar');
+    var tb=document.getElementById('_wtb')||document.getElementById('_hdr');
+    var sW=sb?sb.offsetWidth:0,tH=tb?tb.offsetHeight:42;
+    wrap.style.left=sW+'px';wrap.style.top=tH+'px';wrap.style.right='0';wrap.style.bottom='0';
+    wrap.style.display='block';_act=true;_rend();setTimeout(_fit,50);
+    var btn=document.getElementById('_mm_btn');if(btn)btn.classList.add('_mm_on');
+  },
+  hide:function(){
+    var wrap=document.getElementById('_mm_wrap');if(wrap)wrap.style.display='none';_act=false;
+    var btn=document.getElementById('_mm_btn');if(btn)btn.classList.remove('_mm_on');
+  },
+  toggle:function(rawData){if(_act)this.hide();else this.show(rawData);},
+  refresh:function(rawData){if(_act)this.show(rawData);},
+  isActive:function(){return _act;},
+  fitView:function(){_fit();}
+};
+document.addEventListener('DOMContentLoaded',function(){window.__MM.init();});
+})();
+</script>
+<script>
+// MM adapter — ambiental
+window.__MM_getData = function(){
+  if(typeof DATA==='undefined'||typeof cur==='undefined') return null;
+  return DATA[cur]||null;
+};
+(function(){
+  if(typeof selChap!=='undefined'){
+    var _o=selChap;
+    selChap=function(k){_o(k);window.__MM&&window.__MM.isActive()&&window.__MM.refresh(window.__MM_getData());};
+  }
+})();
+</script>
+<script>
+// Mobile sidebar + color picker (called from #_hdr)
+var _sbo=window.innerWidth>768;
+function _sbT(){_sbo=!_sbo;_sbA();localStorage.setItem('_sbo',_sbo?'1':'0');}
+function _sbC(){_sbo=false;_sbA();}
+function _sbA(){var sb=document.getElementById('sidebar'),ov=document.getElementById('_sbov'),mob=window.innerWidth<=768;if(sb)sb.classList.toggle('sb-off',!_sbo);if(ov)ov.classList.toggle('open',_sbo&&mob);}
+function _logout(){_doLogout();}
+function _pickColor(c){var m={y:'yellow',g:'green',b:'blue',p:'pink',o:'orange'};_hl(c?m[c]:null);}
+window.addEventListener('DOMContentLoaded',function(){var sv=localStorage.getItem('_sbo');_sbo=window.innerWidth>768?(sv!=='0'):false;_sbA();});
+window.addEventListener('resize',function(){if(window.innerWidth>768&&!_sbo){_sbo=true;_sbA();}if(window.innerWidth<=768&&_sbo){_sbo=false;_sbA();}});
+</script>
+</body>
+</html>
+
+<div id="_sbov" onclick="_sbC()"></div>
+<div id="_hdr">
+  <button class="hbtn" onclick="_sbT()" style="padding:4px 8px;font-size:16px;" title="Menu">&#9776;</button>
+  <a href="index.html" class="hbtn">&#8592; Portal</a>
+  <a href="index.html" onclick="try{sessionStorage.setItem('_gotoTab','tracker')}catch(e){}" class="hbtn">&#128202; Tracker</a>
+  <span id="_htit">Dir. Coletivo</span>
+  <div id="_hlbar">
+    <div class="hlsw" style="background:rgba(250,204,21,0.85)" onclick="_pickColor('y')" id="_sw_y" title="Amarelo"></div>
+    <div class="hlsw" style="background:rgba(34,197,94,0.75)"  onclick="_pickColor('g')" id="_sw_g" title="Verde"></div>
+    <div class="hlsw" style="background:rgba(59,130,246,0.75)" onclick="_pickColor('b')" id="_sw_b" title="Azul"></div>
+    <div class="hlsw" style="background:rgba(236,72,153,0.75)" onclick="_pickColor('p')" id="_sw_p" title="Rosa"></div>
+    <div class="hlsw" style="background:rgba(249,115,22,0.75)" onclick="_pickColor('o')" id="_sw_o" title="Laranja"></div>
+    <div class="hlsw clr" onclick="_pickColor(null)" id="_sw_x" title="Limpar">&#x2715;</div>
+  </div>
+  <button class="hbtn" onclick="_tT()" id="_thb" style="margin-left:4px;">&#9728;&#65039;</button>
+  <button onclick="_logout()" class="hbtn" style="color:#ef4444;border-color:#ef4444;">Sair</button>
+</div>
+
+

@@ -109,8 +109,9 @@
   .b-title em{font-style:italic;color:var(--accent);}
   .b-subtitle{font-size:13px;color:var(--muted);font-weight:300;width:100%;max-width:960px;margin-bottom:4px;}
   .b-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;max-width:960px;}
-  /* 13 cards = 4×3+1, center the last */
-  .b-grid .b-card:nth-child(13){grid-column:2;}
+  /* 14 cards = 4×3+2, last row cols 1+3 for balance */
+  .b-grid .b-card:nth-child(13){grid-column:1;}
+  .b-grid .b-card:nth-child(14){grid-column:3;}
   .b-card{border:1px solid transparent;border-radius:14px;padding:28px 20px 22px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;transition:all .2s;}
   .b-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px var(--shadow);filter:brightness(.97);}
   .b-card.card-complete{box-shadow:0 0 0 2px var(--cborder) inset;}
@@ -146,6 +147,8 @@
   .bc-durbanistico    .b-prog-fill{background:#65a30d;}
   .bc-dprevidenciario {background:#fef9c3;border-color:#fef08a;--cmuted:#713f12;--cborder:#ca8a04;}
   .bc-dprevidenciario .b-prog-fill{background:#ca8a04;}
+  .bc-dcoletivo       {background:#ffe4e6;border-color:#fecdd3;--cmuted:#881337;--cborder:#e11d48;}
+  .bc-dcoletivo       .b-prog-fill{background:#e11d48;}
   /* dark card colors */
   [data-theme="dark"] .bc-admin      {background:rgba(91,141,238,.13);border-color:rgba(91,141,238,.28);--cmuted:#93b6f5;--cborder:#5b8dee;}
   [data-theme="dark"] .bc-admin      .b-prog-fill{background:#5b8dee;}
@@ -173,6 +176,8 @@
   [data-theme="dark"] .bc-durbanistico    .b-prog-fill{background:#65a30d;}
   [data-theme="dark"] .bc-dprevidenciario {background:rgba(202,138,4,.13);border-color:rgba(202,138,4,.28);--cmuted:#fde047;--cborder:#ca8a04;}
   [data-theme="dark"] .bc-dprevidenciario .b-prog-fill{background:#ca8a04;}
+  [data-theme="dark"] .bc-dcoletivo       {background:rgba(225,29,72,.13);border-color:rgba(225,29,72,.28);--cmuted:#fda4af;--cborder:#e11d48;}
+  [data-theme="dark"] .bc-dcoletivo       .b-prog-fill{background:#e11d48;}
   [data-theme="dark"] .b-prog{background:rgba(255,255,255,.08);}
 
   /* MAPA VIEWER */
@@ -268,6 +273,7 @@ t-chevron{transform:rotate(180deg);}
   .b-grid { grid-template-columns: repeat(2,1fr) !important; }
   .b-grid .b-card:nth-child(7) { grid-column: auto !important; }
   .b-grid .b-card:nth-child(13) { grid-column: auto !important; }
+  .b-grid .b-card:nth-child(14) { grid-column: auto !important; }
   .tb-user { display: none !important; }
   .overall-bar { flex-direction: column; align-items: flex-start; gap: 12px; }
   .tb-logo { font-size: 14px; margin-right: 12px; }
@@ -467,6 +473,10 @@ t-chevron{transform:rotate(180deg);}
           <div class="b-icon">🛡️</div><div class="b-name">Dir. Previdenciário</div><div class="b-cap">10 capítulos</div>
           <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
         </div>
+        <div class="b-card bc-dcoletivo card-dcoletivo" onclick="openMapa('mapas_dcoletivo.html','Direito Coletivo','#e11d48')">
+          <div class="b-icon">⚡</div><div class="b-name">Dir. Coletivo</div><div class="b-cap">5 capítulos</div>
+          <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -578,7 +588,8 @@ const SUBJECTS = [
   {id:'deleitoral',name:'Direito Eleitoral',color:'#0284c7',chapters:['Noções Introdutórias','Sistemas Eleitorais','Partidos Políticos','Justiça Eleitoral','MP Eleitoral','Alistamento Eleitoral e Capacidade Política','Convenções Partidárias e Reg. de Candidaturas','Condições de Elegibilidade e Inelegibilidade','Arrecadação de Recursos e Prestação de Contas','Pesquisas Eleitorais e Propaganda Política','Organização das Eleições, Garantias e Diplomação','Abuso de Poder e Condutas Vedadas','Ações e Recursos Eleitorais','Crimes Eleitorais e Processo Penal Eleitoral']},
   {id:'dfinanceiro',name:'Direito Financeiro',color:'#db2777',chapters:['Finanças Públicas na CF — PPA, LDO e LOA','Finanças Públicas na CF — Ciclo Orçamentário','Orçamento Público — Princípios','Despesa Pública','Receitas Públicas','Créditos Adicionais','Restos a Pagar e Despesas de Ex. Anteriores','Lei de Responsabilidade Fiscal']},
   {id:'durbanistico',name:'Direito Urbanístico',color:'#65a30d',chapters:['Estatuto da Cidade — Lei 10.257/2001','Parcelamento do Solo Urbano — Lei 6.766/1979','Concessão de Uso Especial — MP 2.220/2001']},
-  {id:'dprevidenciario',name:'Direito Previdenciário',color:'#ca8a04',chapters:['Seguridade Social','Beneficiários','Custeio','Filiação, Inscrição e Período de Carência','Salário de Contribuição','Custeio (Cont.)','Filiação, Inscrição e Carência (Cont.)','Benefícios Previdenciários','Assistência Social','Previdência Privada']}
+  {id:'dprevidenciario',name:'Direito Previdenciário',color:'#ca8a04',chapters:['Seguridade Social','Beneficiários','Custeio','Filiação, Inscrição e Período de Carência','Salário de Contribuição','Custeio (Cont.)','Filiação, Inscrição e Carência (Cont.)','Benefícios Previdenciários','Assistência Social','Previdência Privada']},
+  {id:'dcoletivo',name:'Direito Coletivo',color:'#e11d48',chapters:['Histórico Legislativo das Ações Coletivas','Microssistema Processual Coletivo','Princípios e Microssistema Processual Coletivo','Princípios do Processo Coletivo','Lei de Ação Civil Pública']}
 ];
 
 const FLAGS = {hard:'🔴',review:'🟡',done:'🟢'};
