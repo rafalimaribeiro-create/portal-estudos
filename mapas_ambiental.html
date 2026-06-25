@@ -426,6 +426,7 @@ body { padding-top: 46px !important; }
 .tb-tmbtn.tmbtn-p{background:#1e3a5f;border-color:#3b82f6;color:#60a5fa;}
 body.timer-c #timer-block,body.timer-c .timer-fmt{display:none!important;}
 body.timer-a #tb-timer-bar{display:none!important;}
+.kbf{outline:2px solid #38bdf8!important;outline-offset:-2px;border-radius:4px;background:rgba(56,189,248,.10)!important;}
 </style>
 </head>
 <body>
@@ -456,7 +457,7 @@ body.timer-a #tb-timer-bar{display:none!important;}
     <div class="tfmt-opt" data-fmt="c" onclick="_timerSetFmt('c')">Topo</div>
   </div>
 </div>
-  <div id="kb-hint">↑ ↓ ← → capítulo &nbsp;·&nbsp; E expandir &nbsp;·&nbsp; R recolher</div>
+  <div id="kb-hint">↑↓←→ navegar nós &nbsp;·&nbsp; E/R tudo &nbsp;·&nbsp; PgUp/Dn capítulo</div>
 </nav>
 <div id="main-area">
   <div class="match-bar" id="matchBar"></div>
@@ -635,12 +636,25 @@ function selChap(k){cur=k;expanded.clear();document.getElementById("search").val
 function toggle(id){if(expanded.has(id))expanded.delete(id);else expanded.add(id);render();}
 function expandAll(){function add(n,p){expanded.add(p);(n.children||[]).forEach((c,i)=>add(c,p+"_"+i));(n.callouts||[]).forEach((c,i)=>add(c,p+"_c"+i));}const t=DATA[cur];(t.children||[]).forEach((n,i)=>add(n,"r"+i));render();}
 function collapseAll(){expanded.clear();render();}
+var _kbP=null;
+function _kbRows(){return Array.prototype.slice.call(document.querySelectorAll('#content .node>.row'));}
+function _kbSet(row){var old=document.querySelectorAll('.row.kbf');for(var i=0;i<old.length;i++)old[i].classList.remove('kbf');if(row){row.classList.add('kbf');_kbP=row.parentElement.id.slice(1);row.scrollIntoView({block:'nearest'});}}
+function _kbCur(){var rows=_kbRows();for(var i=0;i<rows.length;i++)if(rows[i].classList.contains('kbf'))return i;return -1;}
+function _kbRefocus(){if(_kbP){var nd=document.getElementById('n'+_kbP);if(nd)_kbSet(nd.firstElementChild);}}
 document.addEventListener('keydown',function(e){
   if(document.activeElement&&document.activeElement.tagName==='INPUT')return;
-  if(e.key==='ArrowDown'){e.preventDefault();var idx=CHAPTERS.indexOf(cur);if(idx<CHAPTERS.length-1)selChap(CHAPTERS[idx+1]);}
-  else if(e.key==='ArrowUp'){e.preventDefault();var idx=CHAPTERS.indexOf(cur);if(idx>0)selChap(CHAPTERS[idx-1]);}
-  else if(e.key==='ArrowRight'){e.preventDefault();var idx=CHAPTERS.indexOf(cur);if(idx<CHAPTERS.length-1)selChap(CHAPTERS[idx+1]);}
-  else if(e.key==='ArrowLeft'){e.preventDefault();var idx=CHAPTERS.indexOf(cur);if(idx>0)selChap(CHAPTERS[idx-1]);}
+  var rows,i,row,tog,idx;
+  if(e.key==='ArrowDown'){e.preventDefault();rows=_kbRows();i=_kbCur();_kbSet(i<0?rows[0]:rows[Math.min(i+1,rows.length-1)]);}
+  else if(e.key==='ArrowUp'){e.preventDefault();rows=_kbRows();i=_kbCur();_kbSet(i<=0?rows[0]:rows[i-1]);}
+  else if(e.key==='ArrowRight'){e.preventDefault();rows=_kbRows();i=_kbCur();if(i<0){_kbSet(rows[0]);return;}row=rows[i];tog=row.querySelector('.tog');
+    if(tog&&tog.textContent==='▸'){toggle(row.parentElement.id.slice(1));_kbRefocus();}
+    else if(tog&&tog.textContent==='▾'){_kbSet(rows[Math.min(i+1,rows.length-1)]);}}
+  else if(e.key==='ArrowLeft'){e.preventDefault();rows=_kbRows();i=_kbCur();if(i<0)return;row=rows[i];tog=row.querySelector('.tog');
+    var p=row.parentElement.id.slice(1);
+    if(tog&&tog.textContent==='▾'){toggle(p);_kbRefocus();}
+    else{var pp=p.replace(/_[^_]*$/,'');if(pp!==p){var nd=document.getElementById('n'+pp);if(nd)_kbSet(nd.firstElementChild);}}}
+  else if(e.key==='PageDown'){e.preventDefault();idx=CHAPTERS.indexOf(cur);if(idx<CHAPTERS.length-1)selChap(CHAPTERS[idx+1]);}
+  else if(e.key==='PageUp'){e.preventDefault();idx=CHAPTERS.indexOf(cur);if(idx>0)selChap(CHAPTERS[idx-1]);}
   else if(e.key==='e'||e.key==='E'){expandAll();}
   else if(e.key==='r'||e.key==='R'){collapseAll();}
 });

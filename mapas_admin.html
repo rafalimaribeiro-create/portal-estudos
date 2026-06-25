@@ -665,6 +665,7 @@ body { padding-top: 42px !important; }
 .tb-tmbtn.tmbtn-p{background:#1e3a5f;border-color:#3b82f6;color:#60a5fa;}
 body.timer-c #timer-block,body.timer-c .timer-fmt{display:none!important;}
 body.timer-a #tb-timer-bar{display:none!important;}
+.kbf{outline:2px solid #38bdf8!important;outline-offset:-2px;border-radius:4px;background:rgba(56,189,248,.10)!important;}
 </style>
 </head>
 <body>
@@ -697,7 +698,7 @@ body.timer-a #tb-timer-bar{display:none!important;}
     <div class="tfmt-opt" data-fmt="c" onclick="_timerSetFmt('c')">Topo</div>
   </div>
 </div>
-  <div id="kb-hint">↑ ↓ ← → capítulo &nbsp;·&nbsp; E expandir &nbsp;·&nbsp; R recolher</div>
+  <div id="kb-hint">↑↓←→ navegar nós &nbsp;·&nbsp; E/R tudo &nbsp;·&nbsp; PgUp/Dn capítulo</div>
 </div>
 
 <div id="main">
@@ -942,12 +943,22 @@ function collapseAll() {
     if (i > 0) el.classList.remove('open');
   });
 }
+function _kbRows(){return Array.prototype.filter.call(document.querySelectorAll('#tree-container .node-row'),function(r){return r.offsetParent!==null;});}
+function _kbSet(row){var old=document.querySelectorAll('.node-row.kbf');for(var i=0;i<old.length;i++)old[i].classList.remove('kbf');if(row){row.classList.add('kbf');row.scrollIntoView({block:'nearest'});}}
+function _kbCur(rows){for(var i=0;i<rows.length;i++)if(rows[i].classList.contains('kbf'))return i;return -1;}
 document.addEventListener('keydown',function(e){
   if(document.activeElement&&document.activeElement.tagName==='INPUT')return;
-  if(e.key==='ArrowDown'){e.preventDefault();if(currentMapIdx<MAPS.length-1)loadMap(currentMapIdx+1);}
-  else if(e.key==='ArrowUp'){e.preventDefault();if(currentMapIdx>0)loadMap(currentMapIdx-1);}
-  else if(e.key==='ArrowRight'){if(currentMapIdx<MAPS.length-1)loadMap(currentMapIdx+1);}
-  else if(e.key==='ArrowLeft'){if(currentMapIdx>0)loadMap(currentMapIdx-1);}
+  var rows,i,row,nd,ch;
+  if(e.key==='ArrowDown'){e.preventDefault();rows=_kbRows();i=_kbCur(rows);_kbSet(i<0?rows[0]:rows[Math.min(i+1,rows.length-1)]);}
+  else if(e.key==='ArrowUp'){e.preventDefault();rows=_kbRows();i=_kbCur(rows);_kbSet(i<=0?rows[0]:rows[i-1]);}
+  else if(e.key==='ArrowRight'){e.preventDefault();rows=_kbRows();i=_kbCur(rows);if(i<0){_kbSet(rows[0]);return;}row=rows[i];nd=row.parentElement;ch=nd.querySelector(':scope>.node-children');
+    if(ch&&ch.classList.contains('collapsed')){row.click();}
+    else if(ch){rows=_kbRows();_kbSet(rows[Math.min(i+1,rows.length-1)]);}}
+  else if(e.key==='ArrowLeft'){e.preventDefault();rows=_kbRows();i=_kbCur(rows);if(i<0)return;row=rows[i];nd=row.parentElement;ch=nd.querySelector(':scope>.node-children');
+    if(ch&&!ch.classList.contains('collapsed')){row.click();}
+    else{var pn=nd.parentElement.closest('.tree-node');if(pn)_kbSet(pn.firstElementChild);}}
+  else if(e.key==='PageDown'){e.preventDefault();if(currentMapIdx<MAPS.length-1)loadMap(currentMapIdx+1);}
+  else if(e.key==='PageUp'){e.preventDefault();if(currentMapIdx>0)loadMap(currentMapIdx-1);}
   else if(e.key==='e'||e.key==='E'){expandAll();}
   else if(e.key==='r'||e.key==='R'){collapseAll();}
 });
