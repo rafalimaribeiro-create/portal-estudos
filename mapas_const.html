@@ -376,6 +376,8 @@ body{padding-top:42px!important;}
   .exam-tag:hover::after{display:block;}
   .txt.long{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100% - 20px);display:inline-block;cursor:pointer;vertical-align:bottom;}
 .txt.long.open{white-space:normal;overflow:visible;text-overflow:clip;}
+#kb-hint{font-size:9px;font-family:monospace;color:var(--muted);padding:8px 16px 10px;
+  letter-spacing:.06em;border-top:1px solid var(--border);text-align:center;opacity:.6;}
 </style>
 </head>
 <body>
@@ -386,6 +388,7 @@ body{padding-top:42px!important;}
   </div>
   <div id="subject-filter"></div>
   <div id="chapter-list"></div>
+  <div id="kb-hint">← → capítulo &nbsp;·&nbsp; E expandir &nbsp;·&nbsp; R recolher</div>
 </div>
 <div id="main">
   <div id="toolbar">
@@ -487,6 +490,14 @@ function toggleExpand() {
 document.getElementById('search').addEventListener('input', e => {
   searchQ = e.target.value.toLowerCase().trim();
   renderChapter();
+});
+
+document.addEventListener('keydown',function(e){
+  if(document.activeElement&&document.activeElement.tagName==='INPUT')return;
+  if(e.key==='ArrowRight'){if(selectedIdx<CHAPTERS_META.length-1)selectChapter(selectedIdx+1);}
+  else if(e.key==='ArrowLeft'){if(selectedIdx>0)selectChapter(selectedIdx-1);}
+  else if(e.key==='e'||e.key==='E'){if(!expandAll){expandAll=true;document.getElementById('expand-btn').textContent='⊟ Recolher';renderChapter();}}
+  else if(e.key==='r'||e.key==='R'){if(expandAll){expandAll=false;document.getElementById('expand-btn').textContent='⊞ Expandir';renderChapter();}}
 });
 
 function renderChapter() {
