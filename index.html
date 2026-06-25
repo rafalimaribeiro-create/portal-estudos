@@ -109,7 +109,8 @@
   .b-title em{font-style:italic;color:var(--accent);}
   .b-subtitle{font-size:13px;color:var(--muted);font-weight:300;width:100%;max-width:960px;margin-bottom:4px;}
   .b-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;max-width:960px;}
-  .b-grid .b-card:nth-child(7){grid-column:2;}
+  .b-grid .b-card:nth-child(7){grid-column:1;}
+  .b-grid .b-card:nth-child(8){grid-column:3;}
   .b-card{border:1px solid transparent;border-radius:14px;padding:28px 20px 22px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;transition:all .2s;}
   .b-card:hover{transform:translateY(-3px);box-shadow:0 8px 28px var(--shadow);filter:brightness(.97);}
   .b-card.card-complete{box-shadow:0 0 0 2px var(--cborder) inset;}
@@ -133,6 +134,8 @@
   .bc-dtributario .b-prog-fill{background:#4f46e5;}
   .bc-trabalho   {background:#ede9fe;border-color:#ddd6fe;--cmuted:#5b21b6;--cborder:#9c6fe4;}
   .bc-trabalho   .b-prog-fill{background:#9c6fe4;}
+  .bc-dconsumidor{background:#ffedd5;border-color:#fed7aa;--cmuted:#9a3412;--cborder:#ea580c;}
+  .bc-dconsumidor .b-prog-fill{background:#ea580c;}
   /* dark card colors */
   [data-theme="dark"] .bc-admin      {background:rgba(91,141,238,.13);border-color:rgba(91,141,238,.28);--cmuted:#93b6f5;--cborder:#5b8dee;}
   [data-theme="dark"] .bc-admin      .b-prog-fill{background:#5b8dee;}
@@ -148,6 +151,8 @@
   [data-theme="dark"] .bc-dtributario .b-prog-fill{background:#6366f1;}
   [data-theme="dark"] .bc-trabalho   {background:rgba(187,154,247,.13);border-color:rgba(187,154,247,.28);--cmuted:#d0b8fa;--cborder:#bb9af7;}
   [data-theme="dark"] .bc-trabalho   .b-prog-fill{background:#bb9af7;}
+  [data-theme="dark"] .bc-dconsumidor{background:rgba(234,88,12,.13);border-color:rgba(234,88,12,.28);--cmuted:#fb9a6a;--cborder:#ea580c;}
+  [data-theme="dark"] .bc-dconsumidor .b-prog-fill{background:#ea580c;}
   [data-theme="dark"] .b-prog{background:rgba(255,255,255,.08);}
 
   /* MAPA VIEWER */
@@ -242,6 +247,7 @@ t-chevron{transform:rotate(180deg);}
   .b-body { padding: 16px 14px !important; gap: 10px !important; justify-content:flex-start !important; }
   .b-grid { grid-template-columns: repeat(2,1fr) !important; }
   .b-grid .b-card:nth-child(7) { grid-column: auto !important; }
+  .b-grid .b-card:nth-child(8) { grid-column: auto !important; }
   .tb-user { display: none !important; }
   .overall-bar { flex-direction: column; align-items: flex-start; gap: 12px; }
   .tb-logo { font-size: 14px; margin-right: 12px; }
@@ -417,6 +423,10 @@ t-chevron{transform:rotate(180deg);}
           <div class="b-icon">👷</div><div class="b-name">Dir. do Trabalho</div><div class="b-cap">15 capítulos</div>
           <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
         </div>
+        <div class="b-card bc-dconsumidor card-dconsumidor" onclick="openMapa('mapas_dconsumidor.html','Direito do Consumidor','#ea580c')">
+          <div class="b-icon">🛒</div><div class="b-name">Dir. do Consumidor</div><div class="b-cap">5 capítulos</div>
+          <div class="b-prog"><div class="b-prog-fill" style="width:0%"></div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -522,7 +532,8 @@ const SUBJECTS = [
 ,
   {id:'ptrabalho',name:'Processo do Trabalho',color:'#f59e0b',chapters:['Teoria Geral do Proc. do Trabalho','Organização da JT e Competência','Partes e Procuradores','Prazos, Custas e Nulidades','Procedimento Ordinário','Provas','Recursos em Espécie','Liquidação e Execução','MS, Ação Rescisória e Inq. Falta Grave','Prescrição e Decadência','Rito Sumaríssimo e Sumário','Dissídio Coletivo e Ação de Cumprimento']},
   {id:'dtributario',name:'Direito Tributário',color:'#6366f1',chapters:['Noções Introdutórias','Limitações Constitucionais','Competência e Legislação','Obrigação Tributária','Responsabilidade Tributária','Crédito Tributário e Lançamento','Suspensão da Exigibilidade','Extinção do CT','Exclusão do CT']},
-    {id:'dtrabalho',name:'Dir. do Trabalho',color:'#bb9af7',chapters:['Fontes do D. do Trabalho','Princípios do D. do Trabalho','Relação de Emprego','Terceirização e Flexibilização','Contrato Individual de Trabalho','Extinção do CT e Estabilidade','Salário e Remuneração','Jornada de Trabalho e Descansos','Férias e Prescrição','Segurança e Medicina do Trabalho','CCP e D. Coletivo do Trabalho','Empregado Doméstico','FGTS','Direito de Greve','Dano Moral e Profissões Regulamentadas']}
+    {id:'dtrabalho',name:'Dir. do Trabalho',color:'#bb9af7',chapters:['Fontes do D. do Trabalho','Princípios do D. do Trabalho','Relação de Emprego','Terceirização e Flexibilização','Contrato Individual de Trabalho','Extinção do CT e Estabilidade','Salário e Remuneração','Jornada de Trabalho e Descansos','Férias e Prescrição','Segurança e Medicina do Trabalho','CCP e D. Coletivo do Trabalho','Empregado Doméstico','FGTS','Direito de Greve','Dano Moral e Profissões Regulamentadas']},
+  {id:'dconsumidor',name:'Direito do Consumidor',color:'#ea580c',chapters:['Introdução e Aplicabilidade','Direitos Básicos e PNRC','Vícios e Fatos do Produto','Infrações Penais','Práticas Comerciais']}
 ];
 
 const FLAGS = {hard:'🔴',review:'🟡',done:'🟢'};
