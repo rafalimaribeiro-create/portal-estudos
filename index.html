@@ -377,7 +377,7 @@ t-chevron{transform:rotate(180deg);}
 <body>
 
 <!-- AUTH -->
-<div id="auth-screen">
+<div id="auth-screen" style="display:none">
   <div class="auth-box">
     <div class="auth-logo">Revisão <em>Jurídica</em></div>
     <div class="auth-sub">Portal de Mapas Mentais</div>
@@ -397,11 +397,15 @@ t-chevron{transform:rotate(180deg);}
       <button class="auth-btn" onclick="doSignup()">Criar conta</button>
     </div>
     <div class="auth-msg" id="auth-msg"></div>
+    <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border);text-align:center;">
+      <button onclick="_skipAuth()" style="background:none;border:none;color:var(--muted);font-size:12px;font-family:'DM Mono',monospace;cursor:pointer;text-decoration:underline;padding:4px;">Continuar sem conta →</button>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;opacity:.7;">seu progresso fica salvo neste navegador</div>
+    </div>
   </div>
 </div>
 
 <!-- TOPBAR -->
-<div id="topbar" style="display:none">
+<div id="topbar">
   <div class="tb-logo">Revisão <em>Jurídica</em></div>
   <div class="tb-nav">
     <div class="tb-tab active" onclick="showView('home',this)">Mapas</div>
@@ -411,12 +415,12 @@ t-chevron{transform:rotate(180deg);}
   <div class="tb-right">
     <button class="tb-btn" onclick="toggleTheme()" id="theme-btn">☀️ Claro</button>
     <span class="tb-user" id="user-email-display"></span>
-    <button class="tb-btn" onclick="doLogout()">Sair</button>
+    <button class="tb-btn" id="auth-btn" onclick="doLogout()">Sair</button>
   </div>
 </div>
 
 <!-- MAIN -->
-<div id="main" style="display:none">
+<div id="main">
 
   <!-- HOME -->
   <div id="view-home" style="display:flex;flex-direction:column;">
@@ -663,6 +667,7 @@ sb.auth.onAuthStateChange(async(event,session)=>{
     document.getElementById('topbar').style.display='flex';
     document.getElementById('main').style.display='flex';
     document.getElementById('user-email-display').textContent=session.user.user_metadata?.name||session.user.email;
+    const _ab=document.getElementById('auth-btn'); if(_ab){ _ab.textContent='Sair'; _ab.setAttribute('onclick','doLogout()'); }
     // Switch to pending tab (set at page load, before this callback ran)
     if(_pendingTab){
       try{
@@ -687,15 +692,36 @@ sb.auth.onAuthStateChange(async(event,session)=>{
     }catch(e){ _lsSaveStatus('⚠ DB connection error','err'); console.error('DB conn error:',e); }
   } else {
     currentUser=null;
-    document.getElementById('auth-screen').style.display='flex';
-    document.getElementById('topbar').style.display='none';
-    document.getElementById('main').style.display='none';
+    _enterLocalMode();
   }
 });
 
+// -- LOCAL (no-login) MODE --
+function _skipAuth(){ try{localStorage.setItem('_skip_auth','1');}catch(e){} _enterLocalMode(); }
+function _showAuth(){ document.getElementById('auth-screen').style.display='flex'; }
+async function _enterLocalMode(){
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('topbar').style.display='flex';
+  document.getElementById('main').style.display='flex';
+  const ud=document.getElementById('user-email-display'); if(ud) ud.textContent='Modo local';
+  const ab=document.getElementById('auth-btn'); if(ab){ ab.textContent='Entrar'; ab.setAttribute('onclick','_showAuth()'); }
+  if(_pendingTab){
+    try{
+      const _tabBtn=[...document.querySelectorAll('.tb-tab')].find(b=>(b.getAttribute('onclick')||'').includes("'"+_pendingTab+"'"));
+      showView(_pendingTab,_tabBtn||null);
+    }catch(_){}
+    _pendingTab=null;
+  }
+  _loadProgressLS();
+  try{ loadLeiSeca(); }catch(e){}
+  try{ renderTracker(); }catch(e){}
+  try{ renderLeiSeca(); }catch(e){}
+  try{ renderHomeCards(); }catch(e){}
+}
+
 // ── DATA LOADING ──
 async function loadProgress(){
-  if(!currentUser){ return; }
+  if(!currentUser){ _loadProgressLS(); return; }
   try{
     const {data,error}=await sb.from('progress').select('chapter_id,done,done_at').eq('user_id',currentUser.id);
     if(error){
@@ -742,7 +768,6 @@ function showView(view,tabEl){
 
 // Sync when user returns to portal from a map
 window.addEventListener('focus', async ()=>{
-  if(!currentUser) return;
   try{
     if(typeof loadProgress==='function') await loadProgress();
     if(typeof loadLeiSeca==='function') loadLeiSeca();
@@ -1055,7 +1080,7 @@ async function lsToggleItem(itemId, checked){
   if(barEl) barEl.style.width=pct+'%';
   if(cntEl) cntEl.textContent=done+' / '+total+' itens';
   // Save
-  if(!currentUser){ _lsSaveStatus('Faça login para salvar','err'); return; }
+  if(!currentUser){ _lsSaveStatus('✓ salvo neste navegador','ok'); return; }
   _lsSaveStatus('salvando…','saving');
   try{
     const {error:lue} = await sb.from('progress').upsert(

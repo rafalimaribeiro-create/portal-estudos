@@ -784,20 +784,27 @@ var _sb=supabase.createClient('https://qseismabfaonggrwzuiu.supabase.co','eyJhbG
 });
 var _mid='deleitoral';
 var _u=null,_m={},_sid=null,_sel=null;
+var _LK='_marks_'+_mid;
+function _lsSave(){try{localStorage.setItem(_LK,JSON.stringify(_m));}catch(e){}}
+function _lsLoad(){try{var v=JSON.parse(localStorage.getItem(_LK)||'{}');if(v&&typeof v==='object')_m=v;}catch(e){}}
 
 // Auth: read directly from Supabase localStorage (same domain, same storage)
 window.addEventListener('DOMContentLoaded',function(){
-  _sb.auth.getSession().then(function(r){
-    if(r.data&&r.data.session&&r.data.session.user){
-      _u=r.data.session.user;
-      _lm().then(_aa);
-    }
-  });
+  var go=function(){
+    _lm().then(_aa);
+    if(!_u){var lo=document.querySelector('button[onclick="_doLogout()"]');if(lo)lo.style.display='none';}
+  };
+  try{
+    _sb.auth.getSession().then(function(r){
+      if(r.data&&r.data.session&&r.data.session.user)_u=r.data.session.user;
+      go();
+    }).catch(go);
+  }catch(e){go();}
 });
 
 // ── LOAD MARKS ──
 async function _lm(){
-  if(!_u)return;
+  if(!_u){_lsLoad();return;}
   try{
     var opts={headers:{'Authorization':'Bearer '+(_u._token||''),'apikey':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzZWlzbWFiZmFvbmdncnd6dWl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzU4MTMsImV4cCI6MjA5Mzc1MTgxM30.eYnWJo9NI_-wGJCd2HalmnCGMhMvlKZxmZKuTpx3xS0'}};
     var [a,b,c,d]=await Promise.all([
@@ -865,27 +872,32 @@ document.addEventListener('click',function(e){
 function _uid(){return _u?_u.id:null;}
 
 async function _hl(color){
-  if(!_sid)return;if(!_u){alert('Faça login para usar marcações');return;}
+  if(!_sid)return;
   if(!_m[_sid])_m[_sid]={};_m[_sid].hl=color;
   if(_sel)_am(_sel,_sid);
   document.querySelectorAll('._sw[id^="_sw_"]').forEach(function(s){s.classList.remove('_on');});
-  if(color){var sw=document.getElementById('_sw_'+color[0]);if(sw)sw.classList.add('_on');await _sb.from('highlights').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,color:color},{onConflict:'user_id,map_id,node_id'});}
+  if(color){var sw=document.getElementById('_sw_'+color[0]);if(sw)sw.classList.add('_on');}
+  _lsSave();
+  if(!_u)return;
+  if(color)await _sb.from('highlights').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,color:color},{onConflict:'user_id,map_id,node_id'});
   else await _sb.from('highlights').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
 }
 
 async function _fc(color){
-  if(!_sid)return;if(!_u){alert('Faça login para usar marcações');return;}
+  if(!_sid)return;
   if(!_m[_sid])_m[_sid]={};_m[_sid].fc=color;
   if(_sel)_am(_sel,_sid);
   document.querySelectorAll('._sw[id^="_fc_"]').forEach(function(s){s.classList.remove('_on');});
   if(color){var fcb=document.querySelector('._sw[onclick*="'+color+'"]');if(fcb)fcb.classList.add('_on');}
   var sz=(_m[_sid]&&_m[_sid].fs)||null;
+  _lsSave();
+  if(!_u)return;
   if(color||sz)await _sb.from('node_style').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,font_color:color,font_size:sz},{onConflict:'user_id,map_id,node_id'});
   else await _sb.from('node_style').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
 }
 
 async function _fs(delta){
-  if(!_sid)return;if(!_u){alert('Faça login para usar marcações');return;}
+  if(!_sid)return;
   if(!_m[_sid])_m[_sid]={};
   var t=_sel?_txt(_sel):null;
   var cur=(_m[_sid].fs)||(t?parseInt(window.getComputedStyle(t).fontSize)||13:13);
@@ -894,16 +906,21 @@ async function _fs(delta){
   if(_sel)_am(_sel,_sid);
   var fv=document.getElementById('_fsv');if(fv)fv.value=nv?(nv+'px'):'—';
   var fc=(_m[_sid]&&_m[_sid].fc)||null;
+  _lsSave();
+  if(!_u)return;
   if(nv||fc)await _sb.from('node_style').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,font_color:fc,font_size:nv},{onConflict:'user_id,map_id,node_id'});
   else await _sb.from('node_style').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
 }
 
 async function _fl(flag){
-  if(!_sid)return;if(!_u){alert('Faça login para usar marcações');return;}
+  if(!_sid)return;
   if(!_m[_sid])_m[_sid]={};_m[_sid].fl=flag;
   if(_sel)_am(_sel,_sid);
   document.querySelectorAll('#_f0,#_f1,#_f2').forEach(function(b){b.classList.remove('_on');});
-  if(flag){var fi={hard:'_f0',review:'_f1',done:'_f2'};var fb=document.getElementById(fi[flag]);if(fb)fb.classList.add('_on');await _sb.from('node_flags').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,flag:flag},{onConflict:'user_id,map_id,node_id'});}
+  if(flag){var fi={hard:'_f0',review:'_f1',done:'_f2'};var fb=document.getElementById(fi[flag]);if(fb)fb.classList.add('_on');}
+  _lsSave();
+  if(!_u)return;
+  if(flag)await _sb.from('node_flags').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,flag:flag},{onConflict:'user_id,map_id,node_id'});
   else await _sb.from('node_flags').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
 }
 
@@ -917,10 +934,12 @@ function _on(){
 }
 function _cn(){document.getElementById('_np').classList.remove('_o');}
 async function _sn(){
-  if(!_sid||!_u)return _cn();
+  if(!_sid)return _cn();
   var content=document.getElementById('_npta').value;
   if(!_m[_sid])_m[_sid]={};_m[_sid].nt=content;
   if(_sel)_am(_sel,_sid);
+  _lsSave();
+  if(!_u){_cn();return;}
   if(content.trim())await _sb.from('node_notes').upsert({user_id:_uid(),map_id:_mid,node_id:_sid,content:content},{onConflict:'user_id,map_id,node_id'});
   else await _sb.from('node_notes').delete().eq('user_id',_uid()).eq('map_id',_mid).eq('node_id',_sid);
   _cn();
@@ -946,16 +965,22 @@ var _TRK = {
 
 // Auth
 window.addEventListener('DOMContentLoaded', function(){
-  _sb.auth.getSession().then(function(r){
-    if(r.data&&r.data.session&&r.data.session.user){
-      _TRK.user = r.data.session.user;
-      _trkLoad();
-    } else {
-      _trkRender();
-    }
-  });
+  var go=function(){_trkLoadLS();_trkRender();};
+  try{
+    _sb.auth.getSession().then(function(r){
+      if(r.data&&r.data.session&&r.data.session.user){
+        _TRK.user = r.data.session.user;
+        _trkLoad();
+      } else { go(); }
+    }).catch(go);
+  }catch(e){go();}
 });
 
+function _trkLoadLS(){
+  try{Object.keys(localStorage).filter(function(k){return k.indexOf('_pgprog_'+_TRK.mapId+'_')===0;}).forEach(function(k){
+    try{var v=JSON.parse(localStorage.getItem(k));if(v&&v.done)_TRK.done[k.slice(8)]=true;}catch(e){}
+  });}catch(e){}
+}
 async function _trkLoad(){
   try{
     var r = await _sb.from('progress')
@@ -989,22 +1014,18 @@ function _trkRender(){
 }
 
 async function _trkToggle(chapterId, done, chk){
-  if(!_TRK.user){
-    // Try to recover session
-    try {
-      const r = await _sb.auth.getSession();
-      if(r.data && r.data.session && r.data.session.user){
-        _TRK.user = r.data.session.user;
-      } else {
-        console.warn('No session found, cannot save tracker');
-        return;
-      }
-    } catch(e) { console.error('getSession error:', e); return; }
-  }
   var now = done ? new Date().toISOString() : null;
   if(done) _TRK.done[chapterId] = true;
   else delete _TRK.done[chapterId];
   _trkRender();
+  try{ localStorage.setItem('_pgprog_'+chapterId, JSON.stringify({done:done, date:now})); }catch(_){}
+  if(!_TRK.user){
+    try {
+      const r = await _sb.auth.getSession();
+      if(r.data && r.data.session && r.data.session.user) _TRK.user = r.data.session.user;
+      else return;
+    } catch(e) { return; }
+  }
   try{
     await _sb.from('progress').upsert({
       user_id: _TRK.user.id,
