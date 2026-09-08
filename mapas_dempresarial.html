@@ -427,6 +427,9 @@ body { padding-top: 46px !important; }
 body.timer-c #timer-block,body.timer-c .timer-fmt{display:none!important;}
 body.timer-a #tb-timer-bar{display:none!important;}
 .kbf{outline:2px solid #38bdf8!important;outline-offset:-2px;border-radius:4px;background:rgba(56,189,248,.10)!important;}
+.qblock{margin:4px 0 3px 20px;border-left:2px solid rgba(128,128,128,.3);padding:2px 0 2px 11px;}
+.qline{font-size:12px;font-style:italic;opacity:.75;padding:1.5px 0;display:flex;gap:7px;align-items:baseline;line-height:1.5;}
+.qline .qm{font-style:normal;font-size:10px;opacity:.7;flex-shrink:0;color:var(--accent,#7aa2f7);}
 </style>
 </head>
 <body>
@@ -548,6 +551,17 @@ function _inlineExams(t){
 }
 
 function xpand(el,ev){el.classList.toggle('open');ev.stopPropagation();}
+var _QQ=/\?\s*$/;
+function _qSplit(t){
+  if(!t)return null;
+  var L=String(t).replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n')
+        .map(function(x){return x.trim();}).filter(function(x){return x;});
+  if(L.length<3)return null;
+  var h=L[0];
+  if(h.length>60||_QQ.test(h))return null;
+  for(var i=1;i<L.length;i++){if(!_QQ.test(L[i]))return null;}
+  return {head:h,qs:L.slice(1)};
+}
 function renderNode(n,depth,path){
   const id=path;
   const hasKids=(n.children&&n.children.length)||(n.callouts&&n.callouts.length);
@@ -566,9 +580,12 @@ function renderNode(n,depth,path){
   const tog=hasKids?(isExp?"▾":"▸"):"·";
   const dc=depth===0?"d0":depth===1?"d1":depth===2?"d2":"dn";
   const rowCls=`row${isHit?" hit":""}`;
-  const _ie=_inlineExams(n.title||'');
+  const _q=_qSplit(n.title||'');
+  const _ie=_q?null:_inlineExams(n.title||'');
   let titleHtml;
-  if(_ie){
+  if(_q){
+    titleHtml=`<span class="txt ${dc}">${hilite(_q.head,term)}</span>`;
+  } else if(_ie){
     const pills=_ie.tags.map(function(t){return `<span class="exam-tag" data-full="${esc(t.full)}">${esc(t.short)}</span>`;}).join(' ');
     const _xl=_ie.content.length>120;
     titleHtml=`<span class="txt ${dc}${_xl?' long':''}"${_xl?' onclick="xpand(this,event)"':''} >${hilite(_ie.content,term)}</span> ${pills}`;
@@ -584,7 +601,8 @@ function renderNode(n,depth,path){
     (n.callouts||[]).forEach((c,i)=>{if(!term||matches(c,term)) childHtml+=renderNode({...c,callout:true},depth+1,path+"_c"+i);});
     childHtml+="</div>";
   }
-  return `<div class="node" id="n${id}"><div class="${rowCls}" onclick="toggle('${id}')"><span class="tog">${tog}</span>${titleHtml}</div>${childHtml}</div>`;
+  const _qh=_q?`<div class="qblock">${_q.qs.map(function(x){return `<div class="qline"><span class="qm">?</span><span>${hilite(x,term)}</span></div>`;}).join('')}</div>`:"";
+  return `<div class="node" id="n${id}"><div class="${rowCls}" onclick="toggle('${id}')"><span class="tog">${tog}</span>${titleHtml}</div>${_qh}${childHtml}</div>`;
 }
 
 function render(){

@@ -180,6 +180,9 @@ body { padding-top: 46px !important; }
 body.timer-c #timer-block,body.timer-c .timer-fmt{display:none!important;}
 body.timer-a #tb-timer-bar{display:none!important;}
 .kbf{outline:2px solid #38bdf8!important;outline-offset:-2px;border-radius:4px;background:rgba(56,189,248,.10)!important;}
+.qblock{margin:4px 0 3px 20px;border-left:2px solid rgba(128,128,128,.3);padding:2px 0 2px 11px;}
+.qline{font-size:12px;font-style:italic;opacity:.75;padding:1.5px 0;display:flex;gap:7px;align-items:baseline;line-height:1.5;}
+.qline .qm{font-style:normal;font-size:10px;opacity:.7;flex-shrink:0;color:var(--accent,#7aa2f7);}
 </style>
 </head>
 <body>
@@ -237,6 +240,17 @@ function escapeHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+var _QQ=/\?\s*$/;
+function _qSplit(t){
+  if(!t)return null;
+  var L=String(t).replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n')
+        .map(function(x){return x.trim();}).filter(function(x){return x;});
+  if(L.length<3)return null;
+  var h=L[0];
+  if(h.length>60||_QQ.test(h))return null;
+  for(var i=1;i<L.length;i++){if(!_QQ.test(L[i]))return null;}
+  return {head:h,qs:L.slice(1)};
+}
 function buildTree(node, depth) {
   if (!node || !node.label) return '';
   const hasChildren = node.children && node.children.length > 0;
@@ -244,8 +258,10 @@ function buildTree(node, depth) {
   const esc = escapeHtml(label);
   const tags = makeTags(label);
   
+  const _q = _qSplit(label);
+  const _qh = _q ? `<div class="qblock">${_q.qs.map(function(x){return `<div class="qline"><span class="qm">?</span><span>${escapeHtml(x)}</span></div>`;}).join('')}</div>` : '';
   let inner = hasChildren ? `<span class="toggle">&#9654;</span>` : `<span class="no-toggle">&#8226;</span>`;
-  inner += tags + `<span class="node-label">${esc}</span>`;
+  inner += tags + `<span class="node-label">${_q?escapeHtml(_q.head):esc}</span>`;
   
   let childrenHtml = '';
   if (hasChildren) {
@@ -258,6 +274,7 @@ function buildTree(node, depth) {
   
   return `<div class="node depth-${Math.min(depth,4)}" data-label="${esc.replace(/"/g,'&quot;')}">
     <div class="node-header">${inner}</div>
+    ${_qh}
     ${childrenHtml}
   </div>`;
 }

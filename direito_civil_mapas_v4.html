@@ -416,6 +416,9 @@ body{padding-top:42px!important;}
 body.timer-c #timer-block,body.timer-c .timer-fmt{display:none!important;}
 body.timer-a #tb-timer-bar{display:none!important;}
 .kbf{outline:2px solid #38bdf8!important;outline-offset:-2px;border-radius:4px;background:rgba(56,189,248,.10)!important;}
+.qblock{margin:4px 0 3px 20px;border-left:2px solid rgba(128,128,128,.3);padding:2px 0 2px 11px;}
+.qline{font-size:12px;font-style:italic;opacity:.75;padding:1.5px 0;display:flex;gap:7px;align-items:baseline;line-height:1.5;}
+.qline .qm{font-style:normal;font-size:10px;opacity:.7;flex-shrink:0;color:var(--accent,#7aa2f7);}
 </style>
 </head>
 <body>
@@ -574,6 +577,17 @@ function _inlineExams(t){
     content.appendChild(root);
   }
 
+var _QQ=/\?\s*$/;
+function _qSplit(t){
+  if(!t)return null;
+  var L=String(t).replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n')
+        .map(function(x){return x.trim();}).filter(function(x){return x;});
+  if(L.length<3)return null;
+  var h=L[0];
+  if(h.length>60||_QQ.test(h))return null;
+  for(var i=1;i<L.length;i++){if(!_QQ.test(L[i]))return null;}
+  return {head:h,qs:L.slice(1)};
+}
   function renderNode(node, container, depth, path) {
     var hasChildren = node.children && node.children.length > 0;
     var id = path + cleanTitle(node.title || '').substring(0, 20);
@@ -626,6 +640,21 @@ function _inlineExams(t){
     row.appendChild(toggle);
     row.appendChild(content);
     wrapper.appendChild(row);
+    var _q=_qSplit(rawTitle);
+    if(_q){
+      var _tx=content.querySelector('.node-text');
+      if(_tx)_tx.textContent=_q.head;
+      var _qb=document.createElement('div');
+      _qb.className='qblock';
+      _q.qs.forEach(function(x){
+        var l=document.createElement('div'); l.className='qline';
+        var m=document.createElement('span'); m.className='qm'; m.textContent='?';
+        var t=document.createElement('span'); t.textContent=x;
+        l.appendChild(m); l.appendChild(t); _qb.appendChild(l);
+      });
+      wrapper.appendChild(_qb);
+    }
+
     if (hasChildren) {
       var childrenEl = document.createElement('div');
       childrenEl.className = 'node-children hidden';
