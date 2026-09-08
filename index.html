@@ -544,15 +544,6 @@ t-chevron{transform:rotate(180deg);}
     </div>v>
 
 <!-- NOTE MODAL (para mapas) -->
-<div id="note-modal">
-  <div class="note-modal-box">
-    <div class="note-modal-title" id="note-modal-title">Anotação</div>
-    <textarea class="note-modal-ta" id="note-modal-ta" placeholder="Digite sua anotação..."></textarea>
-    <div class="note-modal-actions">
-      <button class="btn-cancel" onclick="closeNoteModal()">Cancelar</button>
-      <button class="btn-save" onclick="saveNoteModal()">Salvar</button>
-    </div>
-  </div>
 </div>
 
 <script>
@@ -586,7 +577,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
 });
 
 const SUBJECTS = [
-  {id:'admin',name:'Direito Administrativo',color:'#5b8dee',chapters:['Noções Preliminares','Regime Jurídico-Administrativo','Organização da Administração Pública','Atos Administrativos','Poderes Administrativos','Serviços Públicos','Responsabilidade Civil do Estado','Bens Públicos','Intervenção Estatal na Propriedade','Processo Administrativo','Improbidade Administrativa','Lei de Acesso à Informação']},
+  {id:'admin',name:'Direito Administrativo',color:'#5b8dee',chapters:['Noções Preliminares','Regime Jurídico-Administrativo','Organização da Administração Pública','Entes de Cooperação','Atos Administrativos','Poderes Administrativos','Serviços Públicos','Responsabilidade Civil do Estado','Bens Públicos','Intervenção Estatal na Propriedade','Processo Administrativo','Improbidade Administrativa','Lei de Acesso à Informação']},
   {id:'const',name:'Direito Constitucional',color:'#7dc87d',chapters:['Teoria Geral do Estado','Constitucionalismo e Direito Constitucional','Constituição — Classificação e Evolução','Poder Constituinte','Efeitos de Nova CF e Reformas','Sistemas Normativos Jurídicos','Hermenêutica e Interpretação Constitucional','Existência, Validade, Vigência e Eficácia','Organização do Estado','Poder Legislativo','Poder Executivo','Processo Legislativo','Defesa do Estado e das Instituições','Direitos Fundamentais em Espécie','Teoria Geral dos Direitos Fundamentais','Controle de Const. — Teoria Geral','Controle de Const. — Controle Concreto','Controle de Const. — Ações Diretas','Controle de Const. — Atos Omissivos','Controle de Const. — ADPF']},
   {id:'civil',name:'Direito Civil',color:'#e07b7b',chapters:['LINDB','Pessoa Natural','Pessoa Jurídica','Bens','Prescrição e Decadência','Negócio Jurídico','Obrigações: Intro','Adimplemento','Transmissão','Inadimplemento','Responsabilidade Civil','Teoria Geral dos Contratos','Contratos em Espécie','Posse','Propriedade','Dir. Reais de Aquisição/Fruição','Dir. Reais de Garantia','Casamento','Separação e Divórcio','União Estável','Relações de Parentesco','Alimentos','Tutela e Curatela','Sucessão em Geral','Sucessão Legítima','Sucessão Testamentária','Lei de Locações']},
   {id:'ambiental',name:'Direito Ambiental',color:'#6dcfb8',chapters:['Propedêutica do Direito Ambiental','Conceito Jurídico de Meio Ambiente','Proteção Constitucional do Meio Ambiente','Repartição de Competências Ambiental','PNMA e SISNAMA','Licenciamento Ambiental','Estudo de Impacto Ambiental','Política Nacional de Recursos Hídricos','Código Florestal','SNUC','Meio Ambiente do Trabalho','Responsabilidade Ambiental','Responsabilidade Criminal Ambiental','Tutela Processual do Meio Ambiente','Tributação Ambiental','Patrimônio Cultural']}
@@ -864,6 +855,11 @@ async function onCheck(key,checked){
   const isoNow=now?now.toISOString():null;
   progress[key]={done:checked,date:isoNow};
   try{ localStorage.setItem('_pgprog_'+key, JSON.stringify({done:checked,date:isoNow})); }catch(_){}
+  if(!currentUser){
+    _lsSaveStatus('✓ salvo neste navegador','ok');
+    updateOverallBar(); updateSubjectBar(key.split('_')[0]); renderHomeCards();
+    return;
+  }
   try{
     // Try upsert with conflict resolution
     const {data:ud, error:ue} = await sb.from('progress').upsert(
@@ -886,6 +882,7 @@ async function onCheck(key,checked){
 
 // ── FLAGS ──
 async function onFlag(key,flag,btn){
+  if(!currentUser) return;
   const isActive=btn.classList.contains('active');
   const newFlag=isActive?null:flag;
   // update UI
@@ -914,6 +911,7 @@ function toggleNote(key){
 }
 
 async function saveNote(key){
+  if(!currentUser) return;
   const ta=document.getElementById('notetx-'+key);
   if(!ta) return;
   const content=ta.value;
