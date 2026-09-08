@@ -780,15 +780,25 @@ function renderTree(rootNode) {
   document.getElementById('node-count').textContent = total + ' tópicos';
 
 var _QQ=/\?\s*$/;
+function _qm(x){return _QQ.test(x)?'?':'\u00b7';}
 function _qSplit(t){
   if(!t)return null;
   var L=String(t).replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n')
         .map(function(x){return x.trim();}).filter(function(x){return x;});
   if(L.length<3)return null;
-  var h=L[0];
-  if(h.length>60||_QQ.test(h))return null;
-  for(var i=1;i<L.length;i++){if(!_QQ.test(L[i]))return null;}
-  return {head:h,qs:L.slice(1)};
+  var fq=-1;
+  for(var i=0;i<L.length;i++){if(_QQ.test(L[i])){fq=i;break;}}
+  if(fq<1)return null;
+  var h=L.slice(0,fq).join(' ').trim(), body=L.slice(fq);
+  if(!h||h.length>80)return null;
+  if(body.length<2)return null;
+  var qn=0;
+  for(var j=0;j<body.length;j++){
+    if(body[j].length>120)return null;
+    if(_QQ.test(body[j]))qn++;
+  }
+  if(qn<2||qn*2<body.length)return null;
+  return {head:h,qs:body};
 }
   function buildNode(node, depth, path) {
     const hasChildren = node.children && node.children.length > 0;
@@ -843,7 +853,7 @@ function _qSplit(t){
       _qb.className='qblock';
       _q.qs.forEach(function(x){
         var l=document.createElement('div'); l.className='qline';
-        var m=document.createElement('span'); m.className='qm'; m.textContent='?';
+        var m=document.createElement('span'); m.className='qm'; m.textContent=_qm(x);
         var t=document.createElement('span'); t.textContent=x;
         l.appendChild(m); l.appendChild(t); _qb.appendChild(l);
       });
