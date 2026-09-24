@@ -658,7 +658,7 @@ function renderNode(node, depth) {
       const label = cal.l || '';
       const typeLabel = type==='cespe'?'⚡ CESPE':type==='stf'?'⚖ STF/STJ':'📌 OBS';
       html += `<div class="callout ${type}">
-        <div class="callout-label">${typeLabel}${label&&label!==typeLabel.slice(2)?' · '+hl(label,q):''}</div>
+        <div class="callout-label">${typeLabel}${label&&label.trim().toUpperCase()!==typeLabel.slice(2).trim().toUpperCase()?' · '+hl(label,q):''}</div>
         ${(cal.n||[]).map(n=>`<div class="callout-note">${hl(n,q)}</div>`).join('')}
       </div>`;
     }
