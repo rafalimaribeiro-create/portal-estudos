@@ -430,6 +430,20 @@ body.timer-a #tb-timer-bar{display:none!important;}
 .qblock{margin:4px 0 3px 20px;border-left:2px solid rgba(128,128,128,.3);padding:2px 0 2px 11px;}
 .qline{font-size:12px;font-style:italic;opacity:.75;padding:1.5px 0;display:flex;gap:7px;align-items:baseline;line-height:1.5;}
 .qline .qm{font-style:normal;font-size:10px;opacity:.7;flex-shrink:0;color:var(--accent,#7aa2f7);}
+
+/* ── julgado: texto legível no tema claro ── */
+[data-theme="light"] .callout-body{color:#1a1a1a!important;}
+[data-theme="light"] .cespe .callout-title{color:#7c2d12!important;}
+[data-theme="light"] .stj   .callout-title{color:#1e3a8a!important;}
+[data-theme="light"] .obs   .callout-title{color:#065f46!important;}
+/* ── quadro recolhível: abre ao passar o mouse (ou ao clicar, no toque) ── */
+.callout-box{cursor:pointer;}
+.callout-box .callout-body{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;
+  overflow:hidden;transition:max-height .25s ease;}
+.callout-box:hover .callout-body,.callout-box.open .callout-body{
+  -webkit-line-clamp:999;max-height:60vh;overflow-y:auto;}
+.callout-label::after{content:' \25B8';font-size:9px;opacity:.65;}
+.callout-box:hover .callout-label::after,.callout-box.open .callout-label::after{content:' \25BE';}
 </style>
 </head>
 <body>
@@ -1324,6 +1338,13 @@ function _logout(){_doLogout();}
 function _pickColor(c){var m={y:'yellow',g:'green',b:'blue',p:'pink',o:'orange'};_hl(c?m[c]:null);}
 window.addEventListener('DOMContentLoaded',function(){var sv=localStorage.getItem('_sbo');_sbo=window.innerWidth>768?(sv!=='0'):false;_sbA();});
 window.addEventListener('resize',function(){if(window.innerWidth>768&&!_sbo){_sbo=true;_sbA();}if(window.innerWidth<=768&&_sbo){_sbo=false;_sbA();}});
+</script>
+
+<script>
+document.addEventListener('click',function(e){
+  var b=e.target.closest&&e.target.closest('.callout-box');
+  if(b)b.classList.toggle('open');
+});
 </script>
 </body>
 </html>
