@@ -1328,7 +1328,7 @@ function _lay(n,y0,ex,sd){
 }
 function _layR(r){
   r._cy=0;r._y=-r._h/2;r._x=-r._w/2;r._side=0;
-  var ac=_vc(r),ul=ac.length>3,rn=ul?Math.ceil(ac.length/2):ac.length;
+  var ac=_vc(r),ul=ac.length>1,rn=ul?Math.ceil(ac.length/2):ac.length;
   var rc=ac.slice(0,rn),lc=ac.slice(rn);
   ac.forEach(function(c,i){_ac(c,i%_P.length);});
   var ry=-rc.reduce(function(s,c){return s+_sh(c);},0)/2;
