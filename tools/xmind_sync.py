@@ -114,7 +114,15 @@ def le_xmind(caminho):
     if folha is None:
         return None
     topo = folha.find('topic')
-    return _no(topo) if topo is not None else None
+    if topo is None:
+        return None
+    no = _no(topo)
+    # mapa "desbalanceado": o XMind guarda quantos ramos da raiz ficam à
+    # direita. Sem isso o portal dividiria pela metade e trocaria os lados.
+    m = re.search(r'<right-number>(\d+)</right-number>', xml)
+    if m:
+        no['rn'] = int(m.group(1))
+    return no
 
 
 def conta(n):
@@ -129,6 +137,8 @@ def conta(n):
 def _para(no, campo_titulo, campo_filhos, aceita_ricos):
     """Reescreve a árvore nos nomes de campo que o mapa de destino usa."""
     saida = {campo_titulo: no.get('title', '')}
+    if no.get('rn') is not None:
+        saida['rn'] = no['rn']
     if no.get('notes'):
         saida['notes'] = no['notes']
     if no.get('mk') and aceita_ricos:
