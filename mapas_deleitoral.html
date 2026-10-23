@@ -1094,8 +1094,10 @@ var _col=new Set(),_nid=0,_cur=null,_tr={x:0,y:0,sc:1},_act=false;
 
 function _norm(n){
   var t=(typeof n==='object'&&n)?(n.text||n.title||n.label||n.t||''):'';
-  var c=n.children||n.c||[];
-  return{text:t,children:c.map(_norm)};
+  var c=(n.children||n.c||[]).concat(n.callouts||[]).concat(n.summaries||[]);
+  var o={text:t,children:c.map(_norm)};
+  if(typeof n.rn==='number')o.rn=n.rn;
+  return o;
 }
 var _MMFONT="'SF Mono','Fira Code','Courier New',monospace";
 var _PADX=13,_mctx=null,_mwc={},_mwcN=0;
@@ -1156,7 +1158,12 @@ function _lay(n,y0,ex,sd){
 }
 function _layR(r){
   r._cy=0;r._y=-r._h/2;r._x=-r._w/2;r._side=0;
-  var ac=_vc(r),ul=ac.length>3,rn=ul?Math.ceil(ac.length/2):ac.length;
+  var ac=_vc(r),rn;
+  if(typeof r.rn==='number'&&r.rn>=0&&r.rn<=ac.length){
+    rn=r.rn;                       // divisão escolhida (right-number do XMind)
+  }else{
+    rn=ac.length>3?Math.ceil(ac.length/2):ac.length;
+  }
   var rc=ac.slice(0,rn),lc=ac.slice(rn);
   ac.forEach(function(c,i){_ac(c,i%_P.length);});
   var ry=-rc.reduce(function(s,c){return s+_sh(c);},0)/2;
