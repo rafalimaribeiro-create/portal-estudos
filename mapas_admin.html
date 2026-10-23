@@ -1383,6 +1383,7 @@ function _norm(n){
   var c=(n.children||n.c||[]).concat(n.callouts||[]).concat(n.summaries||[]);
   var o={text:t,children:c.map(_norm)};
   if(typeof n.rn==='number')o.rn=n.rn;
+  if(n.lrev)o.lrev=true;
   return o;
 }
 var _MMFONT="'SF Mono','Fira Code','Courier New',monospace";
@@ -1454,7 +1455,13 @@ function _layR(r){
   ac.forEach(function(c,i){_ac(c,i%_P.length);});
   var ry=-rc.reduce(function(s,c){return s+_sh(c);},0)/2;
   rc.forEach(function(c){c._side=1;_lay(c,ry,r._w/2+_GX,1);ry+=_sh(c);});
-  if(lc.length){var ly=-lc.reduce(function(s,c){return s+_sh(c);},0)/2;lc.forEach(function(c){c._side=-1;_lay(c,ly,-r._w/2-_GX,-1);ly+=_sh(c);});}
+  if(lc.length){
+    // lrev: desenha a coluna esquerda de baixo para cima, sem mexer na
+    // ordem dos dados (a árvore em lista segue a sequência original)
+    var ls=r.lrev?lc.slice().reverse():lc;
+    var ly=-ls.reduce(function(s,c){return s+_sh(c);},0)/2;
+    ls.forEach(function(c){c._side=-1;_lay(c,ly,-r._w/2-_GX,-1);ly+=_sh(c);});
+  }
 }
 var NS='http://www.w3.org/2000/svg';
 function E(t,a){var e=document.createElementNS(NS,t);if(a)for(var k in a)e.setAttribute(k,a[k]);return e;}
