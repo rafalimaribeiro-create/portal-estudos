@@ -149,6 +149,13 @@ body { padding-top: 46px !important; }
 [data-theme="light"] .chapter-btn.active { color:#7aa2f7!important; border-left-color:#7aa2f7!important; }
 [data-theme="light"] #main { background:#f8f7f2!important; }
 [data-theme="light"] .node { color:#1a1a1a!important; }
+/* a paleta de profundidade foi pensada para fundo escuro; no claro cada cor
+   ganha uma versão escura do mesmo matiz, preservando o código de cores */
+[data-theme="light"] {
+  --accent:#1e4fa0!important; --accent2:#5b21b6!important;
+  --cyan:#065f80!important;   --green:#3f6212!important;
+  --amber:#7c4a08!important;
+}
 [data-theme="light"] .chapter-title { color:#7aa2f7!important; }
 #kb-hint{font-size:9px;font-family:monospace;color:var(--muted);padding:8px 16px 10px;
   letter-spacing:.06em;border-top:1px solid var(--border);text-align:center;opacity:.6;}
