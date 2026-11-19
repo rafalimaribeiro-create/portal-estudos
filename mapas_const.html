@@ -39,6 +39,7 @@ body{font-family:'IBM Plex Mono',monospace;background:#0f172a;color:#e2e8f0;disp
 .node-row.clickable{cursor:pointer}
 .node-icon{min-width:14px;margin-top:1px;font-size:10px;opacity:.7}
 .node-text{flex:1}
+.is-exam .node-text{font-family:'Inter','Segoe UI',system-ui,sans-serif;letter-spacing:.01em;font-style:italic;}
 .cespe-badge{font-size:9px;background:#f59e0b;color:#1a1a1a;border-radius:3px;padding:1px 4px;font-weight:700;margin-left:4px;flex-shrink:0}
 .callout{margin:4px 0 4px 16px;padding:6px 10px;border-radius:6px;font-size:11px}
 .callout.cespe{background:#422006;border:1px solid #f59e0b}
@@ -49,6 +50,11 @@ body{font-family:'IBM Plex Mono',monospace;background:#0f172a;color:#e2e8f0;disp
 .callout.stf .callout-label{color:#60a5fa}
 .callout.obs .callout-label{color:#4ade80}
 .callout-note{color:#e2e8f0;margin-top:2px;line-height:1.4}
+.callout{cursor:pointer;}
+.callout .callout-note{display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;transition:max-height .25s ease;}
+.callout:hover .callout-note,.callout.open .callout-note{-webkit-line-clamp:999;max-height:60vh;overflow-y:auto;}
+.callout-label::after{content:' \25B8';font-size:9px;opacity:.65;}
+.callout:hover .callout-label::after,.callout.open .callout-label::after{content:' \25BE';}
 #legend{padding:6px 16px;border-top:1px solid #1e293b;background:#0a0f1e;display:flex;gap:16px;align-items:center}
 .legend-label{font-size:9px;color:#475569;font-weight:700;text-transform:uppercase;letter-spacing:1px}
 .legend-badge{font-size:9px;padding:1px 6px;border-radius:3px;font-weight:600}
@@ -645,7 +651,7 @@ function renderNode(node, depth) {
   const _q = _qSplit(title);
   const cespe = isCespe(title);
   
-  const colors = ['#e2e8f0','#94a3b8','#64748b','#475569','#334155'];
+  const colors = ['#e2e8f0','#b6c2d9','#9aa8c0','#8694ad','#78869e'];
   const color = cespe ? '#fbbf24' : colors[Math.min(depth, colors.length-1)];
   const fontSize = depth===0?15:depth===1?13:12;
   const fontWeight = depth<=1?600:400;
@@ -655,7 +661,7 @@ function renderNode(node, depth) {
   const id = 'n'+Math.random().toString(36).slice(2);
   
   let html = `<div class="node" style="margin-left:${indent}px">
-    <div class="node-row${(hasChildren||hasCallouts)?' clickable':''}" 
+    <div class="node-row${(hasChildren||hasCallouts)?' clickable':''}${cespe?' is-exam':''}" 
          style="color:${color};font-size:${fontSize}px;font-weight:${fontWeight}"
          ${(hasChildren||hasCallouts)?`onclick="toggleNode('${id}')"`:''}
          id="row-${id}">
@@ -1455,6 +1461,12 @@ window.__MM_getData = function(){
     if(e.target.closest&&e.target.closest('[data-ft]'))hide();
   });
 })();
+</script>
+<script>
+document.addEventListener('click',function(e){
+  var b=e.target.closest&&e.target.closest('.callout');
+  if(b)b.classList.toggle('open');
+});
 </script>
 </body>
 </html>
