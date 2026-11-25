@@ -734,7 +734,6 @@ function toggleMapTheme(){
     <button class="_tb-btn" id="_tb" onclick="_tT()" title="Alternar tema">☀️</button>
   <a href="index.html" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;text-decoration:none;white-space:nowrap;">← Portal</a>
   <a href="index.html" onclick="try{sessionStorage.setItem('_gotoTab','tracker')}catch(e){}" style="font-size:12px;font-family:monospace;color:var(--text-muted,#5a6070);background:none;border:1px solid var(--border,#2e3350);border-radius:6px;padding:3px 10px;text-decoration:none;white-space:nowrap;">📊 Tracker</a>
-  <button class="_tb-btn" id="_mm_btn" onclick="window.__MM&&window.__MM.toggle(window.__MM_getData())" title="Mapa Mental" style="font-size:15px;padding:2px 8px;">🌐</button>
   </div>
   <div class="_sep"></div>
 
@@ -1468,6 +1467,7 @@ document.addEventListener('click',function(e){
   if(b)b.classList.toggle('open');
 });
 </script>
+
 <!--XM-START-->
 <script>
 /* XM — visualizador de mapas mentais estilo XMind (estudo). Sem dependências. */
@@ -1743,7 +1743,7 @@ function place_(){
   var r=S.ref.getBoundingClientRect();
   if(r.width<50){H.host.style.display='none';return;}
   H.host.style.left=r.left+'px';H.host.style.top=r.top+'px';H.host.style.width=r.width+'px';H.host.style.height=Math.max(200,window.innerHeight-r.top)+'px';
-  H.fab.style.left=Math.max(r.left+8,r.left+r.width-300)+'px';H.fab.style.top=(r.top+10)+'px';
+  H.fab.style.left=Math.max(r.left+8,r.left+r.width-330)+'px';H.fab.style.top=(r.top+10)+'px';
   H.host.style.setProperty('--xm-bg',isLight()?'#f7f5f0':'#12141c');
   H.host.style.setProperty('--xm-panel',isLight()?'#ffffff':'#1b1f2b');
   H.host.style.setProperty('--xm-line',isLight()?'#d8d3c8':'#2e3350');
@@ -1771,7 +1771,7 @@ function injectCSS(){
   '#xm-mini{position:absolute;right:12px;bottom:60px;width:190px;height:120px;background:var(--xm-panel);border:1px solid var(--xm-line);border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.3);cursor:pointer}'+
   '#xm-insp{position:absolute;left:12px;bottom:12px;width:300px;max-width:calc(100% - 24px);display:none;background:var(--xm-panel);border:1px solid var(--xm-line);border-radius:12px;padding:10px;box-shadow:0 4px 16px rgba(0,0,0,.35)}'+
   '#xm-toast{position:absolute;left:50%;top:60px;transform:translateX(-50%);padding:7px 14px;border-radius:8px;color:#fff;font:13px system-ui;opacity:0;transition:opacity .25s;pointer-events:none;z-index:5;max-width:90%}'+
-  '#xm-fab{position:fixed;z-index:60;display:none;gap:2px;padding:3px;white-space:nowrap;border-radius:10px;border:1px solid var(--xm-line);background:var(--xm-panel);color:var(--xm-ink);box-shadow:0 2px 10px rgba(0,0,0,.35)}#xm-fab .xm-b{padding:7px 12px;font-size:13px}'+
+  '#xm-fab{position:fixed;z-index:60;display:none;gap:2px;padding:3px;white-space:nowrap;border-radius:10px;border:1px solid var(--xm-line);background:var(--xm-panel);color:var(--xm-ink);box-shadow:0 2px 10px rgba(0,0,0,.35)}#xm-fab .xm-b{padding:7px 12px;font-size:13px}#xm-fab .xm-go{background:#2f6fed;color:#fff;font-weight:700;font-size:14px;padding:10px 18px;border-radius:8px;box-shadow:0 0 0 3px rgba(47,111,237,.35);animation:xmpulse 2.4s ease-in-out infinite}#xm-fab .xm-go:hover{background:#1f58c7}@keyframes xmpulse{50%{box-shadow:0 0 0 7px rgba(47,111,237,.12)}}'+
   '#xm-title{font:600 13px system-ui;padding:0 8px;max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'+
   '#xm-search{font:12px system-ui;border:0;background:none;color:inherit;outline:none;width:130px;padding:5px}'+
   '.xm-chk{display:flex;align-items:center;gap:6px;font:12px system-ui;padding:3px 8px;cursor:pointer;white-space:nowrap}'+
@@ -1819,7 +1819,7 @@ function init(opts){
   H.toast=h('div',{id:'xm-toast'});host.appendChild(H.toast);
   document.body.appendChild(host);
   H.fab=h('div',{id:'xm-fab'});
-  var fm=h('button',{class:'xm-b',text:'🗺 Mapa mental'}),ft=h('button',{class:'xm-b on',text:'☰ Texto (nós)'});
+  var fm=h('button',{class:'xm-b xm-go',text:'🗺 Ver como mapa mental'}),ft=h('button',{class:'xm-b',text:'☰ Texto (nós)',style:'opacity:.6;cursor:default'});
   fm.onclick=function(){setMode('map');};H.fab.appendChild(fm);H.fab.appendChild(ft);document.body.appendChild(H.fab);
   // pan / zoom
   var dr=null;
