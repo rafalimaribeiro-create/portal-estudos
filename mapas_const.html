@@ -1500,7 +1500,7 @@ function sbc(){try{return typeof _sb!=='undefined'?_sb:(window._sb||null);}catch
 function norm(n,m){
   m=m||{};var T=m.text||'text',C=m.kids||'children',K=m.callouts||'callouts',N=m.note||'notes',CF=m.isCallout||'callout',MK=m.mk||'mk',SM=m.summaries||'summaries';
   if(!n)return null;
-  var o={text:clean(n[T]),children:[],note:n[N]?clean(Array.isArray(n[N])?n[N].join('\n'):n[N]):'',kind:n[CF]===true?'callout':'',mk:typeof n[MK]==='string'?n[MK]:''};
+  var o={text:clean(n[T]),children:[],note:n[N]?clean(Array.isArray(n[N])?n[N].join('\n'):n[N]):'',kind:n[CF]===true?'callout':'',mk:typeof n[MK]==='string'?n[MK]:'',rn:typeof n.rn==='number'?n.rn:null};
   (n[C]||[]).forEach(function(c){var x=norm(c,m);if(x)o.children.push(x);});
   (n[K]||[]).forEach(function(c){var x=norm(c,m);if(x){x.kind='callout';o.children.push(x);}});
   (n[SM]||[]).forEach(function(c){var x=norm(c,m);if(x){x.kind='summary';o.children.push(x);}});
@@ -1519,7 +1519,7 @@ function hid(n){return slug(n.text)+'__'+S.mapId;}
 
 /* ---------- build / measure / layout ---------- */
 function build(n,depth,parent,path){
-  var o={text:n.text,depth:depth,parent:parent,path:path,kind:n.kind||'',note:n.note||'',mk:n.mk||'',collapsed:false,children:[]};
+  var o={text:n.text,depth:depth,parent:parent,path:path,kind:n.kind||'',note:n.note||'',mk:n.mk||'',rn:n.rn,collapsed:false,children:[]};
   o.children=n.children.map(function(c,i){return build(c,depth+1,o,path+'.'+i);});
   return o;
 }
@@ -1561,7 +1561,11 @@ function place(n,x,yTop,dir,col){
 function layout(){
   var r=S.root;measure(r);r.children.forEach(sub);sub(r);
   var ch=r.children,L=[],R=[];
-  if(S.layout==='map'){var tot=ch.reduce(function(a,c){return a+c.sh;},0),acc=0;ch.forEach(function(c){(acc<tot/2?R:L).push(c);acc+=c.sh;});}
+  if(S.layout==='map'){
+    if(typeof r.rn==='number'&&r.rn>=0&&r.rn<=ch.length){R=ch.slice(0,r.rn);L=ch.slice(r.rn);}
+    else{var tot=ch.reduce(function(a,c){return a+c.sh;},0),acc=0;ch.forEach(function(c){(acc<tot/2?R:L).push(c);acc+=c.sh;});}
+    L.reverse(); /* XMind: lado esquerdo segue o sentido horário (de baixo para cima) */
+  }
   else R=ch.slice();
   function hs(a){return a.reduce(function(s,c){return s+c.sh;},0)+GY*Math.max(0,a.length-1);}
   r.dir=0;r.col=0;r.x=-r.w/2;r.y=-r.h/2;
